@@ -89,10 +89,16 @@
         </div>
         <div id="antHellNotice" class="mode-notice is-hidden" role="status" aria-live="polite"></div>
       </div>
-      <button id="accountButton" class="account-menu-button" type="button" data-i18n="login">登录</button>
-      <button id="petalDexButton" class="petaldex-menu-button" type="button" data-i18n="petalDex">花瓣图鉴</button>
-      <button id="monsterDexButton" class="monsterdex-menu-button" type="button" data-i18n="monsterDex">怪物图鉴</button>
+      <div class="start-menu-buttons" aria-label="主菜单">
+        <button id="tutorialButton" class="tutorial-menu-button" type="button" data-i18n="tutorial">新手教程</button>
+        <button id="accountButton" class="account-menu-button" type="button" data-i18n="login">登录</button>
+        <button id="petalDexButton" class="petaldex-menu-button" type="button" data-i18n="petalDex">花瓣图鉴</button>
+        <button id="monsterDexButton" class="monsterdex-menu-button" type="button" data-i18n="monsterDex">怪物图鉴</button>
+        <button id="shopButton" class="shop-menu-button" type="button" data-i18n="shop">商店</button>
+      </div>
     </section>
+
+    <div id="gameNotice" class="game-notice is-hidden" role="status" aria-live="polite"></div>
 
     <section id="accountPanel" class="account-panel is-hidden" aria-label="登录">
       <div class="account-columns">
@@ -138,6 +144,58 @@
       </div>
       <div id="petalDexList" class="monsterdex-list"></div>
     </section>
+
+    <section id="shopPanel" class="monsterdex-panel shop-panel is-hidden" aria-label="商店">
+      <div class="monsterdex-head">
+        <div class="monsterdex-title" data-i18n="shop">商店</div>
+        <button id="shopCloseButton" class="monsterdex-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="shop-points">
+        <span data-i18n="shopPoints">积分</span>
+        <b id="shopPointsValue">0</b>
+      </div>
+      <div class="shop-layout">
+        <div class="shop-section shop-task-section">
+          <div class="shop-section-title" data-i18n="dailyTasks">每日任务</div>
+          <div id="dailyTaskList" class="daily-task-list"></div>
+        </div>
+        <div class="shop-section shop-store-section">
+          <div class="shop-section-title" data-i18n="shopItems">可购买物品</div>
+          <div id="shopItemList" class="shop-item-list"></div>
+          <div id="shopMessage" class="shop-message"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="tutorialPanel" class="monsterdex-panel tutorial-panel is-hidden" aria-label="新手教程">
+      <div class="monsterdex-head">
+        <div class="monsterdex-title" data-i18n="tutorial">新手教程</div>
+        <button id="tutorialCloseButton" class="monsterdex-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="tutorial-list">
+        <article class="tutorial-card">
+          <b data-i18n="tutorialMoveTitle">移动</b>
+          <p data-i18n="tutorialMoveBody">电脑可以用 WASD 移动，也可以在设置里改成朝鼠标方向移动；平板模式下点住屏幕空白处即可移动。</p>
+        </article>
+        <article class="tutorial-card">
+          <b data-i18n="tutorialCombatTitle">战斗</b>
+          <p data-i18n="tutorialCombatBody">花瓣会围着玩家转，碰到怪物会造成伤害。左键或空格扩大攻击范围，右键或 Shift 收回防守。</p>
+        </article>
+        <article class="tutorial-card">
+          <b data-i18n="tutorialInventoryTitle">背包与装备</b>
+          <p data-i18n="tutorialInventoryBody">点击背包里的花瓣会自动装备到主栏，主栏满了会放到副栏。数字键可以交换同位置主副栏，R 键一键交换两栏。</p>
+        </article>
+        <article class="tutorial-card">
+          <b data-i18n="tutorialStrategyTitle">策略</b>
+          <p data-i18n="tutorialStrategyBody">越深入地图怪物等级越高。先刷低等级花瓣，合成、锻造、点天赋，再去挑战更深区域。</p>
+        </article>
+        <article class="tutorial-card">
+          <b data-i18n="tutorialGarden2Title">花园2</b>
+          <p data-i18n="tutorialGarden2Body">花园2需要玩家等级超过30级才能进入，里面只会出现更高级的怪物。</p>
+        </article>
+      </div>
+    </section>
+
 
     <div class="hud" aria-label="玩家信息">
       <canvas id="portraitCanvas" class="portrait" aria-hidden="true"></canvas>
@@ -314,9 +372,9 @@
 
         <div id="authorGate" class="author-gate">
           <label class="author-label" for="authorNameInput" data-i18n="authorName">名字</label>
-          <input id="authorNameInput" class="author-input" type="text" autocomplete="off" maxlength="16" />
+          <input id="authorNameInput" class="author-input author-secret-input" type="text" autocomplete="off" maxlength="16" />
           <label class="author-label" for="authorBirthdayInput" data-i18n="authorBirthday">生日</label>
-          <input id="authorBirthdayInput" class="author-input" type="text" autocomplete="off" maxlength="12" />
+          <input id="authorBirthdayInput" class="author-input author-secret-input" type="text" autocomplete="off" maxlength="12" />
           <button id="authorVerifyButton" class="author-main-button" type="button" data-i18n="confirm">确认</button>
           <div id="authorMessage" class="author-message"></div>
         </div>

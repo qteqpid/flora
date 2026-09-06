@@ -10,9 +10,11 @@ const loadingBar = document.querySelector("#loadingBar");
 const startScreen = document.querySelector("#startScreen");
 const nameInput = document.querySelector("#nameInput");
 const spawnButton = document.querySelector("#spawnButton");
+const tutorialButton = document.querySelector("#tutorialButton");
 const accountButton = document.querySelector("#accountButton");
 const monsterDexButton = document.querySelector("#monsterDexButton");
 const petalDexButton = document.querySelector("#petalDexButton");
+const shopButton = document.querySelector("#shopButton");
 const accountPanel = document.querySelector("#accountPanel");
 const loginForm = document.querySelector("#loginForm");
 const loginNameInput = document.querySelector("#loginName");
@@ -30,6 +32,15 @@ const monsterDexCloseButton = document.querySelector("#monsterDexCloseButton");
 const petalDexPanel = document.querySelector("#petalDexPanel");
 const petalDexList = document.querySelector("#petalDexList");
 const petalDexCloseButton = document.querySelector("#petalDexCloseButton");
+const shopPanel = document.querySelector("#shopPanel");
+const shopCloseButton = document.querySelector("#shopCloseButton");
+const shopPointsValue = document.querySelector("#shopPointsValue");
+const dailyTaskList = document.querySelector("#dailyTaskList");
+const shopItemList = document.querySelector("#shopItemList");
+const shopMessage = document.querySelector("#shopMessage");
+const tutorialPanel = document.querySelector("#tutorialPanel");
+const tutorialCloseButton = document.querySelector("#tutorialCloseButton");
+const gameNotice = document.querySelector("#gameNotice");
 const modeButtons = Array.from(document.querySelectorAll(".mode-button"));
 const antHellNotice = document.querySelector("#antHellNotice");
 const deathScreen = document.querySelector("#deathScreen");
@@ -202,6 +213,30 @@ const TEXT = {
     accountWrongPassword: "密码不对",
     monsterDex: "怪物图鉴",
     petalDex: "花瓣图鉴",
+    tutorial: "新手教程",
+    tutorialMoveTitle: "移动",
+    tutorialMoveBody: "电脑可以用 WASD 移动，也可以在设置里改成朝鼠标方向移动；平板模式下点住屏幕空白处即可移动。",
+    tutorialCombatTitle: "战斗",
+    tutorialCombatBody: "花瓣会围着玩家转，碰到怪物会造成伤害。左键或空格扩大攻击范围，右键或 Shift 收回防守。",
+    tutorialInventoryTitle: "背包与装备",
+    tutorialInventoryBody: "点击背包里的花瓣会自动装备到主栏，主栏满了会放到副栏。数字键可以交换同位置主副栏，R 键一键交换两栏。",
+    tutorialStrategyTitle: "策略",
+    tutorialStrategyBody: "越深入地图怪物等级越高。先刷低等级花瓣，合成、锻造、点天赋，再去挑战更深区域。",
+    tutorialGarden2Title: "花园2",
+    tutorialGarden2Body: "花园2需要玩家等级超过30级才能进入，里面只会出现更高级的怪物。",
+    garden2LevelRequired: "需要超过30级才能进入花园2。",
+    shop: "商店",
+    shopPoints: "积分",
+    dailyTasks: "每日任务",
+    shopItems: "可购买物品",
+    shopBuy: "购买",
+    shopBought: "已购买",
+    shopNotEnoughPoints: "积分不够",
+    shopTaskComplete: "完成",
+    shopTaskRewarded: "已领奖",
+    shopTaskKill: "击败",
+    shopCost: "价格",
+    shopReward: "奖励",
     monsterBee: "蜜蜂",
     monsterLadybug: "瓢虫",
     monsterRock: "石头",
@@ -335,6 +370,30 @@ const TEXT = {
     accountWrongPassword: "Wrong password",
     monsterDex: "Monster Dex",
     petalDex: "Petal Dex",
+    tutorial: "Tutorial",
+    tutorialMoveTitle: "Movement",
+    tutorialMoveBody: "On desktop, use WASD or switch to mouse movement in Settings. On tablet layout, hold any empty screen area to move.",
+    tutorialCombatTitle: "Combat",
+    tutorialCombatBody: "Petals orbit you and damage monsters on contact. Left click or Space expands attack range; right click or Shift pulls petals inward.",
+    tutorialInventoryTitle: "Inventory",
+    tutorialInventoryBody: "Click a petal in your inventory to equip it. If the main bar is full, it goes to the secondary bar. Number keys swap matching slots; R swaps both bars.",
+    tutorialStrategyTitle: "Strategy",
+    tutorialStrategyBody: "Monster levels rise deeper into the map. Farm lower tiers, craft, forge, and spend talent points before pushing forward.",
+    tutorialGarden2Title: "Garden 2",
+    tutorialGarden2Body: "Garden 2 requires player level above 30 and contains higher-tier monsters.",
+    garden2LevelRequired: "Reach level 31 to enter Garden 2.",
+    shop: "Shop",
+    shopPoints: "Points",
+    dailyTasks: "Daily Tasks",
+    shopItems: "Items",
+    shopBuy: "Buy",
+    shopBought: "Bought",
+    shopNotEnoughPoints: "Not enough points",
+    shopTaskComplete: "Complete",
+    shopTaskRewarded: "Rewarded",
+    shopTaskKill: "Defeat",
+    shopCost: "Cost",
+    shopReward: "Reward",
     monsterBee: "Bee",
     monsterLadybug: "Ladybug",
     monsterRock: "Rock",
@@ -471,8 +530,8 @@ const LADYBUG_STATS = {
   hitRadiusY: 31,
 };
 const ROCK_STATS = {
-  maxHealth: 115,
-  attack: 10,
+  maxHealth: 900,
+  attack: 25,
   experienceReward: 10,
   bodyDamageCooldown: 200,
   radius: 43,
@@ -505,6 +564,8 @@ const MONSTER_DEFINITIONS = {
   },
 };
 const MONSTER_SPECIES = Object.keys(MONSTER_DEFINITIONS);
+const SHOP_DAILY_MIN_TIER_INDEX = Math.max(0, getTierIndexByName("Ultra"));
+const DAILY_TASK_COUNT = 5;
 const LADYBUG_CHASE_TIER_INDEX = getTierIndexByName("Epic");
 const LADYBUG_CHASE_DURATION_MS = 6500;
 const LADYBUG_CHASE_RADIUS = 1400;
@@ -584,7 +645,10 @@ const PETAL_MONSTER_PUSH_STRENGTH = 0.72;
 const PETAL_DURABILITY_TIER_MULTIPLIER = 2;
 const PETAL_BASE_DURABILITY = 10;
 const PETAL_BASE_ATTACK = 10;
-const LENTIL_BASE_HOMING_RANGE = 260;
+const LENTIL_BASE_HOMING_RANGE = 1050;
+const LENTIL_HOMING_IMPACT_INSET_RATIO = 0.35;
+const LENTIL_HOMING_SPEED_PER_RADIAN = 165;
+const LENTIL_HOMING_START_RADIUS_RATIO = 0.55;
 const PETAL_DEFINITIONS = {
   Basic: {
     labelKey: "petalBasic",
@@ -635,9 +699,9 @@ const PETAL_DEFINITIONS = {
     labelKey: "petalStone",
     asset: "rock",
     baseAttack: 10,
-    baseDurability: 25,
-    baseRespawnMs: 1200,
-    durabilityCost: 8,
+    baseDurability: 320,
+    baseRespawnMs: 850,
+    durabilityCost: 1,
   },
   Lentil: {
     labelKey: "petalLentil",
@@ -661,6 +725,7 @@ const PETAL_DEFINITIONS = {
     durabilityTierMultiplier: 2,
   },
 };
+const SHOP_PETAL_NAMES = Object.keys(PETAL_DEFINITIONS).filter((name) => name !== "ThunderHammer");
 const POLLEN_BARRIER_RADIUS = 28;
 const POLLEN_BARRIER_LIFETIME_MS = 10000;
 const POLLEN_BARRIER_DAMAGE_COOLDOWN_MS = 300;
@@ -753,6 +818,14 @@ const MAP_GARDEN2_SMALL_WALLS = [
   { progress: 0.73, offset: 3.5, progressRadius: 0.016, offsetRadius: 0.9, seed: 29.7 },
   { progress: 0.86, offset: -3.2, progressRadius: 0.015, offsetRadius: 0.85, seed: 31.0 },
   { progress: 0.92, offset: 1.8, progressRadius: 0.011, offsetRadius: 0.58, seed: 32.4 },
+  { progress: 0.77, offset: -1.5, progressRadius: 0.011, offsetRadius: 0.54, seed: 33.1 },
+  { progress: 0.80, offset: 2.4, progressRadius: 0.013, offsetRadius: 0.62, seed: 33.8 },
+  { progress: 0.83, offset: -3.9, progressRadius: 0.012, offsetRadius: 0.72, seed: 34.5 },
+  { progress: 0.88, offset: 3.0, progressRadius: 0.012, offsetRadius: 0.68, seed: 35.2 },
+  { progress: 0.90, offset: -0.8, progressRadius: 0.01, offsetRadius: 0.52, seed: 35.9 },
+  { progress: 0.94, offset: -2.8, progressRadius: 0.012, offsetRadius: 0.64, seed: 36.6 },
+  { progress: 0.96, offset: 1.2, progressRadius: 0.01, offsetRadius: 0.5, seed: 37.3 },
+  { progress: 0.985, offset: -1.9, progressRadius: 0.009, offsetRadius: 0.48, seed: 38.0 },
 ];
 const MAP_DENSE_WALL_FIELDS = [
   { x: 22.4, y: 47.3, radiusX: 7.4, radiusY: 5.4, cellSize: 2.35, wallRadiusMin: 0.58, wallRadiusMax: 0.92, fill: 0.86, seed: 41.2 },
@@ -842,7 +915,8 @@ const MAP_DEFINITIONS = {
   },
 };
 const GARDEN2_PORTAL_RADIUS = 150;
-const GARDEN2_PORTAL_DURATION_MS = 720;
+const GARDEN2_PORTAL_DURATION_MS = 180;
+const GARDEN2_PORTAL_SWITCH_DELAY_MS = 45;
 const MAP_EDGE_DISTORT_AMPLITUDE = 2.35;
 const MAP_EDGE_DISTORT_STEP = 3.5;
 const MAP_WALL_LUMA_THRESHOLD = 110;
@@ -900,10 +974,12 @@ const TALENT_DEFINITIONS = [
   { id: "attackRange", labelKey: "talentAttackRange", maxLevel: 10 },
 ];
 let antHellNoticeTimeout = 0;
+let gameNoticeTimeout = 0;
 let talentHoldTimer = 0;
 let nextDamageNumberId = 1;
 let backgroundTickTimer = 0;
 let nextItemId = 1;
+let nextMonsterId = 1;
 let dragData = null;
 let dragDropCompleted = false;
 
@@ -1155,6 +1231,7 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
   const sizeScale = scaleSizeByTier(1, tier.index);
 
   return {
+    id: nextMonsterId++,
     name: speciesName,
     asset: definition.asset,
     tierIndex: tier.index,
@@ -1245,6 +1322,11 @@ function createSaveData() {
     inventory: state.inventory.map(serializePetalItem).filter(Boolean),
     petals: state.weapon.petals.map(serializePetalItem),
     secondaryPetals: state.weapon.secondaryPetals.map(serializePetalItem),
+    shop: {
+      points: state.shop.points,
+      dateKey: state.shop.dateKey,
+      tasks: state.shop.tasks,
+    },
     savedAt: Date.now(),
   };
 }
@@ -1273,10 +1355,15 @@ function applySaveData(saveData) {
   state.weapon.secondaryPetals = Array.from({ length: MAX_EQUIPMENT_SLOTS }, (_, index) =>
     restorePetalItem(saveData.secondaryPetals?.[index] || null),
   );
+  state.shop.points = Math.max(0, Math.floor(saveData.shop?.points || 0));
+  state.shop.dateKey = saveData.shop?.dateKey || "";
+  state.shop.tasks = Array.isArray(saveData.shop?.tasks) ? saveData.shop.tasks : [];
+  state.shop.message = "";
   refreshPlayerMaxHealth();
   state.player.health = clamp(saveData.player.health || state.player.maxHealth, 1, state.player.maxHealth);
   applyTalentEffects();
   grantTalentPoint();
+  ensureDailyShopTasks();
   nameInput.value = state.player.name;
 }
 
@@ -1360,6 +1447,8 @@ const state = {
       index < BASE_EQUIPMENT_SLOTS ? createPetalItem(index === 0 ? "Pollen" : "Basic", 0) : null,
     ),
     secondaryPetals: Array.from({ length: MAX_EQUIPMENT_SLOTS }, () => null),
+    homingUnits: Object.create(null),
+    homingUpdatedAt: 0,
   },
   camera: { x: 0, y: 0, freeX: 0, freeY: 0 },
   inventory: [],
@@ -1374,6 +1463,12 @@ const state = {
     groups: 0,
     message: "",
     animating: false,
+  },
+  shop: {
+    points: 0,
+    dateKey: "",
+    tasks: [],
+    message: "",
   },
   leaderboardRewardPetal: null,
   lastLeaderboardRenderAt: 0,
@@ -1398,12 +1493,14 @@ const state = {
     x: 0,
     y: 0,
   },
+  nextPortalNoticeAt: 0,
   pointer: { x: 0, y: 0, worldX: 0, worldY: 0, active: false },
   eyeLook: { x: 0, y: -0.3 },
   controls: { attack: false, defend: false },
   assets: {},
   mapCollision: null,
   mapArtCanvas: null,
+  mapStaticCache: Object.create(null),
 };
 
 function clamp(value, min, max) {
@@ -1642,8 +1739,7 @@ async function loadAssets() {
 
   const loadedAssets = await Promise.all(promises);
   state.assets = Object.fromEntries(loadedAssets);
-  buildMapCollisionData();
-  buildMapArtCanvas();
+  primeMapStaticCache();
   await waitForImage(loadingArt);
   loadingBar.style.width = "100%";
 }
@@ -1666,6 +1762,7 @@ function buildMapCollisionData() {
     data: imageData.data,
     playBounds,
   };
+  return state.mapCollision;
 }
 
 function buildMapArtCanvas() {
@@ -1685,6 +1782,50 @@ function buildMapArtCanvas() {
     lineWidth: 1.15,
   });
   state.mapArtCanvas = artCanvas;
+  return artCanvas;
+}
+
+function buildStaticMapData(mapId) {
+  const previousMapId = state.mapId;
+  const previousRoute = MAP_ROUTE;
+  const previousCollision = state.mapCollision;
+  const previousArtCanvas = state.mapArtCanvas;
+
+  state.mapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  MAP_ROUTE = getRouteSegments(getActiveMapDefinition().routePoints);
+  const collision = buildMapCollisionData();
+  const artCanvas = buildMapArtCanvas();
+  const route = MAP_ROUTE;
+
+  state.mapId = previousMapId;
+  MAP_ROUTE = previousRoute;
+  state.mapCollision = previousCollision;
+  state.mapArtCanvas = previousArtCanvas;
+
+  return { route, collision, artCanvas };
+}
+
+function applyMapStaticData(mapId) {
+  const safeMapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  if (!state.mapStaticCache[safeMapId]) {
+    state.mapStaticCache[safeMapId] = buildStaticMapData(safeMapId);
+  }
+
+  const cached = state.mapStaticCache[safeMapId];
+  state.mapId = safeMapId;
+  MAP_ROUTE = cached.route;
+  state.mapCollision = cached.collision;
+  state.mapArtCanvas = cached.artCanvas;
+}
+
+function primeMapStaticCache() {
+  const currentMapId = state.mapId;
+  for (const mapId of Object.keys(MAP_DEFINITIONS)) {
+    if (!state.mapStaticCache[mapId]) {
+      state.mapStaticCache[mapId] = buildStaticMapData(mapId);
+    }
+  }
+  applyMapStaticData(currentMapId);
 }
 
 function drawCollisionMap(targetCtx, width, height) {
@@ -2768,6 +2909,239 @@ function renderPetalDexUi() {
   }
 }
 
+function getLocalDateKey(date = new Date()) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function createSeededRandom(seedText) {
+  let seed = 2166136261;
+  for (let index = 0; index < seedText.length; index++) {
+    seed ^= seedText.charCodeAt(index);
+    seed = Math.imul(seed, 16777619);
+  }
+
+  return () => {
+    seed = Math.imul(seed ^ (seed >>> 15), 2246822519);
+    seed = Math.imul(seed ^ (seed >>> 13), 3266489917);
+    seed ^= seed >>> 16;
+    return (seed >>> 0) / 4294967296;
+  };
+}
+
+function getDailyTaskTargetCount(tierIndex, randomValue = 0) {
+  const tierStep = Math.max(0, tierIndex - SHOP_DAILY_MIN_TIER_INDEX);
+  return Math.max(1, Math.round(7 - tierStep * 0.38 + randomValue * 2));
+}
+
+function getDailyTaskReward(tierIndex, targetCount) {
+  const tierStep = Math.max(0, tierIndex - SHOP_DAILY_MIN_TIER_INDEX + 1);
+  return Math.max(8, Math.round(8 + tierStep ** 1.22 * 5 + targetCount * 1.5));
+}
+
+function generateDailyShopTasks(dateKey = getLocalDateKey()) {
+  const random = createSeededRandom(`flora-shop-${dateKey}`);
+  const usedKeys = new Set();
+  const tasks = [];
+
+  while (tasks.length < DAILY_TASK_COUNT && usedKeys.size < MONSTER_SPECIES.length * TIERS.length) {
+    const speciesName = MONSTER_SPECIES[Math.floor(random() * MONSTER_SPECIES.length)];
+    const tierIndex = SHOP_DAILY_MIN_TIER_INDEX + Math.floor(
+      random() * (TIERS.length - SHOP_DAILY_MIN_TIER_INDEX),
+    );
+    const taskKey = `${speciesName}:${tierIndex}`;
+    if (usedKeys.has(taskKey)) continue;
+    usedKeys.add(taskKey);
+
+    const targetCount = getDailyTaskTargetCount(tierIndex, random());
+    tasks.push({
+      id: `${dateKey}:${taskKey}`,
+      speciesName,
+      tierIndex,
+      targetCount,
+      progress: 0,
+      reward: getDailyTaskReward(tierIndex, targetCount),
+      completed: false,
+    });
+  }
+
+  return tasks;
+}
+
+function ensureDailyShopTasks() {
+  const dateKey = getLocalDateKey();
+  if (state.shop.dateKey === dateKey && Array.isArray(state.shop.tasks) && state.shop.tasks.length) return;
+
+  state.shop.dateKey = dateKey;
+  state.shop.tasks = generateDailyShopTasks(dateKey);
+  state.shop.message = "";
+}
+
+function getShopItemPrice(petalName, tierIndex) {
+  const tierStep = Math.max(1, tierIndex - SHOP_DAILY_MIN_TIER_INDEX + 1);
+  const petalIndex = Math.max(0, SHOP_PETAL_NAMES.indexOf(petalName));
+  const rarityPrice = 42 + Math.round(tierStep ** 1.55 * 18);
+  return rarityPrice + petalIndex * 7;
+}
+
+function recordMonsterKillForShopTasks(monster) {
+  ensureDailyShopTasks();
+
+  let changed = false;
+  for (const task of state.shop.tasks) {
+    if (task.completed) continue;
+    if (task.speciesName !== monster.name || task.tierIndex !== monster.tierIndex) continue;
+
+    task.progress = Math.min(task.targetCount, (task.progress || 0) + 1);
+    changed = true;
+
+    if (task.progress >= task.targetCount) {
+      task.completed = true;
+      state.shop.points += task.reward;
+      state.shop.message = `+${task.reward} ${getCurrentText().shopPoints}`;
+    }
+  }
+
+  if (changed) {
+    renderShopUi();
+    saveActiveAccount();
+  }
+}
+
+function rewardMonsterKill(monster) {
+  addPlayerExperience(monster.experienceReward);
+  recordMonsterKillForShopTasks(monster);
+  spawnMonsterDrops(monster);
+}
+
+function renderDailyTaskList() {
+  const text = getCurrentText();
+  dailyTaskList.innerHTML = "";
+
+  state.shop.tasks.forEach((task) => {
+    const tier = getTier(task.tierIndex);
+    const row = document.createElement("div");
+    row.className = "daily-task-row";
+    row.classList.toggle("is-complete", task.completed);
+    row.style.setProperty("--tier-color", tier.color);
+    row.style.setProperty("--tier-border-color", darkenHexColor(tier.color));
+
+    const icon = document.createElement("div");
+    icon.className = "daily-task-icon";
+    const image = document.createElement("img");
+    image.src = ASSETS[MONSTER_DEFINITIONS[task.speciesName]?.asset] || ASSETS.bee;
+    image.alt = "";
+    icon.append(image);
+
+    const body = document.createElement("div");
+    body.className = "daily-task-body";
+    const title = document.createElement("div");
+    title.className = "daily-task-title";
+    title.textContent = `${text.shopTaskKill} ${tier.name} ${getMonsterDisplayName(task.speciesName)}`;
+    const progress = document.createElement("div");
+    progress.className = "daily-task-progress";
+    progress.textContent = `${Math.min(task.progress || 0, task.targetCount)} / ${task.targetCount}`;
+    const bar = document.createElement("div");
+    bar.className = "daily-task-bar";
+    const fill = document.createElement("span");
+    fill.style.width = `${(Math.min(task.progress || 0, task.targetCount) / task.targetCount) * 100}%`;
+    bar.append(fill);
+    body.append(title, progress, bar);
+
+    const reward = document.createElement("div");
+    reward.className = "daily-task-reward";
+    reward.textContent = task.completed
+      ? text.shopTaskRewarded
+      : `${text.shopReward}: ${task.reward}`;
+
+    row.append(icon, body, reward);
+    dailyTaskList.append(row);
+  });
+}
+
+function renderShopItemList() {
+  const text = getCurrentText();
+  shopItemList.innerHTML = "";
+
+  for (let tierIndex = SHOP_DAILY_MIN_TIER_INDEX; tierIndex < TIERS.length; tierIndex++) {
+    const tier = getTier(tierIndex);
+    const tierRow = document.createElement("section");
+    tierRow.className = "shop-tier-row";
+    tierRow.style.setProperty("--tier-color", tier.color);
+    tierRow.style.setProperty("--tier-border-color", darkenHexColor(tier.color));
+
+    const tierLabel = document.createElement("div");
+    tierLabel.className = "shop-tier-label";
+    tierLabel.textContent = tier.name;
+
+    const items = document.createElement("div");
+    items.className = "shop-tier-items";
+
+    SHOP_PETAL_NAMES.forEach((petalName) => {
+      const item = createPetalPreviewItem(petalName, tierIndex);
+      const price = getShopItemPrice(petalName, tierIndex);
+      const button = document.createElement("button");
+      button.className = "shop-buy-button";
+      button.type = "button";
+      button.disabled = state.shop.points < price;
+      button.style.setProperty("--tier-color", item.tierColor);
+      button.style.setProperty("--tier-border-color", darkenHexColor(item.tierColor));
+      button.title = `${item.tier} ${getPetalDisplayName(item)} · ${text.shopCost}: ${price}`;
+
+      const preview = document.createElement("div");
+      preview.className = "item-slot";
+      renderItemContent(preview, item, 1);
+      preview.draggable = false;
+
+      const priceLabel = document.createElement("b");
+      priceLabel.className = "shop-price";
+      priceLabel.textContent = `${price}`;
+      button.append(preview, priceLabel);
+      button.addEventListener("click", () => buyShopItem(petalName, tierIndex));
+      button.addEventListener("pointerenter", (event) => showPetalDexTooltip(getPetalDexEntry(petalName, tierIndex), event));
+      button.addEventListener("pointermove", (event) => showPetalDexTooltip(getPetalDexEntry(petalName, tierIndex), event));
+      button.addEventListener("pointerleave", hideItemTooltip);
+      button.addEventListener("pointercancel", hideItemTooltip);
+      items.append(button);
+    });
+
+    tierRow.append(tierLabel, items);
+    shopItemList.append(tierRow);
+  }
+}
+
+function renderShopUi() {
+  if (!shopPanel) return;
+  ensureDailyShopTasks();
+  shopPointsValue.textContent = `${state.shop.points}`;
+  renderDailyTaskList();
+  renderShopItemList();
+  shopMessage.textContent = state.shop.message;
+}
+
+function buyShopItem(petalName, tierIndex) {
+  ensureDailyShopTasks();
+  const price = getShopItemPrice(petalName, tierIndex);
+  const text = getCurrentText();
+
+  if (state.shop.points < price) {
+    state.shop.message = text.shopNotEnoughPoints;
+    renderShopUi();
+    return;
+  }
+
+  const item = createPetalItem(petalName, tierIndex);
+  state.shop.points -= price;
+  state.inventory.push(item);
+  sortInventory();
+  state.shop.message = `${text.shopBought}: ${item.tier} ${getPetalDisplayName(item)}`;
+  renderItemUi();
+  renderShopUi();
+  saveActiveAccount();
+}
+
 function hideItemTooltip() {
   itemTooltip.classList.add("is-hidden");
 }
@@ -3823,8 +4197,7 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
         addDamageNumber(monster, bodyDamage, time);
         monster.lastPlayerHitAt = time;
         if (wasAlive && !monster.alive) {
-          addPlayerExperience(monster.experienceReward);
-          spawnMonsterDrops(monster);
+          rewardMonsterKill(monster);
         }
       }
       monster.nextPlayerBodyDamageAt = time + PLAYER_BODY_DAMAGE_COOLDOWN_MS;
@@ -3963,6 +4336,16 @@ function showAntHellNotice() {
   }, 2400);
 }
 
+function showGameNotice(messageKeyOrText, duration = 2200) {
+  window.clearTimeout(gameNoticeTimeout);
+  const text = getCurrentText();
+  gameNotice.textContent = text[messageKeyOrText] || messageKeyOrText || "";
+  gameNotice.classList.remove("is-hidden");
+  gameNoticeTimeout = window.setTimeout(() => {
+    gameNotice.classList.add("is-hidden");
+  }, duration);
+}
+
 function selectMode(mode) {
   if (mode === "antHell") {
     showAntHellNotice();
@@ -4013,6 +4396,10 @@ function applyLanguage() {
   monsterDexPanel.setAttribute("aria-label", text.monsterDex);
   petalDexButton.setAttribute("aria-label", text.petalDex);
   petalDexPanel.setAttribute("aria-label", text.petalDex);
+  tutorialButton.setAttribute("aria-label", text.tutorial);
+  tutorialPanel.setAttribute("aria-label", text.tutorial);
+  shopButton.setAttribute("aria-label", text.shop);
+  shopPanel.setAttribute("aria-label", text.shop);
   talentButton.setAttribute("aria-label", text.talents);
   talentPanel.setAttribute("aria-label", text.talents);
   craftButton.setAttribute("aria-label", text.craft);
@@ -4026,13 +4413,12 @@ function applyLanguage() {
   populateAuthorControls();
   updateAuthorPanelUi();
   renderPetalDexUi();
+  renderShopUi();
   updateLeaderboard(performance.now(), true);
 }
 
 function rebuildActiveMap() {
-  MAP_ROUTE = getRouteSegments(getActiveMapDefinition().routePoints);
-  buildMapCollisionData();
-  buildMapArtCanvas();
+  applyMapStaticData(state.mapId);
 }
 
 function switchActiveMap(mapId) {
@@ -4052,6 +4438,7 @@ function switchActiveMap(mapId) {
   updatePointerWorld();
   state.drops = [];
   state.monsters = [];
+  state.weapon.homingUnits = Object.create(null);
   seedMonsterPopulation();
   renderMonsterDexUi();
 }
@@ -4068,6 +4455,14 @@ function getMapPortalDefinitions(mapId = state.mapId) {
 
 function startMapPortalTransition(portal, time) {
   if (state.portalTransition.active || !portal) return;
+  if (portal.targetMapId === "garden2" && state.player.level <= 30) {
+    if (time >= state.nextPortalNoticeAt) {
+      showGameNotice("garden2LevelRequired");
+      state.nextPortalNoticeAt = time + 900;
+    }
+    return;
+  }
+
   state.portalTransition.active = true;
   state.portalTransition.startedAt = time;
   state.portalTransition.duration = GARDEN2_PORTAL_DURATION_MS;
@@ -4080,12 +4475,8 @@ function startMapPortalTransition(portal, time) {
 function updatePortalTransition(time) {
   if (!state.portalTransition.active) return false;
 
-  const progress = clamp(
-    (time - state.portalTransition.startedAt) / state.portalTransition.duration,
-    0,
-    1,
-  );
-  if (progress < 1) return true;
+  const elapsed = time - state.portalTransition.startedAt;
+  if (elapsed < GARDEN2_PORTAL_SWITCH_DELAY_MS) return true;
 
   const targetMapId = state.portalTransition.targetMapId;
   state.portalTransition.active = false;
@@ -4138,6 +4529,7 @@ function syncSettingsUi() {
   renderCraftingUi();
   renderForgingUi();
   renderMonsterDexUi();
+  renderShopUi();
 }
 
 function syncCombatControls() {
@@ -4193,10 +4585,14 @@ function closeFloatingPanels() {
   forgeButton.classList.remove("is-active");
   accountPanel.classList.add("is-hidden");
   accountButton.classList.remove("is-active");
+  tutorialPanel.classList.add("is-hidden");
+  tutorialButton.classList.remove("is-active");
   petalDexPanel.classList.add("is-hidden");
   petalDexButton.classList.remove("is-active");
   monsterDexPanel.classList.add("is-hidden");
   monsterDexButton.classList.remove("is-active");
+  shopPanel.classList.add("is-hidden");
+  shopButton.classList.remove("is-active");
   authorPanel.classList.add("is-hidden");
 }
 
@@ -4212,10 +4608,14 @@ function isFloatingPanelTarget(target) {
     forgeButton.contains(target) ||
     accountPanel.contains(target) ||
     accountButton.contains(target) ||
+    tutorialPanel.contains(target) ||
+    tutorialButton.contains(target) ||
     petalDexPanel.contains(target) ||
     petalDexButton.contains(target) ||
     monsterDexPanel.contains(target) ||
     monsterDexButton.contains(target) ||
+    shopPanel.contains(target) ||
+    shopButton.contains(target) ||
     authorCard.contains(target)
   );
 }
@@ -4827,6 +5227,13 @@ function openAccountPanel(messageKey = "") {
   state.uiLockMovement = true;
 }
 
+function openTutorialPanel() {
+  closeFloatingPanels();
+  tutorialPanel.classList.remove("is-hidden");
+  tutorialButton.classList.add("is-active");
+  state.uiLockMovement = true;
+}
+
 function openMonsterDexPanel() {
   closeFloatingPanels();
   renderMonsterDexUi();
@@ -4840,6 +5247,14 @@ function openPetalDexPanel() {
   renderPetalDexUi();
   petalDexPanel.classList.remove("is-hidden");
   petalDexButton.classList.add("is-active");
+  state.uiLockMovement = true;
+}
+
+function openShopPanel() {
+  closeFloatingPanels();
+  renderShopUi();
+  shopPanel.classList.remove("is-hidden");
+  shopButton.classList.add("is-active");
   state.uiLockMovement = true;
 }
 
@@ -4884,6 +5299,7 @@ function loginAccount() {
   setAccountMessage("accountLoginSuccess");
   renderItemUi();
   renderTalentUi();
+  renderShopUi();
   updateLeaderboard(performance.now(), true);
   closeFloatingPanels();
   saveActiveAccount();
@@ -4925,6 +5341,7 @@ function registerAccount() {
   setAccountMessage("accountRegisterSuccess");
   renderItemUi();
   renderTalentUi();
+  renderShopUi();
   updateLeaderboard(performance.now(), true);
   closeFloatingPanels();
 }
@@ -5809,6 +6226,29 @@ function createGarden2UpperSpawnPoint(tierIndex, sequence, spawnPadding) {
   return null;
 }
 
+function createGarden2DistributedSpawnPoint(tierIndex, sequence, spawnPadding) {
+  if (state.mapId !== "garden2") return null;
+
+  for (let attempt = 0; attempt < 520; attempt++) {
+    const tileIndex = (sequence * 131 + attempt * 157 + tierIndex * 263) % (MAP_TILE_COLUMNS * MAP_TILE_ROWS);
+    const baseTileX = tileIndex % MAP_TILE_COLUMNS;
+    const baseTileY = Math.floor(tileIndex / MAP_TILE_COLUMNS);
+    const jitterX = 0.18 + wallTextureHash(baseTileX, baseTileY, sequence + attempt * 0.37) * 0.64;
+    const jitterY = 0.18 + wallTextureHash(baseTileX, baseTileY, tierIndex + attempt * 0.41) * 0.64;
+    const { x, y } = routeTileToWorld(baseTileX + jitterX, baseTileY + jitterY);
+
+    if (
+      isPointInsideMap(x, y, spawnPadding) &&
+      !isCircleBlockedByMap(x, y, spawnPadding) &&
+      getMonsterTierIndexForPosition(x, y) === tierIndex
+    ) {
+      return { x, y };
+    }
+  }
+
+  return null;
+}
+
 function createTierSpawnPoint(tierIndex) {
   const { min, max } = getMonsterTierProgressRange(tierIndex);
   const spawnPadding = scaleSizeByTier(BEE_STATS.radius, tierIndex);
@@ -5819,6 +6259,8 @@ function createTierSpawnPoint(tierIndex) {
   );
   const sequence = nextMonsterSpawnSequence(tierIndex);
   const laneCount = 9;
+  const distributedSpawn = createGarden2DistributedSpawnPoint(tierIndex, sequence, spawnPadding);
+  if (distributedSpawn) return distributedSpawn;
   const upperSpawn = createGarden2UpperSpawnPoint(tierIndex, sequence, spawnPadding);
   if (upperSpawn) return upperSpawn;
 
@@ -5855,7 +6297,8 @@ function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesN
   let fallbackY = 0;
   let fallbackDirection = 1;
 
-  for (let attempt = 0; attempt < 32; attempt++) {
+  const maxSpawnAttempts = state.mapId === "garden2" ? 96 : 32;
+  for (let attempt = 0; attempt < maxSpawnAttempts; attempt++) {
     const { x, y } = createTierSpawnPoint(tierIndex);
     const direction = Math.random() < 0.5 ? -1 : 1;
     fallbackX = x;
@@ -5905,10 +6348,34 @@ function updateMonsterSpawns(time) {
   state.nextMonsterSpawnAt = time + MONSTER_RESPAWN_MS;
 }
 
-function getWeaponPositions(orbitRadius = state.weapon.orbitRadius) {
+function getWeaponHomingKey(petal, unitIndex = 0) {
+  return `${petal?.id || "petal"}:${unitIndex}`;
+}
+
+function movePointToward(x, y, targetX, targetY, maxStep) {
+  const dx = targetX - x;
+  const dy = targetY - y;
+  const distance = Math.hypot(dx, dy);
+  if (distance <= maxStep || distance <= 0.001) {
+    return { x: targetX, y: targetY, arrived: true };
+  }
+
+  return {
+    x: x + (dx / distance) * maxStep,
+    y: y + (dy / distance) * maxStep,
+    arrived: false,
+  };
+}
+
+function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state.lastTime) {
   const orbitingPetals = state.weapon.petals.filter((petal) => petal && !(petal.placeableBarrier && petal.placed));
   const placedPetals = state.weapon.petals.filter((petal) => petal?.placeableBarrier && petal.placed && petal.active);
   const lentilHomingRange = getLentilHomingRange();
+  const shouldUpdateHoming = time !== state.weapon.homingUpdatedAt;
+  const homingDt = shouldUpdateHoming
+    ? clamp((time - (state.weapon.homingUpdatedAt || time)) / 1000, 0, 0.08)
+    : 0;
+  const activeHomingKeys = new Set();
   const orbitingUnits = orbitingPetals.flatMap((petal) =>
     Array.from({ length: getPetalOrbitUnitCount(petal) }, (_, unitIndex) => ({
       petal,
@@ -5922,20 +6389,88 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius) {
     const angle = state.weapon.angle + (index / equippedCount) * Math.PI * 2;
     const lightScale = unit.petal.name === "Light" ? 0.72 : 1;
     const hitRadius = state.weapon.hitRadius * lightScale;
-    let x = state.player.x + Math.cos(angle) * orbitRadius;
-    let y = state.player.y + Math.sin(angle) * orbitRadius;
+    const orbitX = state.player.x + Math.cos(angle) * orbitRadius;
+    const orbitY = state.player.y + Math.sin(angle) * orbitRadius;
+    let x = orbitX;
+    let y = orbitY;
     let drawAngle = angle;
+    let homing = false;
+    let homingStartX = orbitX;
+    let homingStartY = orbitY;
+    const homingKey = getWeaponHomingKey(unit.petal, unit.unitIndex);
 
     if (lentilHomingRange > 0 && isPetalUnitActive(unit.petal, unit.unitIndex)) {
-      const target = getNearestMonsterToPoint(x, y, lentilHomingRange);
+      const target = getNearestMonsterToPoint(
+        state.player.x,
+        state.player.y,
+        lentilHomingRange + orbitRadius + hitRadius,
+      );
       if (target) {
-        const targetAngle = Math.atan2(target.y - y, target.x - x);
-        const distance = Math.hypot(target.x - x, target.y - y);
-        const targetDistance = Math.max(0, distance - target.radius - hitRadius * 0.55);
-        const travel = Math.min(lentilHomingRange, targetDistance);
-        x += Math.cos(targetAngle) * travel;
-        y += Math.sin(targetAngle) * travel;
-        drawAngle = targetAngle;
+        const targetAngle = Math.atan2(target.y - state.player.y, target.x - state.player.x);
+        const monsterShape = getMonsterHitbox(target);
+        const bodyRadius = hitShapeRadiusToward(monsterShape, targetAngle + Math.PI);
+        const impactInset = Math.min(
+          bodyRadius * LENTIL_HOMING_IMPACT_INSET_RATIO,
+          Math.max(6, hitRadius * 0.5),
+        );
+        const targetX = target.x - Math.cos(targetAngle) * impactInset;
+        const targetY = target.y - Math.sin(targetAngle) * impactInset;
+        const startDistance = Math.min(
+          orbitRadius * LENTIL_HOMING_START_RADIUS_RATIO,
+          Math.hypot(targetX - state.player.x, targetY - state.player.y) * 0.35,
+        );
+        homingStartX = state.player.x + Math.cos(targetAngle) * startDistance;
+        homingStartY = state.player.y + Math.sin(targetAngle) * startDistance;
+        const homingSpeed = Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN);
+        let homingState = state.weapon.homingUnits[homingKey];
+        if (!homingState) {
+          homingState = {
+            x: orbitX,
+            y: orbitY,
+            targetId: target.id,
+          };
+          state.weapon.homingUnits[homingKey] = homingState;
+        }
+
+        if (shouldUpdateHoming) {
+          const nextPoint = movePointToward(
+            homingState.x,
+            homingState.y,
+            targetX,
+            targetY,
+            homingSpeed * homingDt,
+          );
+          homingState.x = nextPoint.x;
+          homingState.y = nextPoint.y;
+          homingState.targetId = target.id;
+        }
+
+        x = homingState.x;
+        y = homingState.y;
+        drawAngle = Math.atan2(targetY - y, targetX - x) || targetAngle;
+        homing = true;
+        activeHomingKeys.add(homingKey);
+      }
+    }
+
+    if (!homing && state.weapon.homingUnits[homingKey]) {
+      const homingState = state.weapon.homingUnits[homingKey];
+      const homingSpeed = Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN);
+      if (shouldUpdateHoming) {
+        const nextPoint = movePointToward(homingState.x, homingState.y, orbitX, orbitY, homingSpeed * homingDt);
+        homingState.x = nextPoint.x;
+        homingState.y = nextPoint.y;
+        if (nextPoint.arrived) {
+          delete state.weapon.homingUnits[homingKey];
+        }
+      }
+
+      if (state.weapon.homingUnits[homingKey]) {
+        x = homingState.x;
+        y = homingState.y;
+        drawAngle = Math.atan2(orbitY - y, orbitX - x) || angle;
+        homing = true;
+        activeHomingKeys.add(homingKey);
       }
     }
 
@@ -5947,10 +6482,22 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius) {
       angle: drawAngle,
       x,
       y,
+      homing,
+      homingStartX,
+      homingStartY,
       hitRadius,
       sizeScale: lightScale,
     };
   });
+
+  if (shouldUpdateHoming) {
+    for (const key of Object.keys(state.weapon.homingUnits)) {
+      if (!activeHomingKeys.has(key)) {
+        delete state.weapon.homingUnits[key];
+      }
+    }
+    state.weapon.homingUpdatedAt = time;
+  }
 
   return orbitingPositions.concat(
     placedPetals.map((petal) => ({
@@ -6164,7 +6711,7 @@ function breakPlacedPollen(petal, time) {
 
 function getLentilHomingRange() {
   return state.weapon.petals.reduce((total, petal) => {
-    if (!petal || petal.name !== "Lentil" || !petal.active) return total;
+    if (!petal || petal.name !== "Lentil") return total;
     return total + scaleStatByTier(PETAL_DEFINITIONS.Lentil.homingRange, 1.18, petal.tierIndex);
   }, 0);
 }
@@ -6189,7 +6736,7 @@ function getNearestMonsterToPoint(x, y, maxDistance) {
 function resolvePlacedPollenBarriers(time) {
   if (!state.spawned) return;
 
-  for (const weapon of getWeaponPositions()) {
+  for (const weapon of getWeaponPositions(undefined, time)) {
     const petal = weapon.petal;
     if (!weapon.placed || !petal?.placeableBarrier || !petal.active || !petal.placed) continue;
 
@@ -6242,8 +6789,7 @@ function resolvePlacedPollenBarriers(time) {
           addDamageNumber(monster, petal.attack, time);
           monster.lastPlayerHitAt = time;
           if (wasAlive && !monster.alive) {
-            addPlayerExperience(monster.experienceReward);
-            spawnMonsterDrops(monster);
+            rewardMonsterKill(monster);
           }
         }
         petal.durability -= getMonsterBodyDamageToPetal(monster);
@@ -6283,7 +6829,7 @@ function updateWeaponHits(time) {
   if (!state.spawned) return;
   if (!state.player.alive || state.player.dying || state.player.hidden) return;
 
-  for (const weapon of getWeaponPositions()) {
+  for (const weapon of getWeaponPositions(undefined, time)) {
     if (!weapon.petal) continue;
     if (!isPetalUnitActive(weapon.petal, weapon.unitIndex)) continue;
     if (weapon.placed) continue;
@@ -6292,7 +6838,7 @@ function updateWeaponHits(time) {
 
     for (const monster of state.monsters) {
       if (monster.hidden || monster.dying || !monster.alive) continue;
-      const reach = state.weapon.hitRadius + monster.radius + 18;
+      const reach = (weapon.hitRadius || state.weapon.hitRadius) + monster.radius + 18;
       if (Math.abs(monster.x - weapon.x) > reach || Math.abs(monster.y - weapon.y) > reach) continue;
 
       const monsterShape = getMonsterHitbox(monster);
@@ -6304,8 +6850,7 @@ function updateWeaponHits(time) {
         addDamageNumber(monster, weapon.petal.attack, time);
         monster.lastPlayerHitAt = time;
         if (wasAlive && !monster.alive) {
-          addPlayerExperience(monster.experienceReward);
-          spawnMonsterDrops(monster);
+          rewardMonsterKill(monster);
         }
       }
 
@@ -7131,21 +7676,68 @@ function drawPlayer() {
 }
 
 function drawHighTierPetalTrail(weapon, center, viewScale, petalSize, screenX, screenY) {
-  if (
-    !weapon.petal ||
-    !isPetalUnitActive(weapon.petal, weapon.unitIndex) ||
-    weapon.petal.tierIndex < HIGH_TIER_TRAIL_START_INDEX
-  ) {
+  if (!weapon.petal || !isPetalUnitActive(weapon.petal, weapon.unitIndex)) {
     return;
   }
 
   const orbitRadius = state.weapon.orbitRadius * viewScale;
-  const color = weapon.petal.tierColor || "#ffffff";
+  const color = weapon.petal.name === "Lentil" ? "#171719" : weapon.petal.tierColor || "#ffffff";
   const speed = Math.max(0.08, getPetalSpinSpeed());
   const unitSeed = (weapon.petal.id || 1) * 13.7 + (weapon.unitIndex || 0) * 31.3;
 
   ctx.save();
   ctx.fillStyle = color;
+  if (weapon.homing) {
+    const start = worldToScreen(weapon.homingStartX, weapon.homingStartY);
+    const dx = screenX - start.x;
+    const dy = screenY - start.y;
+    const length = Math.hypot(dx, dy);
+
+    if (length > 4) {
+      const lineAngle = Math.atan2(dy, dx);
+      const normalAngle = lineAngle + Math.PI / 2;
+      const clusterCount = weapon.petal.tierIndex >= HIGH_TIER_TRAIL_START_INDEX ? 16 : 9;
+      const moteCount = weapon.petal.tierIndex >= HIGH_TIER_TRAIL_START_INDEX ? 5 : 3;
+
+      for (let cluster = 1; cluster <= clusterCount; cluster++) {
+        const progress = cluster / (clusterCount + 1);
+        const baseX = screenX - dx * progress;
+        const baseY = screenY - dy * progress;
+
+        for (let mote = 0; mote < moteCount; mote++) {
+          const seedA = gardenHash(cluster, unitSeed, 141 + mote * 5);
+          const seedB = gardenHash(cluster, unitSeed, 142 + mote * 5);
+          const seedC = gardenHash(cluster, unitSeed, 143 + mote * 5);
+          const side = seedA > 0.5 ? 1 : -1;
+          const sideSpread = side * (6 + progress * 30 * seedB) * viewScale;
+          const backSpread = (seedC - 0.5) * 18 * viewScale;
+          const driftPulse = Math.sin(state.lastTime * 0.011 + unitSeed + cluster + mote) * 3 * viewScale;
+          const x =
+            baseX +
+            Math.cos(normalAngle) * (sideSpread + driftPulse) -
+            Math.cos(lineAngle) * backSpread;
+          const y =
+            baseY +
+            Math.sin(normalAngle) * (sideSpread + driftPulse) -
+            Math.sin(lineAngle) * backSpread;
+          const radius = petalSize * (0.07 - progress * 0.032) * (0.7 + seedA * 0.65);
+
+          ctx.globalAlpha = Math.max(0, 0.5 - progress * 0.36) * (0.6 + seedB * 0.4);
+          ctx.beginPath();
+          ctx.arc(x, y, Math.max(1.05, radius), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+    ctx.restore();
+    return;
+  }
+
+  if (weapon.petal.tierIndex < HIGH_TIER_TRAIL_START_INDEX) {
+    ctx.restore();
+    return;
+  }
+
   if (weapon.placed) {
     for (let mote = 0; mote < 28; mote++) {
       const seedA = gardenHash(mote, unitSeed, 111);
@@ -7524,6 +8116,7 @@ async function boot() {
   renderMonsterDexUi();
   renderPetalDexUi();
   renderForgingUi();
+  renderShopUi();
   updateLeaderboard(performance.now(), true);
   syncSettingsUi();
   loadingScreen.classList.add("is-hidden");
@@ -7557,6 +8150,10 @@ window.addEventListener("pointermove", (event) => {
     forgeButton.contains(event.target) ||
     accountPanel.contains(event.target) ||
     accountButton.contains(event.target) ||
+    tutorialPanel.contains(event.target) ||
+    tutorialButton.contains(event.target) ||
+    shopPanel.contains(event.target) ||
+    shopButton.contains(event.target) ||
     monsterDexPanel.contains(event.target) ||
     monsterDexButton.contains(event.target) ||
     authorPanel.contains(event.target) ||
@@ -7626,28 +8223,34 @@ window.addEventListener("keydown", (event) => {
   }
   if (!state.spawned) return;
 
+  if (isTextEntryTarget(event.target)) {
+    if (event.code === "Enter" && authorPanel.contains(event.target)) {
+      event.preventDefault();
+      verifyAuthorAccess();
+    }
+    return;
+  }
+
   handleAuthorCodeKey(event);
 
-  if (!isTextEntryTarget(event.target)) {
-    const digitMatch = event.code.match(/^(?:Digit|Numpad)([1-9])$/);
-    if (digitMatch) {
-      const slotIndex = Number(digitMatch[1]) - 1;
-      if (slotIndex < getEffectiveEquipmentSlots()) {
-        event.preventDefault();
-        swapEquipmentSlot(slotIndex);
-        return;
-      }
-    }
-    if ((event.code === "Digit0" || event.code === "Numpad0") && getEffectiveEquipmentSlots() >= 10) {
+  const digitMatch = event.code.match(/^(?:Digit|Numpad)([1-9])$/);
+  if (digitMatch) {
+    const slotIndex = Number(digitMatch[1]) - 1;
+    if (slotIndex < getEffectiveEquipmentSlots()) {
       event.preventDefault();
-      swapEquipmentSlot(9);
+      swapEquipmentSlot(slotIndex);
       return;
     }
-    if (event.code === "KeyR") {
-      event.preventDefault();
-      swapAllEquipmentSlots();
-      return;
-    }
+  }
+  if ((event.code === "Digit0" || event.code === "Numpad0") && getEffectiveEquipmentSlots() >= 10) {
+    event.preventDefault();
+    swapEquipmentSlot(9);
+    return;
+  }
+  if (event.code === "KeyR") {
+    event.preventDefault();
+    swapAllEquipmentSlots();
+    return;
   }
 
   if (event.code === "ArrowUp") state.input.cameraUp = true;
@@ -7714,6 +8317,13 @@ accountButton.addEventListener("click", () => {
     closeFloatingPanels();
   }
 });
+tutorialButton.addEventListener("click", () => {
+  if (tutorialPanel.classList.contains("is-hidden")) {
+    openTutorialPanel();
+  } else {
+    closeFloatingPanels();
+  }
+});
 monsterDexButton.addEventListener("click", () => {
   if (monsterDexPanel.classList.contains("is-hidden")) {
     openMonsterDexPanel();
@@ -7724,6 +8334,13 @@ monsterDexButton.addEventListener("click", () => {
 petalDexButton.addEventListener("click", () => {
   if (petalDexPanel.classList.contains("is-hidden")) {
     openPetalDexPanel();
+  } else {
+    closeFloatingPanels();
+  }
+});
+shopButton.addEventListener("click", () => {
+  if (shopPanel.classList.contains("is-hidden")) {
+    openShopPanel();
   } else {
     closeFloatingPanels();
   }
@@ -7880,10 +8497,22 @@ accountPanel.addEventListener("pointerenter", () => {
 accountPanel.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
+tutorialPanel.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+tutorialPanel.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
 petalDexPanel.addEventListener("pointerenter", () => {
   state.uiLockMovement = true;
 });
 petalDexPanel.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
+shopPanel.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+shopPanel.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
 authorPanel.addEventListener("pointerenter", () => {
@@ -7896,6 +8525,12 @@ accountButton.addEventListener("pointerenter", () => {
   state.uiLockMovement = true;
 });
 accountButton.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
+tutorialButton.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+tutorialButton.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
 monsterDexPanel.addEventListener("pointerenter", () => {
@@ -7916,6 +8551,12 @@ petalDexButton.addEventListener("pointerenter", () => {
 petalDexButton.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
+shopButton.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+shopButton.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
 inventoryPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
@@ -7928,10 +8569,16 @@ forgePanel.addEventListener("pointerdown", () => {
 accountPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
+tutorialPanel.addEventListener("pointerdown", () => {
+  state.uiLockMovement = true;
+});
 monsterDexPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
 petalDexPanel.addEventListener("pointerdown", () => {
+  state.uiLockMovement = true;
+});
+shopPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
 authorCard.addEventListener("pointerdown", () => {
@@ -7944,8 +8591,10 @@ window.addEventListener("pointerup", (event) => {
     !craftPanel.contains(event.target) &&
     !forgePanel.contains(event.target) &&
     !accountPanel.contains(event.target) &&
+    !tutorialPanel.contains(event.target) &&
     !petalDexPanel.contains(event.target) &&
     !monsterDexPanel.contains(event.target) &&
+    !shopPanel.contains(event.target) &&
     !authorPanel.contains(event.target) &&
     !dragData
   ) {
@@ -7954,6 +8603,8 @@ window.addEventListener("pointerup", (event) => {
 });
 monsterDexCloseButton.addEventListener("click", closeFloatingPanels);
 petalDexCloseButton.addEventListener("click", closeFloatingPanels);
+shopCloseButton.addEventListener("click", closeFloatingPanels);
+tutorialCloseButton.addEventListener("click", closeFloatingPanels);
 authorCloseButton.addEventListener("click", closeFloatingPanels);
 authorVerifyButton.addEventListener("click", verifyAuthorAccess);
 authorMapPreview.addEventListener("click", selectAuthorTeleportPoint);
