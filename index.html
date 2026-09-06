@@ -1,0 +1,414 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>flora.netlify</title>
+    <link rel="preload" href="loading.webp" as="image" fetchpriority="high" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: #151515;
+      }
+
+      #loadingScreen {
+        position: fixed;
+        inset: 0;
+        z-index: 10;
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        background: #151515;
+        color: #fffdf1;
+        font: 900 42px/1.1 "Trebuchet MS", sans-serif;
+      }
+
+      #loadingScreen.is-hidden {
+        pointer-events: none;
+        opacity: 0;
+      }
+
+      .loading-art {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .loading-meter {
+        position: absolute;
+        bottom: clamp(28px, 7vh, 72px);
+        left: 50%;
+        width: min(360px, 64vw);
+        height: 8px;
+        overflow: hidden;
+        border: 2px solid rgba(255, 255, 255, 0.88);
+        border-radius: 999px;
+        transform: translateX(-50%);
+        background: rgba(255, 255, 255, 0.12);
+        box-shadow: 0 2px 0 rgba(0, 0, 0, 0.28);
+      }
+
+      .loading-bar {
+        width: 0%;
+        height: 100%;
+        border-radius: inherit;
+        background: #fffdf1;
+        transition: width 120ms ease;
+      }
+    </style>
+    <link rel="stylesheet" href="styles.css" media="print" onload="this.media='all'" />
+    <noscript><link rel="stylesheet" href="styles.css" /></noscript>
+  </head>
+  <body class="is-menu">
+    <div id="loadingScreen" class="loading-screen" aria-live="polite">
+      <img class="loading-art" src="loading.webp" alt="" decoding="sync" fetchpriority="high" />
+      <div class="loading-meter" aria-hidden="true">
+        <div id="loadingBar" class="loading-bar"></div>
+      </div>
+    </div>
+
+    <canvas id="gameCanvas" aria-label="flora.netlify game"></canvas>
+    <canvas id="minimapCanvas" class="minimap" aria-label="小地图"></canvas>
+
+    <section id="startScreen" class="start-screen" aria-label="出生界面">
+      <h1 class="start-title">flora.netlify</h1>
+      <div class="spawn-panel">
+        <label class="spawn-label" for="nameInput" data-i18n="namePrompt">这朵小花叫做...</label>
+        <div class="spawn-row">
+          <input id="nameInput" class="name-input" type="text" value="cornwaves" maxlength="16" autocomplete="off" />
+          <button id="spawnButton" class="spawn-button" type="button" data-i18n="spawn">Spawn</button>
+        </div>
+        <div class="mode-row" aria-label="模式">
+          <button class="mode-button is-selected" type="button" data-mode="garden" data-i18n="garden">Garden</button>
+          <button class="mode-button" type="button" data-mode="antHell" data-i18n="antHell">Ant Hell</button>
+        </div>
+        <div id="antHellNotice" class="mode-notice is-hidden" role="status" aria-live="polite"></div>
+      </div>
+      <button id="accountButton" class="account-menu-button" type="button" data-i18n="login">登录</button>
+      <button id="petalDexButton" class="petaldex-menu-button" type="button" data-i18n="petalDex">花瓣图鉴</button>
+      <button id="monsterDexButton" class="monsterdex-menu-button" type="button" data-i18n="monsterDex">怪物图鉴</button>
+    </section>
+
+    <section id="accountPanel" class="account-panel is-hidden" aria-label="登录">
+      <div class="account-columns">
+        <form id="loginForm" class="account-form">
+          <div class="account-title" data-i18n="login">登录</div>
+          <label class="account-label" for="loginName" data-i18n="accountName">名字</label>
+          <input id="loginName" class="account-input" type="text" maxlength="16" autocomplete="username" />
+          <label class="account-label" for="loginPassword" data-i18n="password">密码</label>
+          <input id="loginPassword" class="account-input" type="password" maxlength="32" autocomplete="current-password" />
+          <button id="loginSubmitButton" class="account-submit-button" type="submit" data-i18n="login">登录</button>
+        </form>
+
+        <form id="registerForm" class="account-form">
+          <div class="account-title" data-i18n="register">注册</div>
+          <label class="account-label" for="registerName" data-i18n="accountName">名字</label>
+          <input id="registerName" class="account-input" type="text" maxlength="16" autocomplete="username" />
+          <label class="account-label" for="registerPassword" data-i18n="password">密码</label>
+          <input id="registerPassword" class="account-input" type="password" maxlength="32" autocomplete="new-password" />
+          <label class="account-label" for="registerPasswordConfirm" data-i18n="confirmPassword">再次确认密码</label>
+          <input id="registerPasswordConfirm" class="account-input" type="password" maxlength="32" autocomplete="new-password" />
+          <button id="registerSubmitButton" class="account-submit-button" type="submit" data-i18n="confirm">确定</button>
+          <div class="account-provider-row">
+            <button id="wechatRegisterButton" class="account-provider-button" type="button" data-i18n="wechatRegister">微信注册</button>
+            <button id="appleRegisterButton" class="account-provider-button" type="button" data-i18n="appleRegister">Apple注册</button>
+          </div>
+        </form>
+      </div>
+      <div id="accountMessage" class="account-message"></div>
+    </section>
+
+    <section id="monsterDexPanel" class="monsterdex-panel is-hidden" aria-label="怪物图鉴">
+      <div class="monsterdex-head">
+        <div class="monsterdex-title" data-i18n="monsterDex">怪物图鉴</div>
+        <button id="monsterDexCloseButton" class="monsterdex-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div id="monsterDexList" class="monsterdex-list"></div>
+    </section>
+
+    <section id="petalDexPanel" class="monsterdex-panel is-hidden" aria-label="花瓣图鉴">
+      <div class="monsterdex-head">
+        <div class="monsterdex-title" data-i18n="petalDex">花瓣图鉴</div>
+        <button id="petalDexCloseButton" class="monsterdex-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div id="petalDexList" class="monsterdex-list"></div>
+    </section>
+
+    <div class="hud" aria-label="玩家信息">
+      <canvas id="portraitCanvas" class="portrait" aria-hidden="true"></canvas>
+      <div class="player-panel">
+        <div class="player-row">
+          <div id="playerName" class="player-name">玩家</div>
+          <div id="playerLevel" class="player-level">Lv.1</div>
+        </div>
+        <div class="hud-bar health-hud-bar" aria-hidden="true">
+          <div id="playerHealthFill" class="hud-bar-fill"></div>
+        </div>
+        <div class="hud-bar exp-hud-bar" aria-hidden="true">
+          <div id="playerExperienceFill" class="hud-bar-fill"></div>
+          <span id="playerExperienceCurrent" class="exp-label exp-label-left">0</span>
+          <span id="playerExperienceNeeded" class="exp-label exp-label-right">100 / 100</span>
+        </div>
+      </div>
+    </div>
+
+    <button id="settingsButton" class="settings-button" type="button" aria-label="设置" data-i18n="settings">设置</button>
+    <button id="talentButton" class="talent-button" type="button" aria-label="天赋" data-i18n="talents">天赋</button>
+    <button id="craftButton" class="craft-button" type="button" aria-label="合成" data-i18n="craft">合成</button>
+    <button id="forgeButton" class="forge-button" type="button" aria-label="锻造" data-i18n="forge">锻造</button>
+
+    <section id="leaderboardPanel" class="leaderboard-panel" aria-label="排行榜">
+      <div class="leaderboard-title" data-i18n="leaderboard">排行榜</div>
+      <div id="leaderboardList" class="leaderboard-list"></div>
+    </section>
+
+    <section id="settingsPanel" class="settings-panel is-hidden" aria-label="设置面板">
+      <div class="settings-title" data-i18n="settings">设置</div>
+
+      <div class="settings-group">
+        <div class="settings-label" data-i18n="movementMode">移动方式</div>
+        <div class="segmented-control" role="group" aria-label="移动方式">
+          <button class="settings-option is-selected" type="button" data-setting="movement" data-value="mouse" data-i18n="mouse">鼠标</button>
+          <button class="settings-option" type="button" data-setting="movement" data-value="wasd">WASD</button>
+          <button class="settings-option" type="button" data-setting="movement" data-value="joystick" data-i18n="tablet">平板</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-label" data-i18n="layoutMode">界面模式</div>
+        <div class="segmented-control" role="group" aria-label="界面模式">
+          <button class="settings-option is-selected" type="button" data-setting="layout" data-value="auto" data-i18n="auto">自动</button>
+          <button class="settings-option" type="button" data-setting="layout" data-value="desktop" data-i18n="desktop">电脑</button>
+          <button class="settings-option" type="button" data-setting="layout" data-value="tablet" data-i18n="tablet">平板</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-label" data-i18n="language">语言</div>
+        <div class="segmented-control two-options" role="group" aria-label="语言">
+          <button class="settings-option is-selected" type="button" data-setting="language" data-value="zh">中文</button>
+          <button class="settings-option" type="button" data-setting="language" data-value="en">English</button>
+        </div>
+      </div>
+
+      <div class="settings-group settings-row">
+        <span class="settings-label" data-i18n="music">音乐</span>
+        <button id="musicToggle" class="toggle-button" type="button" aria-pressed="false">关</button>
+      </div>
+
+      <div class="settings-group">
+        <div class="settings-label" data-i18n="cameraMode">视角</div>
+        <div class="segmented-control two-options" role="group" aria-label="视角">
+          <button class="settings-option is-selected" type="button" data-setting="cameraMode" data-value="locked" data-i18n="cameraLocked">锁定</button>
+          <button class="settings-option" type="button" data-setting="cameraMode" data-value="free" data-i18n="cameraFree">自由</button>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <label class="settings-label" for="qualitySelect" data-i18n="quality">质量</label>
+        <select id="qualitySelect" class="quality-select">
+          <option value="low" data-i18n="qualityLow">低</option>
+          <option value="medium" selected data-i18n="qualityMedium">中</option>
+          <option value="high" data-i18n="qualityHigh">高</option>
+        </select>
+      </div>
+
+      <div class="settings-group settings-row">
+        <span class="settings-label" data-i18n="hitboxEdges">碰撞箱边缘</span>
+        <button id="hitboxToggle" class="toggle-button" type="button" aria-pressed="false">关</button>
+      </div>
+
+      <div class="settings-group settings-row">
+        <span class="settings-label" data-i18n="reverseAttack">攻击反向</span>
+        <button id="reverseAttackToggle" class="toggle-button" type="button" aria-pressed="false">关</button>
+      </div>
+
+      <div class="settings-group settings-row">
+        <span class="settings-label" data-i18n="playerHealthBar">玩家血条显示</span>
+        <button id="playerHealthToggle" class="toggle-button" type="button" aria-pressed="true">开</button>
+      </div>
+
+      <div class="settings-group settings-row">
+        <span class="settings-label" data-i18n="otherPetals">他人花瓣显示</span>
+        <button id="otherPetalsToggle" class="toggle-button" type="button" aria-pressed="true">开</button>
+      </div>
+
+      <div class="settings-group settings-row">
+        <span class="settings-label" data-i18n="damageNumbers">伤害数值显示</span>
+        <button id="damageNumbersToggle" class="toggle-button" type="button" aria-pressed="true">开</button>
+      </div>
+    </section>
+
+    <section id="talentPanel" class="talent-panel is-hidden" aria-label="天赋面板">
+      <div class="talent-panel-head">
+        <div class="talent-title" data-i18n="talents">天赋</div>
+        <div id="talentPointsLabel" class="talent-points">0</div>
+      </div>
+      <div id="talentStatsLabel" class="talent-stats"></div>
+      <div id="talentGrid" class="talent-grid"></div>
+    </section>
+
+    <section id="craftPanel" class="craft-panel is-hidden" aria-label="合成面板">
+      <div class="craft-panel-head">
+        <div class="craft-title" data-i18n="craft">合成</div>
+        <button id="craftCloseButton" class="craft-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="craft-layout">
+        <div class="craft-source">
+          <div class="craft-section-title" data-i18n="craftAvailable">可合成花瓣</div>
+          <div id="craftList" class="craft-list"></div>
+        </div>
+        <div class="craft-target">
+          <div class="craft-section-title" data-i18n="craftSlots">合成槽</div>
+          <div id="craftSlots" class="craft-slots">
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+          </div>
+          <button id="craftSubmitButton" class="craft-submit-button" type="button" data-i18n="craft">合成</button>
+          <div id="craftChanceLabel" class="craft-chance"></div>
+          <div class="craft-tip" data-i18n="craftTip">消耗5个相同的花瓣来进行一次合成</div>
+          <div id="craftMessage" class="craft-message"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="forgePanel" class="craft-panel forge-panel is-hidden" aria-label="锻造面板">
+      <div class="craft-panel-head">
+        <div class="craft-title" data-i18n="forge">锻造</div>
+        <button id="forgeCloseButton" class="craft-close-button forge-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="craft-layout">
+        <div class="craft-source">
+          <div class="craft-section-title" data-i18n="forgeAvailable">可锻造材料</div>
+          <div id="forgeList" class="craft-list forge-list"></div>
+        </div>
+        <div class="craft-target">
+          <div class="craft-section-title" data-i18n="forgeSlots">锻造槽</div>
+          <div id="forgeSlots" class="craft-slots forge-slots">
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+            <div class="craft-slot item-slot is-empty"></div>
+          </div>
+          <button id="forgeSubmitButton" class="craft-submit-button forge-submit-button" type="button" data-i18n="forge">锻造</button>
+          <div id="forgeChanceLabel" class="craft-chance" data-i18n="forgeChance">必定成功</div>
+          <div class="craft-tip" data-i18n="forgeTip">消耗5个15级以上同级Stinger换同级雷神之锤</div>
+          <div id="forgeMessage" class="craft-message"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="authorPanel" class="author-panel is-hidden" aria-label="作者面板">
+      <div class="author-card">
+        <button id="authorCloseButton" class="author-close-button" type="button" aria-label="关闭">×</button>
+        <div class="author-title" data-i18n="authorPanel">作者面板</div>
+
+        <div id="authorGate" class="author-gate">
+          <label class="author-label" for="authorNameInput" data-i18n="authorName">名字</label>
+          <input id="authorNameInput" class="author-input" type="text" autocomplete="off" maxlength="16" />
+          <label class="author-label" for="authorBirthdayInput" data-i18n="authorBirthday">生日</label>
+          <input id="authorBirthdayInput" class="author-input" type="text" autocomplete="off" maxlength="12" />
+          <button id="authorVerifyButton" class="author-main-button" type="button" data-i18n="confirm">确认</button>
+          <div id="authorMessage" class="author-message"></div>
+        </div>
+
+        <div id="authorTeleportArea" class="author-teleport is-hidden">
+          <div id="authorMapPreview" class="author-map-preview">
+            <canvas id="authorMapCanvas" aria-label="地图传送预览"></canvas>
+            <div id="authorMapMarker" class="author-map-marker is-hidden"></div>
+          </div>
+          <div class="author-map-hint" data-i18n="authorMapPickHint">点击地图选择传送或生成位置</div>
+          <button id="authorTeleportButton" class="author-main-button" type="button" data-i18n="authorTeleport">传送</button>
+          <div class="author-tools">
+            <div class="author-tool">
+              <div class="author-tool-title">增加物品</div>
+              <div class="author-row">
+                <select id="authorItemNameSelect" class="author-input"></select>
+                <select id="authorItemTierSelect" class="author-input"></select>
+                <input id="authorItemQuantityInput" class="author-input" type="number" min="1" max="9999" value="1" />
+              </div>
+              <button id="authorAddItemButton" class="author-main-button" type="button">加入背包</button>
+            </div>
+            <div class="author-tool">
+              <div class="author-tool-title">修改等级</div>
+              <div class="author-row">
+                <input id="authorLevelInput" class="author-input" type="number" min="1" max="600" value="1" />
+                <button id="authorSetLevelButton" class="author-main-button" type="button">设置等级</button>
+              </div>
+            </div>
+            <div class="author-tool">
+              <div class="author-tool-title">生成生物</div>
+              <div class="author-row">
+                <select id="authorSpawnMapSelect" class="author-input"></select>
+                <select id="authorMonsterSpeciesSelect" class="author-input"></select>
+                <select id="authorMonsterTierSelect" class="author-input"></select>
+                <input id="authorMonsterQuantityInput" class="author-input" type="number" min="1" max="3000" value="1" />
+              </div>
+              <button id="authorSpawnMonsterButton" class="author-main-button" type="button">生成</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="inventoryPanel" class="inventory-panel is-collapsed" aria-label="背包">
+      <div class="inventory-head">
+        <div class="inventory-title" data-i18n="inventory">背包</div>
+        <button id="inventoryToggleButton" class="inventory-toggle-button" type="button" aria-label="收起背包">×</button>
+      </div>
+      <div id="inventoryGrid" class="inventory-grid"></div>
+    </div>
+
+    <div id="deathScreen" class="death-screen is-hidden" aria-live="assertive">
+      <div class="death-title" data-i18n="youDied">你死了</div>
+      <button id="respawnButton" class="respawn-button" type="button" data-i18n="respawn">重生</button>
+    </div>
+
+    <div id="primaryHotbar" class="hotbar primary-hotbar" aria-label="Equipment">
+      <div class="slot is-active" aria-label="装备栏 1"></div>
+      <div class="slot" aria-label="装备栏 2"></div>
+      <div class="slot" aria-label="装备栏 3"></div>
+      <div class="slot" aria-label="装备栏 4"></div>
+      <div class="slot" aria-label="装备栏 5"></div>
+      <div class="slot is-locked" aria-label="装备栏 6"></div>
+      <div class="slot is-locked" aria-label="装备栏 7"></div>
+      <div class="slot is-locked" aria-label="装备栏 8"></div>
+      <div class="slot is-locked" aria-label="装备栏 9"></div>
+      <div class="slot is-locked" aria-label="装备栏 10"></div>
+    </div>
+
+    <div id="secondaryHotbar" class="hotbar secondary-hotbar" aria-label="Secondary Equipment">
+      <div class="slot is-active" aria-label="副栏 1"></div>
+      <div class="slot" aria-label="副栏 2"></div>
+      <div class="slot" aria-label="副栏 3"></div>
+      <div class="slot" aria-label="副栏 4"></div>
+      <div class="slot" aria-label="副栏 5"></div>
+      <div class="slot is-locked" aria-label="副栏 6"></div>
+      <div class="slot is-locked" aria-label="副栏 7"></div>
+      <div class="slot is-locked" aria-label="副栏 8"></div>
+      <div class="slot is-locked" aria-label="副栏 9"></div>
+      <div class="slot is-locked" aria-label="副栏 10"></div>
+    </div>
+
+    <div id="tabletControls" class="tablet-controls" aria-label="平板控制">
+      <div id="joystick" class="joystick" aria-label="虚拟摇杆">
+        <div id="joystickKnob" class="joystick-knob"></div>
+      </div>
+      <div class="touch-actions">
+        <button id="touchAttackButton" class="touch-action-button" type="button" data-i18n="attack">攻击</button>
+        <button id="touchDefendButton" class="touch-action-button" type="button" data-i18n="defend">防御</button>
+      </div>
+    </div>
+
+    <script src="game.js" defer></script>
+  </body>
+</html>

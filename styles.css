@@ -1,0 +1,2883 @@
+:root {
+  color-scheme: dark;
+  --leaf: #22a969;
+  --leaf-deep: #168650;
+  --ink: #111217;
+  --paper: #fffdf1;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--leaf);
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+}
+
+body {
+  position: relative;
+}
+
+.is-menu .hud,
+.is-menu .settings-button,
+.is-menu .talent-button,
+.is-menu .craft-button,
+.is-menu .forge-button,
+.is-menu .settings-panel,
+.is-menu .talent-panel,
+.is-menu .craft-panel,
+.is-menu .forge-panel,
+.is-menu .leaderboard-panel,
+.is-menu .author-panel,
+.is-menu .inventory-panel,
+.is-menu .hotbar,
+.is-menu .minimap,
+.is-menu .tablet-controls {
+  opacity: 0;
+  pointer-events: none;
+}
+
+#gameCanvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  cursor: crosshair;
+  touch-action: none;
+}
+
+.minimap {
+  position: fixed;
+  right: 18px;
+  bottom: 96px;
+  z-index: 4;
+  display: block;
+  width: 170px;
+  height: 170px;
+  border: 5px solid #24743f;
+  border-radius: 7px;
+  background: #94df72;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #151515;
+  opacity: 1;
+  transition: opacity 90ms ease;
+}
+
+.loading-screen.is-hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.loading-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.loading-meter {
+  position: absolute;
+  bottom: clamp(28px, 7vh, 72px);
+  left: 50%;
+  width: min(360px, 64vw);
+  height: 8px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.88);
+  border-radius: 999px;
+  transform: translateX(-50%);
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.28);
+}
+
+.loading-bar {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--paper);
+  transition: width 150ms ease;
+}
+
+.start-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  pointer-events: auto;
+  opacity: 1;
+  transition: opacity 130ms ease;
+}
+
+.start-screen.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.start-title {
+  position: absolute;
+  top: 21%;
+  left: 50%;
+  margin: 0;
+  color: var(--paper);
+  font: 900 clamp(46px, 5.3vw, 88px)/0.95 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  transform: translate(-50%, -50%);
+  -webkit-text-stroke: clamp(4px, 0.42vw, 7px) var(--ink);
+  paint-order: stroke fill;
+  white-space: nowrap;
+}
+
+.spawn-panel {
+  width: min(460px, calc(100vw - 32px));
+  transform: translateY(24px);
+}
+
+.spawn-label {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--paper);
+  font: 900 clamp(15px, 1.6vw, 20px)/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  text-align: center;
+  -webkit-text-stroke: 2.5px var(--ink);
+  paint-order: stroke fill;
+}
+
+.spawn-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 96px;
+  gap: 10px;
+}
+
+.name-input,
+.spawn-button,
+.mode-button {
+  height: 42px;
+  border-radius: 7px;
+  font-family: "Trebuchet MS", "Avenir Next", sans-serif;
+  font-weight: 900;
+  letter-spacing: 0;
+}
+
+.name-input {
+  width: 100%;
+  min-width: 0;
+  padding: 0 10px;
+  border: 5px solid var(--ink);
+  background: #e9e9e9;
+  color: var(--ink);
+  font-size: 25px;
+  outline: none;
+}
+
+.spawn-button,
+.mode-button {
+  color: var(--paper);
+  cursor: pointer;
+  -webkit-text-stroke: 2.2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.spawn-button {
+  border: 5px solid #258340;
+  background: #58c84a;
+  font-size: 20px;
+}
+
+.mode-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: min(260px, 100%);
+  margin: 12px auto 0;
+}
+
+.mode-button {
+  border: 4px solid #24743f;
+  background: rgba(148, 223, 114, 0.46);
+  font-size: 18px;
+}
+
+.mode-button.is-selected {
+  background: #68bd58;
+}
+
+.mode-notice {
+  width: min(380px, 100%);
+  margin: 14px auto 0;
+  padding: 12px 16px 14px;
+  border: 6px solid #13592f;
+  border-radius: 7px;
+  background: #39b75a;
+  color: var(--paper);
+  font: 900 clamp(15px, 1.7vw, 20px)/1.2 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: pre-line;
+  -webkit-text-stroke: 2.4px var(--ink);
+  paint-order: stroke fill;
+  box-shadow:
+    0 7px 0 #0d3f24,
+    0 11px 0 rgba(17, 18, 23, 0.34);
+}
+
+.mode-notice.is-hidden {
+  display: none;
+}
+
+.account-menu-button,
+.petaldex-menu-button,
+.monsterdex-menu-button {
+  position: fixed;
+  left: 50%;
+  bottom: 34px;
+  z-index: 6;
+  min-width: 118px;
+  height: 46px;
+  border: 5px solid #24743f;
+  border-radius: 7px;
+  background: #94df72;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 21px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  transform: translateX(-50%);
+  -webkit-text-stroke: 2.4px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 5px 0 #13592f, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.account-menu-button {
+  transform: translateX(calc(-100% - 88px));
+}
+
+.petaldex-menu-button {
+  min-width: 148px;
+  border-color: #7c5128;
+  background: #e6c56c;
+  transform: translateX(-50%);
+  box-shadow: 0 5px 0 #5c3a1d, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.monsterdex-menu-button {
+  min-width: 148px;
+  border-color: #7c5128;
+  background: #e6c56c;
+  transform: translateX(88px);
+  box-shadow: 0 5px 0 #5c3a1d, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.account-menu-button.is-active,
+.account-menu-button:active {
+  background: #68bd58;
+  transform: translate(calc(-100% - 88px), 3px);
+  box-shadow: 0 2px 0 #13592f, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.petaldex-menu-button.is-active,
+.petaldex-menu-button:active,
+.monsterdex-menu-button.is-active,
+.monsterdex-menu-button:active {
+  background: #f0d883;
+  box-shadow: 0 2px 0 #5c3a1d, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.petaldex-menu-button.is-active,
+.petaldex-menu-button:active {
+  transform: translate(-50%, 3px);
+}
+
+.monsterdex-menu-button.is-active,
+.monsterdex-menu-button:active {
+  transform: translate(88px, 3px);
+  box-shadow: 0 2px 0 #5c3a1d, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.account-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 9;
+  width: min(720px, calc(100vw - 32px));
+  max-height: calc(100vh - 36px);
+  overflow-y: auto;
+  padding: 16px;
+  border: 6px solid #13592f;
+  border-radius: 7px;
+  background: rgba(57, 183, 90, 0.97);
+  color: var(--paper);
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 8px 0 #0d3f24, 0 14px 0 rgba(17, 18, 23, 0.34);
+}
+
+.account-panel.is-hidden {
+  display: none;
+}
+
+.account-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.account-form {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+}
+
+.account-title,
+.account-label,
+.account-message {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.account-title {
+  margin-bottom: 4px;
+  font-size: 26px;
+}
+
+.account-label {
+  font-size: 14px;
+}
+
+.account-input {
+  width: 100%;
+  min-width: 0;
+  height: 38px;
+  padding: 0 10px;
+  border: 4px solid var(--ink);
+  border-radius: 7px;
+  background: #e9e9e9;
+  color: var(--ink);
+  font: 900 18px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  outline: none;
+}
+
+.account-submit-button,
+.account-provider-button {
+  min-height: 40px;
+  border: 4px solid #24743f;
+  border-radius: 7px;
+  background: #94df72;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 16px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 4px 0 #13592f;
+}
+
+.account-provider-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.account-provider-button {
+  min-height: 38px;
+  background: #fffdf1;
+}
+
+.account-message {
+  min-height: 18px;
+  margin-top: 10px;
+  font-size: 15px;
+  text-align: center;
+}
+
+.monsterdex-panel {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 9;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 12px;
+  width: min(900px, calc(100vw - 32px));
+  height: min(650px, calc(100vh - 36px));
+  padding: 16px;
+  border: 7px solid #13592f;
+  border-radius: 7px;
+  background: rgba(57, 183, 90, 0.97);
+  color: var(--paper);
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 8px 0 #0d3f24, 0 14px 0 rgba(17, 18, 23, 0.34);
+}
+
+.monsterdex-panel.is-hidden {
+  display: none;
+}
+
+.monsterdex-head {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 50px;
+  align-items: center;
+  gap: 12px;
+}
+
+.monsterdex-title,
+.monsterdex-card-name,
+.monsterdex-card-tier,
+.monsterdex-stat-label,
+.monsterdex-drop-label {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.monsterdex-title {
+  font-size: 28px;
+  text-align: center;
+}
+
+.monsterdex-close-button {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 4px solid #7b2525;
+  border-radius: 6px;
+  background: #c84444;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 34px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 4px 0 #692020;
+}
+
+.monsterdex-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  min-height: 0;
+  overflow: auto;
+  padding-right: 6px;
+  overscroll-behavior: contain;
+}
+
+.monsterdex-list::-webkit-scrollbar {
+  width: 8px;
+}
+
+.monsterdex-list::-webkit-scrollbar-thumb {
+  border: 2px solid #24743f;
+  border-radius: 999px;
+  background: #fffdf1;
+}
+
+.monsterdex-card {
+  display: grid;
+  grid-template-columns: 70px minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border: 5px solid var(--tier-border-color);
+  border-radius: 7px;
+  background: var(--tier-color);
+  box-shadow: inset 0 0 0 3px rgba(17, 18, 23, 0.16);
+}
+
+.monsterdex-monster-art {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 82px;
+  border: 4px solid var(--tier-border-color);
+  border-radius: 7px;
+  background: rgba(255, 253, 241, 0.2);
+}
+
+.monsterdex-monster-art img {
+  width: 44px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.monsterdex-card-body {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.monsterdex-card-name {
+  font-size: 18px;
+}
+
+.monsterdex-card-tier {
+  font-size: 14px;
+}
+
+.monsterdex-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 5px 8px;
+  color: #111217;
+  font: 900 13px/1.15 "Trebuchet MS", "Avenir Next", sans-serif;
+}
+
+.monsterdex-stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 3px solid rgba(17, 18, 23, 0.42);
+  border-radius: 6px;
+  background: rgba(255, 253, 241, 0.68);
+}
+
+.monsterdex-drop-label {
+  font-size: 13px;
+}
+
+.monsterdex-drops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.monsterdex-drop {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 6px;
+  min-width: 104px;
+  padding: 4px 6px;
+  border: 3px solid var(--drop-border-color);
+  border-radius: 6px;
+  background: var(--drop-color);
+  color: var(--paper);
+  font: 900 12px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  -webkit-text-stroke: 1.2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.monsterdex-drop img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.monsterdex-species-row {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  align-items: start;
+  gap: 14px;
+  min-width: 0;
+  padding: 12px;
+  border: 6px solid #24743f;
+  border-radius: 7px;
+  background: rgba(148, 223, 114, 0.42);
+}
+
+.monsterdex-species-info {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.monsterdex-species-art {
+  display: grid;
+  place-items: center;
+  width: 82px;
+  height: 98px;
+  border: 5px solid #13592f;
+  border-radius: 7px;
+  background: rgba(255, 253, 241, 0.18);
+}
+
+.monsterdex-species-art img {
+  width: 52px;
+  height: 82px;
+  object-fit: contain;
+}
+
+.monsterdex-species-name {
+  max-width: 100%;
+  overflow: hidden;
+  color: var(--paper);
+  font: 900 20px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-text-stroke: 2.2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.monsterdex-tier-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(74px, 74px));
+  align-content: start;
+  gap: 9px;
+  min-width: 0;
+}
+
+.monsterdex-tier-cell {
+  --tier-color: #30c75a;
+  --tier-border-color: #1f843c;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 16px;
+  place-items: center;
+  width: 74px;
+  height: 74px;
+  min-width: 0;
+  padding: 4px;
+  border: 4px solid var(--tier-border-color);
+  border-radius: 7px;
+  background: var(--tier-color);
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 11px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.35px var(--ink);
+  paint-order: stroke fill;
+}
+
+.monsterdex-tier-cell:hover,
+.monsterdex-tier-cell:focus-visible {
+  box-shadow: inset 0 0 0 2px #fffdf1, 0 0 0 2px rgba(17, 18, 23, 0.48);
+  outline: none;
+}
+
+.monsterdex-tier-cell img {
+  width: 36px;
+  height: 48px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.monsterdex-tier-cell span {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.item-tooltip.monster-tooltip {
+  width: 270px;
+}
+
+.monster-tooltip-drop-label {
+  margin: 8px 0 6px;
+  color: #fffdf1;
+  font-size: 12px;
+}
+
+.monster-tooltip-drops {
+  display: grid;
+  gap: 6px;
+}
+
+.monster-tooltip-drop {
+  --drop-color: #30c75a;
+  --drop-border-color: #1f843c;
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  padding: 5px 7px;
+  border: 3px solid var(--drop-border-color);
+  border-radius: 6px;
+  background: var(--drop-color);
+}
+
+.monster-tooltip-drop img {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+.monster-tooltip-drop span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.hud {
+  position: fixed;
+  top: 18px;
+  left: 18px;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: 74px 178px;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+  color: var(--paper);
+  text-shadow: none;
+}
+
+.portrait {
+  display: block;
+  width: 74px;
+  height: 74px;
+}
+
+.player-panel {
+  display: grid;
+  gap: 6px;
+}
+
+.player-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.player-name,
+.player-level {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 3.5px var(--ink);
+  paint-order: stroke fill;
+}
+
+.player-name {
+  font-size: 24px;
+  line-height: 1;
+}
+
+.player-level {
+  font-size: 18px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.hud-bar {
+  width: 178px;
+  height: 14px;
+  overflow: hidden;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: rgba(17, 18, 23, 0.35);
+}
+
+.health-hud-bar {
+  height: 18px;
+}
+
+.exp-hud-bar {
+  position: relative;
+  background: rgba(17, 18, 23, 0.35);
+  pointer-events: auto;
+  transition: height 90ms ease;
+}
+
+.exp-hud-bar:hover {
+  height: 20px;
+}
+
+.hud-bar-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.health-hud-bar .hud-bar-fill {
+  background: #63e06e;
+}
+
+.exp-hud-bar .hud-bar-fill {
+  background: #ffd629;
+}
+
+.exp-label {
+  position: absolute;
+  top: 50%;
+  z-index: 1;
+  color: var(--paper);
+  font: 900 11px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%);
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  transition: opacity 70ms ease;
+}
+
+.exp-label-left {
+  left: 8px;
+}
+
+.exp-label-right {
+  right: 8px;
+}
+
+.exp-hud-bar:hover .exp-label {
+  opacity: 1;
+}
+
+.settings-button {
+  position: fixed;
+  top: 28px;
+  left: 288px;
+  z-index: 4;
+  min-width: 62px;
+  height: 44px;
+  border: 4px solid #34363b;
+  border-radius: 7px;
+  background: #8f949c;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 17px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.talent-button {
+  position: fixed;
+  top: 92px;
+  left: 18px;
+  z-index: 4;
+  min-width: 74px;
+  height: 44px;
+  border: 4px solid #5c191e;
+  border-radius: 7px;
+  background: #d9464f;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 17px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 5px 0 #4a1117, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.craft-button {
+  position: fixed;
+  top: 146px;
+  left: 18px;
+  z-index: 4;
+  min-width: 74px;
+  height: 44px;
+  border: 4px solid #7c5a24;
+  border-radius: 7px;
+  background: #ead38d;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 17px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 5px 0 #6b4519, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.forge-button {
+  position: fixed;
+  top: 200px;
+  left: 18px;
+  z-index: 4;
+  min-width: 74px;
+  height: 44px;
+  border: 4px solid #050506;
+  border-radius: 7px;
+  background: #25262a;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 17px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 5px 0 #060607, 0 8px 0 rgba(17, 18, 23, 0.36);
+}
+
+.talent-button.is-active,
+.talent-button:active,
+.craft-button.is-active,
+.craft-button:active,
+.forge-button.is-active,
+.forge-button:active {
+  background: #b9323e;
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #4a1117, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.craft-button.is-active,
+.craft-button:active {
+  background: #d5b76c;
+  box-shadow: 0 2px 0 #6b4519, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.forge-button.is-active,
+.forge-button:active {
+  background: #111214;
+  box-shadow: 0 2px 0 #060607, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.inventory-panel.is-collapsed:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #335577, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.leaderboard-panel {
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 4;
+  width: min(236px, calc(100vw - 36px));
+  max-height: 270px;
+  overflow: hidden;
+  padding: 10px;
+  border: 5px solid #174d2c;
+  border-radius: 7px;
+  background: rgba(83, 165, 90, 0.92);
+  color: var(--paper);
+  pointer-events: none;
+  box-shadow: 0 6px 0 #0d3f24, 0 10px 0 rgba(17, 18, 23, 0.28);
+}
+
+.leaderboard-title {
+  margin-bottom: 8px;
+  color: var(--paper);
+  font: 900 18px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2.2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.leaderboard-list {
+  display: grid;
+  gap: 5px;
+  max-height: 214px;
+  overflow: hidden;
+}
+
+.leaderboard-row,
+.leaderboard-empty {
+  display: grid;
+  align-items: center;
+  min-height: 28px;
+  border: 3px solid #1f6e3b;
+  border-radius: 6px;
+  background: rgba(148, 223, 114, 0.78);
+  color: var(--paper);
+  font: 900 13px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.7px var(--ink);
+  paint-order: stroke fill;
+}
+
+.leaderboard-row {
+  grid-template-columns: 42px minmax(0, 1fr) 52px;
+  gap: 6px;
+  padding: 3px 6px;
+}
+
+.leaderboard-row.is-current {
+  border-color: #f0d86f;
+  background: rgba(239, 209, 82, 0.82);
+}
+
+.leaderboard-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-level {
+  justify-self: end;
+}
+
+.leaderboard-empty {
+  place-items: center;
+}
+
+.settings-button.is-active,
+.settings-button:active {
+  background: #747981;
+}
+
+.settings-panel {
+  position: fixed;
+  top: 82px;
+  left: 288px;
+  z-index: 7;
+  display: grid;
+  gap: 12px;
+  width: 292px;
+  max-height: calc(100vh - 104px);
+  overflow-y: auto;
+  padding: 14px;
+  border: 5px solid #34363b;
+  border-radius: 7px;
+  background: rgba(132, 137, 145, 0.95);
+  color: var(--paper);
+  pointer-events: auto;
+}
+
+.settings-panel.is-hidden {
+  display: none;
+}
+
+.talent-panel {
+  position: fixed;
+  top: 200px;
+  left: 18px;
+  z-index: 7;
+  display: grid;
+  gap: 12px;
+  width: min(410px, calc(100vw - 36px));
+  max-height: calc(100vh - 172px);
+  overflow-y: auto;
+  padding: 14px;
+  border: 5px solid #5c191e;
+  border-radius: 7px;
+  background: rgba(176, 48, 58, 0.96);
+  color: var(--paper);
+  pointer-events: auto;
+  box-shadow: 0 7px 0 #4a1117, 0 12px 0 rgba(17, 18, 23, 0.34);
+}
+
+.talent-panel::-webkit-scrollbar,
+.settings-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.talent-panel::-webkit-scrollbar-thumb {
+  border: 2px solid #5c191e;
+  border-radius: 999px;
+  background: #ff8a7b;
+}
+
+.settings-panel::-webkit-scrollbar-thumb {
+  border: 2px solid #34363b;
+  border-radius: 999px;
+  background: #b8bcc2;
+}
+
+.talent-panel.is-hidden {
+  display: none;
+}
+
+.craft-panel {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: 7;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+  width: min(900px, calc(100vw - 28px));
+  height: min(580px, calc(100vh - 28px));
+  overflow: auto;
+  padding: 18px 20px 20px;
+  border: 6px solid #7c5128;
+  border-radius: 7px;
+  background: #e6a85c;
+  color: var(--paper);
+  pointer-events: auto;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 8px 0 #5c3a1d, 0 14px 0 rgba(17, 18, 23, 0.34);
+}
+
+.craft-panel.is-hidden {
+  display: none;
+}
+
+.forge-panel {
+  border-color: #050506;
+  background: #18191d;
+  box-shadow: 0 8px 0 #050506, 0 14px 0 rgba(17, 18, 23, 0.42);
+}
+
+.craft-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.craft-panel::-webkit-scrollbar-thumb {
+  border: 2px solid #7c5a24;
+  border-radius: 999px;
+  background: #fff0b8;
+}
+
+.forge-panel::-webkit-scrollbar-thumb {
+  border-color: #050506;
+  background: #62656d;
+}
+
+.craft-panel-head,
+.craft-layout,
+.craft-target {
+  display: grid;
+  gap: 10px;
+}
+
+.craft-panel-head {
+  grid-template-columns: minmax(0, 1fr) 50px;
+  align-items: center;
+}
+
+.craft-layout {
+  grid-template-columns: 330px minmax(300px, 1fr);
+  align-items: center;
+  gap: 34px;
+  min-height: 0;
+}
+
+.craft-source,
+.craft-target {
+  min-width: 0;
+  justify-self: center;
+}
+
+.craft-title,
+.craft-section-title,
+.craft-stack-name,
+.craft-stack-meta {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.craft-title {
+  font-size: 24px;
+}
+
+.craft-close-button {
+  display: grid;
+  place-items: center;
+  width: 50px;
+  height: 50px;
+  border: 4px solid #7b2525;
+  border-radius: 6px;
+  background: #c84444;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 34px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 4px 0 #692020;
+}
+
+.craft-close-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #692020;
+}
+
+.craft-chance,
+.craft-tip,
+.craft-message {
+  color: #1c120a;
+  font-weight: 900;
+  letter-spacing: 0;
+  text-align: center;
+  text-shadow: 0 1px 0 rgba(255, 241, 196, 0.42);
+}
+
+.forge-panel .craft-chance,
+.forge-panel .craft-tip,
+.forge-panel .craft-message {
+  color: #f2f2ee;
+  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.58);
+}
+
+.craft-chance {
+  min-height: 18px;
+  font-size: 14px;
+}
+
+.craft-tip,
+.craft-message {
+  min-height: 18px;
+  font-size: 15px;
+}
+
+.craft-section-title {
+  margin-bottom: 10px;
+  font-size: 15px;
+}
+
+.craft-list {
+  display: grid;
+  grid-template-columns: repeat(5, 54px);
+  grid-auto-rows: 54px;
+  justify-content: center;
+  align-content: start;
+  gap: 0;
+  width: 270px;
+  max-height: 432px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.craft-list > .craft-message {
+  grid-column: 1 / -1;
+  display: grid;
+  min-height: 54px;
+  place-items: center;
+}
+
+.craft-stack-button {
+  display: grid;
+  place-items: stretch;
+  width: 54px;
+  height: 54px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.craft-stack-button.is-selected {
+  z-index: 1;
+}
+
+.craft-stack-button:active {
+  transform: scale(0.96);
+}
+
+.craft-stack-button .item-slot {
+  width: 54px;
+  height: 54px;
+  grid-template-rows: minmax(0, 1fr) 12px;
+  padding: 2px;
+  border: 4px solid var(--tier-border-color);
+  border-radius: 0;
+  background: var(--tier-color);
+  cursor: pointer;
+}
+
+.craft-stack-button.is-selected .item-slot {
+  border-color: var(--tier-border-color);
+  box-shadow: inset 0 0 0 2px #fff1c4, 0 0 0 2px rgba(28, 18, 10, 0.45);
+}
+
+.craft-stack-button .item-slot img {
+  width: 32px;
+  height: 32px;
+}
+
+.craft-stack-info {
+  display: none;
+}
+
+.craft-stack-name,
+.craft-stack-meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.craft-stack-name {
+  font-size: 15px;
+}
+
+.craft-stack-meta {
+  font-size: 12px;
+}
+
+.craft-empty-slot {
+  width: 54px;
+  height: 54px;
+  border: 2px solid #b07c48;
+  background: #c48b54;
+}
+
+.forge-panel .craft-empty-slot {
+  border-color: #303138;
+  background: #24262b;
+}
+
+.craft-slots {
+  position: relative;
+  width: 286px;
+  height: 236px;
+  margin: 0 auto;
+}
+
+.craft-slots.is-crafting {
+  animation: craftTrayShake 820ms cubic-bezier(0.22, 0.9, 0.2, 1) both;
+}
+
+.craft-slots.is-crafting .craft-slot {
+  z-index: 1;
+  animation: craftSlotCollide 820ms cubic-bezier(0.18, 0.92, 0.16, 1) both;
+}
+
+.craft-slot:nth-child(1) {
+  --slot-x: 143px;
+  --slot-y: 31px;
+  --craft-collide-x: 0px;
+  --craft-collide-y: 74px;
+  --craft-collide-rotate: -13deg;
+}
+
+.craft-slot:nth-child(2) {
+  --slot-x: 69px;
+  --slot-y: 105px;
+  --craft-collide-x: 74px;
+  --craft-collide-y: 0px;
+  --craft-collide-rotate: 10deg;
+}
+
+.craft-slot:nth-child(3) {
+  --slot-x: 217px;
+  --slot-y: 105px;
+  --craft-collide-x: -74px;
+  --craft-collide-y: 0px;
+  --craft-collide-rotate: -7deg;
+}
+
+.craft-slot:nth-child(4) {
+  --slot-x: 95px;
+  --slot-y: 179px;
+  --craft-collide-x: 48px;
+  --craft-collide-y: -74px;
+  --craft-collide-rotate: 12deg;
+}
+
+.craft-slot:nth-child(5) {
+  --slot-x: 191px;
+  --slot-y: 179px;
+  --craft-collide-x: -48px;
+  --craft-collide-y: -74px;
+  --craft-collide-rotate: -12deg;
+}
+
+.craft-slot.item-slot {
+  position: absolute;
+  left: var(--slot-x);
+  top: var(--slot-y);
+  width: 56px;
+  height: 56px;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 2px;
+  border: 4px solid var(--tier-border-color);
+  border-radius: 0;
+  background: var(--tier-color);
+  cursor: default;
+  transform: translate(-50%, -50%);
+}
+
+.craft-slot.item-slot img {
+  width: 34px;
+  height: 34px;
+}
+
+.craft-slot.item-slot span:not(.item-tier),
+.craft-slot.item-slot .item-tier {
+  display: none;
+}
+
+.craft-submit-button {
+  justify-self: center;
+  width: 82px;
+  min-height: 44px;
+  margin-top: -4px;
+  border: 4px solid #3d3d3d;
+  border-radius: 6px;
+  background: #666;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 18px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 4px 0 #2f2f2f;
+}
+
+.forge-submit-button {
+  border-color: #050506;
+  background: #25262a;
+  box-shadow: 0 4px 0 #060607;
+}
+
+.craft-submit-button:disabled {
+  cursor: default;
+  filter: grayscale(0.45);
+  opacity: 0.68;
+}
+
+.craft-result-burst {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border: 4px solid var(--tier-border-color);
+  border-radius: 7px;
+  background: var(--tier-color);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: craftResultPop 720ms cubic-bezier(0.17, 1.25, 0.26, 1) both;
+}
+
+.craft-result-burst img {
+  width: 54px;
+  height: 54px;
+  object-fit: contain;
+  filter: drop-shadow(0 4px 0 rgba(17, 18, 23, 0.36));
+}
+
+.craft-result-count {
+  position: absolute;
+  right: 0;
+  top: 2px;
+  min-width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 12px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+}
+
+.craft-shard {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  z-index: 3;
+  width: 13px;
+  height: 13px;
+  border: 2px solid #7c5a24;
+  border-radius: 4px 2px 5px 2px;
+  background: #fff0b8;
+  pointer-events: none;
+  animation: craftShardFly 720ms cubic-bezier(0.12, 0.82, 0.22, 1) both;
+}
+
+@keyframes craftTrayShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  44% {
+    transform: translateX(0);
+  }
+  52% {
+    transform: translateX(-5px);
+  }
+  60% {
+    transform: translateX(5px);
+  }
+  68% {
+    transform: translateX(-3px);
+  }
+  76% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes craftSlotCollide {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg) scale(1);
+  }
+  44% {
+    transform: translate(
+        calc(-50% + var(--craft-collide-x)),
+        calc(-50% + var(--craft-collide-y))
+      )
+      rotate(var(--craft-collide-rotate)) scale(1.08);
+  }
+  58% {
+    transform: translate(
+        calc(-50% + var(--craft-collide-x)),
+        calc(-50% + var(--craft-collide-y))
+      )
+      rotate(0deg) scale(0.92);
+  }
+  74% {
+    transform: translate(
+        calc(-50% + var(--craft-collide-x)),
+        calc(-50% + var(--craft-collide-y))
+      )
+      rotate(var(--craft-collide-rotate)) scale(1.02);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+        calc(-50% + var(--craft-collide-x)),
+        calc(-50% + var(--craft-collide-y))
+      )
+      rotate(0deg) scale(0.22);
+    opacity: 0;
+  }
+}
+
+@keyframes craftResultPop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.15) rotate(-22deg);
+  }
+  34% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.25) rotate(9deg);
+  }
+  70% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, calc(-50% - 16px)) scale(1.15);
+  }
+}
+
+@keyframes craftShardFly {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1) rotate(0deg);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--shard-x)), calc(-50% + var(--shard-y))) scale(0.25)
+      rotate(var(--shard-rotate));
+  }
+}
+
+.talent-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.talent-title,
+.talent-points,
+.talent-name {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.talent-title {
+  font-size: 24px;
+}
+
+.talent-points {
+  font-size: 16px;
+}
+
+.talent-stats {
+  display: block;
+  min-height: 32px;
+  padding: 7px 10px;
+  border: 4px solid #5c191e;
+  border-radius: 7px;
+  background: rgba(126, 35, 44, 0.68);
+  color: var(--paper);
+  text-align: center;
+  font: 900 14px/1.15 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.6px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: inset 0 -3px 0 rgba(74, 17, 23, 0.45);
+}
+
+.talent-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.talent-row {
+  display: grid;
+  gap: 6px;
+}
+
+.talent-name {
+  font-size: 14px;
+}
+
+.talent-levels {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: 5px;
+}
+
+.talent-node {
+  min-width: 0;
+  height: 28px;
+  border: 3px solid #5c191e;
+  border-radius: 6px;
+  background: #7e232c;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 12px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.4px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 3px 0 #4a1117;
+  touch-action: none;
+}
+
+.talent-node.is-learned {
+  background: #ff6b5c;
+  border-color: #ffe1a8;
+}
+
+.settings-title,
+.settings-label {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.settings-title {
+  font-size: 24px;
+}
+
+.settings-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settings-row .settings-label {
+  margin-bottom: 0;
+}
+
+.segmented-control {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.segmented-control.two-options {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.settings-option,
+.toggle-button,
+.quality-select {
+  min-height: 34px;
+  border: 3px solid #34363b;
+  border-radius: 7px;
+  background: #b8bcc2;
+  color: var(--paper);
+  font: 900 13px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.6px var(--ink);
+  paint-order: stroke fill;
+}
+
+.settings-option,
+.toggle-button {
+  cursor: pointer;
+}
+
+.settings-option.is-selected,
+.toggle-button.is-on {
+  background: #62be58;
+  border-color: #24743f;
+}
+
+.quality-select {
+  width: 100%;
+  padding: 0 8px;
+  color: var(--ink);
+  background: #e5e5e5;
+  -webkit-text-stroke: 0;
+}
+
+.author-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(17, 18, 23, 0.24);
+  pointer-events: auto;
+}
+
+.author-panel.is-hidden {
+  display: none;
+}
+
+.author-card {
+  position: relative;
+  display: grid;
+  gap: 14px;
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  padding: 18px 20px 20px;
+  border: 7px solid #13592f;
+  border-radius: 7px;
+  background: #39b75a;
+  box-shadow: 0 8px 0 #0d3f24, 0 14px 0 rgba(17, 18, 23, 0.34);
+}
+
+.author-title,
+.author-label,
+.author-message {
+  color: var(--paper);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.author-title {
+  padding-right: 56px;
+  font-size: 28px;
+  text-align: center;
+}
+
+.author-close-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 4px solid #7b2525;
+  border-radius: 6px;
+  background: #c84444;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 32px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 4px 0 #692020;
+}
+
+.author-gate,
+.author-teleport {
+  display: grid;
+  gap: 10px;
+}
+
+.author-tools {
+  display: grid;
+  gap: 12px;
+}
+
+.author-tool {
+  display: grid;
+  gap: 9px;
+  padding: 10px;
+  border: 5px solid #13592f;
+  border-radius: 7px;
+  background: rgba(148, 223, 114, 0.42);
+  box-shadow: inset 0 0 0 3px rgba(17, 18, 23, 0.12);
+}
+
+.author-tool-title {
+  color: var(--paper);
+  font: 900 17px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.7px var(--ink);
+  paint-order: stroke fill;
+}
+
+.author-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(108px, 1fr));
+  gap: 8px;
+  align-items: center;
+}
+
+.author-teleport.is-hidden,
+.author-gate.is-hidden {
+  display: none;
+}
+
+.author-label {
+  font-size: 15px;
+}
+
+.author-input {
+  width: 100%;
+  min-height: 42px;
+  padding: 0 10px;
+  border: 5px solid var(--ink);
+  border-radius: 7px;
+  background: #fffdf1;
+  color: var(--ink);
+  outline: none;
+  font: 900 22px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+}
+
+.author-main-button {
+  justify-self: center;
+  min-width: 112px;
+  min-height: 44px;
+  border: 5px solid #24743f;
+  border-radius: 7px;
+  background: #94df72;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 21px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2.4px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 5px 0 #13592f, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.author-main-button:disabled {
+  cursor: default;
+  filter: grayscale(0.36);
+  opacity: 0.72;
+}
+
+.author-message {
+  min-height: 22px;
+  font-size: 15px;
+  text-align: center;
+}
+
+.author-map-preview {
+  position: relative;
+  width: min(420px, calc(100vw - 88px));
+  aspect-ratio: 1;
+  justify-self: center;
+  overflow: hidden;
+  border: 6px solid #13592f;
+  border-radius: 7px;
+  background: #62ba70;
+  cursor: crosshair;
+  box-shadow: inset 0 0 0 3px rgba(17, 18, 23, 0.18);
+}
+
+.author-map-preview canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+
+.author-map-marker {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border: 4px solid var(--paper);
+  border-radius: 50%;
+  background: #ff3030;
+  box-shadow: 0 0 0 3px var(--ink);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.author-map-marker.is-hidden {
+  display: none;
+}
+
+.death-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 8;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 18px;
+  background: rgba(72, 72, 72, 0.46);
+  opacity: 1;
+  pointer-events: auto;
+  transition: opacity 100ms ease;
+}
+
+.death-screen.is-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.death-title {
+  color: var(--paper);
+  font-size: clamp(40px, 9vw, 86px);
+  font-weight: 900;
+  letter-spacing: 0;
+  -webkit-text-stroke: 5px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: none;
+}
+
+.respawn-button {
+  min-width: 156px;
+  min-height: 56px;
+  padding: 0 28px;
+  border: 5px solid #24743f;
+  border-radius: 7px;
+  background: #94df72;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 24px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2.5px var(--ink);
+  paint-order: stroke fill;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+.respawn-button:active {
+  transform: translateY(3px);
+  box-shadow: none;
+}
+
+.inventory-panel {
+  position: fixed;
+  top: 254px;
+  left: 18px;
+  z-index: 3;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  width: min(420px, calc(100vw - 36px));
+  height: min(780px, calc(100vh - 286px));
+  padding: 14px 16px 18px;
+  border: 6px solid #4477aa;
+  border-radius: 7px;
+  background: #63a8e8;
+  box-shadow: 0 7px 0 #335577, 0 12px 0 rgba(17, 18, 23, 0.28);
+  overflow: hidden;
+  pointer-events: auto;
+  transition: width 120ms ease, padding 120ms ease, max-height 120ms ease;
+}
+
+.inventory-panel.is-collapsed {
+  display: grid;
+  place-items: center;
+  width: 74px;
+  height: 44px;
+  min-width: 74px;
+  padding: 0;
+  border: 4px solid #335577;
+  cursor: pointer;
+  box-shadow: 0 5px 0 #254463, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.inventory-head {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 58px;
+  margin-bottom: 14px;
+  border-bottom: 4px solid #4477aa;
+}
+
+.inventory-title {
+  color: var(--paper);
+  font: 900 32px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 3px var(--ink);
+  paint-order: stroke fill;
+}
+
+.inventory-toggle-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border: 4px solid #b83c3c;
+  border-radius: 6px;
+  background: #d64848;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 32px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  box-shadow: 0 4px 0 #8f2c2c;
+}
+
+.inventory-toggle-button:active {
+  transform: translateY(2px);
+  box-shadow: 0 2px 0 #8f2c2c;
+}
+
+.inventory-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 70px);
+  grid-auto-rows: 70px;
+  gap: 8px;
+  justify-content: center;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 2px 4px 6px 0;
+  overscroll-behavior: contain;
+}
+
+.inventory-panel.is-collapsed .inventory-head {
+  min-height: 0;
+  margin-bottom: 0;
+  border-bottom: 0;
+}
+
+.inventory-panel.is-collapsed .inventory-title {
+  font-size: 17px;
+  -webkit-text-stroke-width: 2px;
+}
+
+.inventory-panel.is-collapsed .inventory-toggle-button {
+  display: none;
+}
+
+.inventory-panel.is-collapsed .inventory-grid {
+  display: none;
+}
+
+.inventory-grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.inventory-grid::-webkit-scrollbar-thumb {
+  border: 2px solid #335577;
+  border-radius: 999px;
+  background: #d7eeff;
+}
+
+.inventory-tier-group {
+  display: grid;
+  gap: 6px;
+}
+
+.inventory-tier-heading {
+  color: var(--paper);
+  font: 900 13px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.inventory-items {
+  display: grid;
+  grid-template-columns: repeat(3, 64px);
+  gap: 8px;
+}
+
+.inventory-grid .item-slot {
+  width: 70px;
+  height: 70px;
+  grid-template-rows: minmax(0, 1fr) 16px;
+  padding: 4px;
+  border-width: 4px;
+  border-radius: 0;
+  background: var(--tier-color);
+  cursor: grab;
+}
+
+.inventory-grid .item-slot img {
+  width: 40px;
+  height: 40px;
+}
+
+.inventory-grid .item-slot span {
+  font-size: 13px;
+}
+
+.inventory-empty-slot {
+  width: 70px;
+  height: 70px;
+  border: 3px solid #335577;
+  background: #4477aa;
+}
+
+.hotbar {
+  position: fixed;
+  left: 50%;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: repeat(var(--slot-count, 5), 68px);
+  gap: 8px;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+.primary-hotbar {
+  bottom: 90px;
+}
+
+.secondary-hotbar {
+  bottom: 18px;
+  opacity: 0.92;
+}
+
+.secondary-hotbar .slot {
+  transform: scale(0.92);
+  transform-origin: center;
+}
+
+.slot,
+.item-slot {
+  --tier-color: #30c75a;
+  --tier-border-color: #1f843c;
+  --wear-ratio: 0;
+  --recharge-angle: 0deg;
+  position: relative;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 14px;
+  place-items: center;
+  width: 68px;
+  height: 68px;
+  padding: 4px;
+  border: 4px solid var(--tier-border-color);
+  border-radius: 7px;
+  background: var(--tier-color);
+  box-shadow: none;
+  color: #fffdf1;
+  font: 800 12px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  text-shadow: none;
+  user-select: none;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.item-slot {
+  width: 64px;
+  height: 64px;
+  grid-template-rows: minmax(0, 1fr) 13px;
+  cursor: grab;
+}
+
+.slot.is-active {
+  background: var(--tier-color);
+}
+
+.slot.is-empty,
+.item-slot.is-empty {
+  --tier-color: #24743f;
+  --tier-border-color: #18522c;
+  background: rgba(100, 168, 220, 0.34);
+}
+
+.slot.is-dragging,
+.item-slot.is-dragging {
+  opacity: 0.55;
+}
+
+.slot.is-locked {
+  display: none;
+}
+
+.slot img,
+.item-slot img {
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.light-orb-stack {
+  position: relative;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  pointer-events: none;
+}
+
+.light-orb-stack img {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 23px;
+  height: 23px;
+  transform: translate(calc(-50% + var(--orb-x)), calc(-50% + var(--orb-y)));
+  filter: drop-shadow(0 2px 0 rgba(17, 18, 23, 0.28));
+}
+
+.inventory-grid .item-slot .light-orb-stack,
+.craft-stack-button .item-slot .light-orb-stack,
+.craft-slot.item-slot .light-orb-stack {
+  width: 40px;
+  height: 40px;
+}
+
+.craft-slot.item-slot .light-orb-stack img,
+.craft-stack-button .item-slot .light-orb-stack img {
+  width: 22px;
+  height: 22px;
+}
+
+.slot span,
+.item-slot span {
+  position: relative;
+  z-index: 1;
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  -webkit-text-stroke: 1.4px var(--ink);
+  paint-order: stroke fill;
+  pointer-events: none;
+}
+
+.item-wear-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+.item-wear-overlay::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(58, 60, 63, 0.48);
+  border-bottom: 2px solid rgba(255, 255, 255, 0.26);
+  box-shadow: inset 0 -2px 0 rgba(12, 12, 14, 0.24);
+  opacity: 0.88;
+  transform: scaleY(var(--wear-ratio));
+  transform-origin: 50% 0;
+  transition: transform 35ms linear;
+}
+
+.slot.is-recharging .item-wear-overlay,
+.item-slot.is-recharging .item-wear-overlay {
+  background: rgba(52, 54, 58, 0.3);
+}
+
+.slot.is-recharging .item-wear-overlay::before,
+.item-slot.is-recharging .item-wear-overlay::before {
+  top: -24%;
+  left: -24%;
+  width: 148%;
+  height: 148%;
+  border-bottom: 0;
+  background:
+    conic-gradient(
+      from 0deg,
+      rgba(92, 94, 98, 0.74) 0deg 108deg,
+      rgba(255, 255, 255, 0.18) 108deg 142deg,
+      rgba(48, 50, 54, 0.4) 142deg 360deg
+    );
+  opacity: 1;
+  transform-origin: 50% 50%;
+  transform: rotate(var(--recharge-angle));
+  transition: transform 35ms linear;
+}
+
+.item-tier {
+  display: none;
+}
+
+.item-quantity {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 5;
+  display: grid;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 4px;
+  place-items: center;
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 900 12px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  pointer-events: none;
+}
+
+.item-tooltip {
+  --tier-color: #30c75a;
+  --tier-border-color: #1f843c;
+  position: fixed;
+  z-index: 30;
+  width: 230px;
+  padding: 10px;
+  border: 3px solid rgba(17, 18, 23, 0.78);
+  border-left-color: var(--tier-border-color);
+  border-radius: 7px;
+  background: rgba(88, 88, 88, 0.5);
+  box-shadow: 0 6px 0 rgba(17, 18, 23, 0.22);
+  color: #fffdf1;
+  font: 900 13px/1.1 "Trebuchet MS", "Avenir Next", sans-serif;
+  pointer-events: none;
+  text-shadow:
+    -1.5px -1.5px 0 #111217,
+    1.5px -1.5px 0 #111217,
+    -1.5px 1.5px 0 #111217,
+    1.5px 1.5px 0 #111217;
+}
+
+.item-tooltip.is-hidden {
+  display: none;
+}
+
+.item-tooltip-head {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 2px solid rgba(17, 18, 23, 0.46);
+}
+
+.item-tooltip-head img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+}
+
+.item-tooltip-title {
+  overflow: hidden;
+  color: var(--tier-color);
+  font-size: 16px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-tooltip-subtitle {
+  margin-top: 4px;
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.item-tooltip-rows {
+  display: grid;
+  gap: 5px;
+}
+
+.item-tooltip-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.item-tooltip-row span,
+.item-tooltip-row b {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.item-tooltip-row span {
+  opacity: 0.88;
+}
+
+.item-tooltip-row b {
+  max-width: 118px;
+  color: #fffdf1;
+}
+
+.tablet-controls {
+  position: fixed;
+  inset: auto 0 0 0;
+  z-index: 4;
+  display: none;
+  pointer-events: none;
+}
+
+.is-playing.is-tablet-ui .tablet-controls,
+.is-playing.has-joystick .tablet-controls {
+  display: block;
+}
+
+.joystick {
+  position: fixed;
+  left: 28px;
+  top: 28px;
+  width: 142px;
+  height: 142px;
+  border: 5px solid rgba(17, 18, 23, 0.65);
+  border-radius: 999px;
+  background: rgba(255, 253, 241, 0.22);
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  touch-action: none;
+}
+
+.joystick.is-active {
+  opacity: 1;
+}
+
+.joystick-knob {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 58px;
+  height: 58px;
+  border: 5px solid #34363b;
+  border-radius: 999px;
+  background: #8f949c;
+  transform: translate(-50%, -50%);
+}
+
+.touch-actions {
+  position: fixed;
+  right: 24px;
+  bottom: 28px;
+  display: grid;
+  grid-template-columns: repeat(2, 78px);
+  gap: 12px;
+  pointer-events: auto;
+}
+
+.touch-action-button {
+  height: 78px;
+  border: 5px solid #34363b;
+  border-radius: 999px;
+  background: rgba(143, 148, 156, 0.9);
+  color: var(--paper);
+  font: 900 18px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+  touch-action: none;
+}
+
+.touch-action-button:active {
+  background: #747981;
+}
+
+.is-tablet-ui .hud {
+  top: 14px;
+  left: 14px;
+  grid-template-columns: 64px 156px;
+}
+
+.is-tablet-ui .portrait {
+  width: 64px;
+  height: 64px;
+}
+
+.is-tablet-ui .player-name {
+  font-size: 21px;
+}
+
+.is-tablet-ui .player-level {
+  font-size: 16px;
+}
+
+.is-tablet-ui .hud-bar {
+  width: 156px;
+}
+
+.is-tablet-ui .settings-button {
+  top: 22px;
+  left: 248px;
+}
+
+.is-tablet-ui .talent-button {
+  top: 82px;
+  left: 14px;
+}
+
+.is-tablet-ui .craft-button {
+  top: 136px;
+  left: 14px;
+}
+
+.is-tablet-ui .forge-button {
+  top: 190px;
+  left: 14px;
+}
+
+.is-tablet-ui .inventory-panel.is-collapsed {
+  top: 244px;
+  left: 14px;
+  width: 74px;
+  height: 44px;
+}
+
+.is-tablet-ui .talent-panel,
+.is-tablet-ui .craft-panel,
+.is-tablet-ui .forge-panel {
+  top: 190px;
+  left: 14px;
+  width: min(650px, calc(100vw - 28px));
+  max-height: calc(100vh - 216px);
+}
+
+.is-tablet-ui .craft-panel,
+.is-tablet-ui .forge-panel {
+  top: 50%;
+  left: 50%;
+  width: min(860px, calc(100vw - 28px));
+  height: min(540px, calc(100vh - 28px));
+  max-height: none;
+  transform: translate(-50%, -50%);
+}
+
+.is-tablet-ui .settings-panel {
+  top: 74px;
+  left: 14px;
+  width: min(292px, calc(100vw - 28px));
+}
+
+.is-tablet-ui .inventory-panel {
+  top: 204px;
+  left: 14px;
+  right: auto;
+  width: min(420px, calc(100vw - 28px));
+  height: min(720px, calc(100vh - 238px));
+}
+
+.is-tablet-ui .inventory-grid {
+  grid-template-columns: repeat(5, 70px);
+}
+
+.is-tablet-ui .inventory-panel.is-collapsed {
+  width: 74px;
+  height: 44px;
+}
+
+.is-tablet-ui .hotbar {
+  grid-template-columns: repeat(var(--slot-count, 5), 76px);
+}
+
+.is-tablet-ui .primary-hotbar {
+  bottom: 106px;
+}
+
+.is-tablet-ui .secondary-hotbar {
+  bottom: 24px;
+}
+
+.is-tablet-ui .slot {
+  width: 76px;
+  height: 72px;
+  grid-template-rows: 47px 17px;
+}
+
+.is-tablet-ui .minimap {
+  right: 14px;
+  top: 14px;
+  bottom: auto;
+  width: 150px;
+  height: 150px;
+}
+
+.is-tablet-ui .leaderboard-panel {
+  top: 176px;
+  right: 14px;
+  width: min(220px, calc(100vw - 28px));
+}
+
+@media (max-width: 430px) {
+  .minimap {
+    right: 12px;
+    bottom: 82px;
+    width: 132px;
+    height: 132px;
+    border-width: 4px;
+  }
+
+  .start-title {
+    top: 19%;
+    font-size: 42px;
+    -webkit-text-stroke-width: 4px;
+  }
+
+  .spawn-panel {
+    width: min(330px, calc(100vw - 24px));
+    transform: translateY(18px);
+  }
+
+  .spawn-row {
+    grid-template-columns: 1fr 86px;
+    gap: 8px;
+  }
+
+  .name-input,
+  .spawn-button,
+  .mode-button {
+    height: 38px;
+  }
+
+  .name-input {
+    border-width: 4px;
+    font-size: 21px;
+  }
+
+  .spawn-button {
+    border-width: 4px;
+    font-size: 18px;
+  }
+
+  .account-menu-button,
+  .petaldex-menu-button,
+  .monsterdex-menu-button {
+    bottom: 22px;
+    height: 42px;
+    min-width: 104px;
+    font-size: 18px;
+  }
+
+  .account-menu-button {
+    transform: translateX(-50%);
+  }
+
+  .account-menu-button.is-active,
+  .account-menu-button:active {
+    transform: translate(-50%, 3px);
+  }
+
+  .petaldex-menu-button {
+    bottom: 72px;
+    min-width: 132px;
+    transform: translateX(-50%);
+  }
+
+  .petaldex-menu-button.is-active,
+  .petaldex-menu-button:active {
+    transform: translate(-50%, 3px);
+  }
+
+  .monsterdex-menu-button {
+    bottom: 122px;
+    min-width: 132px;
+    transform: translateX(-50%);
+  }
+
+  .monsterdex-menu-button.is-active,
+  .monsterdex-menu-button:active {
+    transform: translate(-50%, 3px);
+  }
+
+  .account-panel {
+    width: calc(100vw - 24px);
+    padding: 12px;
+  }
+
+  .monsterdex-panel {
+    width: calc(100vw - 24px);
+    height: calc(100vh - 24px);
+    padding: 12px;
+  }
+
+  .monsterdex-list {
+    grid-template-columns: 1fr;
+  }
+
+  .monsterdex-species-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    padding: 10px;
+  }
+
+  .monsterdex-species-info {
+    grid-template-columns: 54px minmax(0, 1fr);
+    justify-items: start;
+    align-items: center;
+  }
+
+  .monsterdex-species-art {
+    width: 54px;
+    height: 72px;
+    border-width: 4px;
+  }
+
+  .monsterdex-species-art img {
+    width: 38px;
+    height: 60px;
+  }
+
+  .monsterdex-species-name {
+    text-align: left;
+  }
+
+  .monsterdex-tier-grid {
+    grid-template-columns: repeat(auto-fill, minmax(62px, 62px));
+    gap: 7px;
+  }
+
+  .monsterdex-tier-cell {
+    width: 62px;
+    height: 62px;
+    grid-template-rows: minmax(0, 1fr) 14px;
+    font-size: 10px;
+  }
+
+  .monsterdex-tier-cell img {
+    width: 30px;
+    height: 39px;
+  }
+
+  .account-columns,
+  .account-provider-row {
+    grid-template-columns: 1fr;
+  }
+
+  .inventory-panel {
+    top: 254px;
+    left: 50%;
+    width: calc(100vw - 24px);
+    height: calc(100vh - 298px);
+    padding: 12px;
+    transform: translateX(-50%);
+  }
+
+  .craft-button {
+    top: 146px;
+    left: 12px;
+  }
+
+  .forge-button {
+    top: 200px;
+    left: 12px;
+  }
+
+  .inventory-panel.is-collapsed {
+    top: 254px;
+    left: 12px;
+    width: 74px;
+    height: 44px;
+    padding: 0;
+    transform: none;
+  }
+
+  .talent-panel,
+  .craft-panel,
+  .forge-panel {
+    top: 200px;
+    left: 12px;
+    width: calc(100vw - 24px);
+    max-height: calc(100vh - 226px);
+  }
+
+  .craft-panel,
+  .forge-panel {
+    top: 50%;
+    left: 50%;
+    height: calc(100vh - 24px);
+    max-height: none;
+    padding: 12px;
+    transform: translate(-50%, -50%);
+  }
+
+  .craft-layout {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .leaderboard-panel {
+    top: 154px;
+    right: 12px;
+    width: min(206px, calc(100vw - 24px));
+  }
+
+  .craft-list {
+    grid-template-columns: repeat(5, 54px);
+  }
+
+  .inventory-title {
+    font-size: 28px;
+  }
+
+  .inventory-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-auto-rows: auto;
+    gap: 7px;
+    min-height: 0;
+  }
+
+  .inventory-grid .item-slot,
+  .inventory-empty-slot {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .inventory-grid .item-slot {
+    grid-template-rows: minmax(0, 1fr) 16px;
+  }
+
+  .inventory-grid .item-slot img {
+    width: min(40px, 70%);
+    height: min(40px, 70%);
+  }
+
+  .inventory-panel.is-collapsed {
+    left: 12px;
+    width: 74px;
+    height: 44px;
+    transform: none;
+  }
+
+  .hotbar {
+    grid-template-columns: repeat(var(--slot-count, 5), 58px);
+    gap: 6px;
+  }
+
+  .primary-hotbar {
+    bottom: 76px;
+  }
+
+  .secondary-hotbar {
+    bottom: 12px;
+  }
+
+  .slot,
+  .item-slot {
+    width: 58px;
+    height: 58px;
+    grid-template-rows: 36px 14px;
+    font-size: 11px;
+  }
+
+  .slot img,
+  .item-slot img {
+    width: 33px;
+    height: 33px;
+  }
+
+  .light-orb-stack img {
+    width: 20px;
+    height: 20px;
+  }
+}
