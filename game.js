@@ -42,7 +42,6 @@ const tutorialPanel = document.querySelector("#tutorialPanel");
 const tutorialCloseButton = document.querySelector("#tutorialCloseButton");
 const gameNotice = document.querySelector("#gameNotice");
 const modeButtons = Array.from(document.querySelectorAll(".mode-button"));
-const antHellNotice = document.querySelector("#antHellNotice");
 const deathScreen = document.querySelector("#deathScreen");
 const respawnButton = document.querySelector("#respawnButton");
 const playerName = document.querySelector("#playerName");
@@ -58,6 +57,7 @@ const secondaryEquipmentSlots = Array.from(document.querySelectorAll("#secondary
 const inventoryPanel = document.querySelector("#inventoryPanel");
 const inventoryGrid = document.querySelector("#inventoryGrid");
 const inventoryToggleButton = document.querySelector("#inventoryToggleButton");
+const mainMenuButton = document.querySelector("#mainMenuButton");
 const settingsButton = document.querySelector("#settingsButton");
 const settingsPanel = document.querySelector("#settingsPanel");
 const settingsOptions = Array.from(document.querySelectorAll(".settings-option"));
@@ -93,6 +93,13 @@ const forgeChanceLabel = document.querySelector("#forgeChanceLabel");
 const forgeMessage = document.querySelector("#forgeMessage");
 const leaderboardPanel = document.querySelector("#leaderboardPanel");
 const leaderboardList = document.querySelector("#leaderboardList");
+const authorQuickButton = document.querySelector("#authorQuickButton");
+const authorPortalPanel = document.querySelector("#authorPortalPanel");
+const authorPortalCard = document.querySelector(".author-portal-card");
+const authorPortalCloseButton = document.querySelector("#authorPortalCloseButton");
+const authorPortalPasswordInput = document.querySelector("#authorPortalPasswordInput");
+const authorPortalSubmitButton = document.querySelector("#authorPortalSubmitButton");
+const authorPortalMessage = document.querySelector("#authorPortalMessage");
 const authorPanel = document.querySelector("#authorPanel");
 const authorCard = document.querySelector(".author-card");
 const authorCloseButton = document.querySelector("#authorCloseButton");
@@ -118,6 +125,13 @@ const authorMonsterSpeciesSelect = document.querySelector("#authorMonsterSpecies
 const authorMonsterTierSelect = document.querySelector("#authorMonsterTierSelect");
 const authorMonsterQuantityInput = document.querySelector("#authorMonsterQuantityInput");
 const authorSpawnMonsterButton = document.querySelector("#authorSpawnMonsterButton");
+const chatWidget = document.querySelector("#chatWidget");
+const chatPreview = document.querySelector("#chatPreview");
+const chatPrompt = document.querySelector("#chatPrompt");
+const chatPanel = document.querySelector("#chatPanel");
+const chatLog = document.querySelector("#chatLog");
+const chatForm = document.querySelector("#chatForm");
+const chatInput = document.querySelector("#chatInput");
 const tabletControls = document.querySelector("#tabletControls");
 const joystick = document.querySelector("#joystick");
 const joystickKnob = document.querySelector("#joystickKnob");
@@ -163,6 +177,7 @@ const ASSETS = {
   thunderHammer: "雷神之锤.webp",
   bee: "bee.webp",
   ladybug: "ladybug.webp",
+  babyAnt: "baby-ant-clean-hd.png",
   rock: createRockDataUrl(),
   lentil: createLentilDataUrl(),
 };
@@ -186,14 +201,32 @@ const TIERS = [
   { name: "Ethereal", color: "#d4b5ff" },
   { name: "Transcendent", color: "#8f6bff" },
   { name: "Peerless", color: "#ffd1a8" },
+  {
+    name: "r.a.b.t.",
+    color: "#ffc7e0",
+    borderColor: "#d37ca7",
+    gradient: "linear-gradient(90deg, #ffc7e0 0%, #ffc7e0 28%, #ffe1ee 31%, #fff7fb 35%, #fffdf8 38%, #fffdf8 62%, #fff7fb 65%, #ffe1ee 69%, #ffc7e0 72%, #ffc7e0 100%)",
+    gradientStops: [
+      { offset: 0, color: "#ffc7e0" },
+      { offset: 0.28, color: "#ffc7e0" },
+      { offset: 0.31, color: "#ffe1ee" },
+      { offset: 0.35, color: "#fff7fb" },
+      { offset: 0.38, color: "#fffdf8" },
+      { offset: 0.62, color: "#fffdf8" },
+      { offset: 0.65, color: "#fff7fb" },
+      { offset: 0.69, color: "#ffe1ee" },
+      { offset: 0.72, color: "#ffc7e0" },
+      { offset: 1, color: "#ffc7e0" },
+    ],
+  },
 ].map((tier, index) => ({ ...tier, index }));
+const HIGH_TIER_MONSTER_BROADCAST_MIN_LEVEL = 17;
 
 const TEXT = {
   zh: {
     spawn: "出生",
     garden: "花园",
     antHell: "蚁穴",
-    antHellUnavailable: "Ant Hell is not finished yet.\n蚂蚁地狱还没做完，敬请期待。",
     namePrompt: "这朵小花叫做...",
     login: "登录",
     register: "注册",
@@ -239,6 +272,7 @@ const TEXT = {
     shopReward: "奖励",
     monsterBee: "蜜蜂",
     monsterLadybug: "瓢虫",
+    monsterBabyAnt: "幼蚁",
     monsterRock: "石头",
     monsterHealth: "生命",
     monsterDamage: "体伤",
@@ -248,6 +282,7 @@ const TEXT = {
     monsterDrops: "掉落",
     monsterNoDrops: "暂无掉落",
     monsterDropTier: "掉落等级",
+    mainMenu: "主界面",
     settings: "设置",
     movementMode: "移动方式",
     mouse: "鼠标",
@@ -307,11 +342,16 @@ const TEXT = {
     forgeResult: "获得",
     leaderboard: "排行榜",
     leaderboardEmpty: "暂无玩家",
+    leaderboardNoQualified: "没有超过50级的玩家 · 当前玩家数：{count}",
     authorPanel: "作者面板",
+    authorQuick: "作者模式",
+    authorPortalTitle: "作者传送门",
     authorName: "名字",
     authorBirthday: "生日",
     authorTeleport: "传送",
     authorWrong: "名字或生日不对",
+    authorPortalPrompt: "此为作者传送门，请输入密码",
+    authorPortalWrong: "作者传送门密码不对",
     authorPickPoint: "点一下地图位置，再传送",
     authorMapPickHint: "点击地图选择传送或生成位置",
     authorSpawnPickPoint: "先在地图上点击一个生成位置",
@@ -337,6 +377,9 @@ const TEXT = {
     petalStone: "石头",
     petalLentil: "小扁豆",
     petalThunderHammer: "雷神之锤",
+    chatPrompt: "按Enter键聊天",
+    chatPlaceholder: "输入消息...",
+    chatSend: "发送",
     on: "开",
     off: "关",
     inventory: "背包",
@@ -350,7 +393,6 @@ const TEXT = {
     spawn: "Spawn",
     garden: "Garden",
     antHell: "Ant Hell",
-    antHellUnavailable: "Ant Hell is not finished yet.\n蚂蚁地狱还没做完，敬请期待。",
     namePrompt: "This pretty little flower is called...",
     login: "Login",
     register: "Register",
@@ -396,6 +438,7 @@ const TEXT = {
     shopReward: "Reward",
     monsterBee: "Bee",
     monsterLadybug: "Ladybug",
+    monsterBabyAnt: "Baby Ant",
     monsterRock: "Rock",
     monsterHealth: "Health",
     monsterDamage: "Body Damage",
@@ -405,6 +448,7 @@ const TEXT = {
     monsterDrops: "Drops",
     monsterNoDrops: "No drops yet",
     monsterDropTier: "Drop Tier",
+    mainMenu: "Main",
     settings: "Settings",
     movementMode: "Movement",
     mouse: "Mouse",
@@ -464,11 +508,16 @@ const TEXT = {
     forgeResult: "Received",
     leaderboard: "Leaderboard",
     leaderboardEmpty: "No players yet",
+    leaderboardNoQualified: "No players above level 50 · Players: {count}",
     authorPanel: "Author Panel",
+    authorQuick: "Author",
+    authorPortalTitle: "Author Portal",
     authorName: "Name",
     authorBirthday: "Birthday",
     authorTeleport: "Teleport",
     authorWrong: "Wrong name or birthday",
+    authorPortalPrompt: "Author portal. Enter password",
+    authorPortalWrong: "Wrong author portal password",
     authorPickPoint: "Pick a map point, then teleport",
     authorMapPickHint: "Click the map to choose a teleport or spawn point",
     authorSpawnPickPoint: "Pick a spawn point on the map first",
@@ -494,6 +543,9 @@ const TEXT = {
     petalStone: "Stone",
     petalLentil: "Lentil",
     petalThunderHammer: "Thunder Hammer",
+    chatPrompt: "Press Enter to chat",
+    chatPlaceholder: "Type a message...",
+    chatSend: "Send",
     on: "On",
     off: "Off",
     inventory: "Inventory",
@@ -507,7 +559,7 @@ const TEXT = {
 
 const BEE_STATS = {
   maxHealth: 80,
-  attack: 80,
+  attack: 20,
   experienceReward: 10,
   bodyDamageCooldown: 200,
   radius: 32,
@@ -530,8 +582,8 @@ const LADYBUG_STATS = {
   hitRadiusY: 31,
 };
 const ROCK_STATS = {
-  maxHealth: 900,
-  attack: 25,
+  maxHealth: 115,
+  attack: 10,
   experienceReward: 10,
   bodyDamageCooldown: 200,
   radius: 43,
@@ -542,6 +594,23 @@ const ROCK_STATS = {
   hitRadiusX: 43,
   hitRadiusY: 43,
   stationary: true,
+};
+const BABY_ANT_STATS = {
+  maxHealth: 85,
+  attack: 10,
+  experienceReward: 10,
+  bodyDamageCooldown: 200,
+  radius: 30,
+  width: 82,
+  height: 82,
+  hitShape: "circle",
+  hitRadius: 27,
+  hitRadiusX: 27,
+  hitRadiusY: 27,
+  passive: true,
+  lazyWander: true,
+  spawnSafeRadius: 260,
+  spawnExtraSpacing: 80,
 };
 const MONSTER_DEFINITIONS = {
   Bee: {
@@ -556,6 +625,12 @@ const MONSTER_DEFINITIONS = {
     stats: LADYBUG_STATS,
     drops: ["Rose", "Light"],
   },
+  BabyAnt: {
+    labelKey: "monsterBabyAnt",
+    asset: "babyAnt",
+    stats: BABY_ANT_STATS,
+    drops: ["Light"],
+  },
   Rock: {
     labelKey: "monsterRock",
     asset: "rock",
@@ -563,6 +638,7 @@ const MONSTER_DEFINITIONS = {
     drops: ["Stone", "Lentil"],
   },
 };
+const DEFAULT_MONSTER_SPECIES = ["Bee", "Ladybug", "Rock"];
 const MONSTER_SPECIES = Object.keys(MONSTER_DEFINITIONS);
 const SHOP_DAILY_MIN_TIER_INDEX = Math.max(0, getTierIndexByName("Ultra"));
 const DAILY_TASK_COUNT = 5;
@@ -577,13 +653,30 @@ const DEATH_END_SCALE = 0.8;
 const MAP_MONSTER_TIER_CONFIGS = {
   garden: {
     minTierName: "Common",
-    maxTierName: "Eternal",
-    targetCounts: [155, 155, 153, 150, 148, 145, 143, 140, 138, 175],
+    maxTierName: "Advanced",
+    targetCounts: [112, 108, 101, 94, 86, 78, 66, 55, 43, 32, 22, 14],
+    rareSpawns: [
+      { tierName: "Advanced", maxCount: 8, initialCount: 2, intervalMs: 11000 },
+      { tierName: "King", maxCount: 6, initialCount: 2, intervalMs: 15000 },
+      { tierName: "Unparalleled", maxCount: 4, initialCount: 1, intervalMs: 20000 },
+      { tierName: "Peak", maxCount: 3, initialCount: 1, intervalMs: 26000 },
+      { tierName: "Ethereal", maxCount: 2, initialCount: 1, intervalMs: 34000 },
+      { tierName: "Transcendent", maxCount: 2, initialCount: 1, intervalMs: 36000 },
+      { tierName: "Peerless", maxCount: 1, initialCount: 1, intervalMs: 52000 },
+      { tierName: "r.a.b.t.", maxCount: 1, initialCount: 0, intervalMs: 90000 },
+    ],
   },
   garden2: {
     minTierName: "Eternal",
     maxTierName: "Peerless",
-    targetCounts: [160, 160, 160, 160, 160, 160, 160, 160, 220],
+    targetCounts: [32, 28, 24, 19, 15, 11, 7, 4, 2],
+  },
+  antHell: {
+    minTierName: "Common",
+    maxTierName: "Advanced",
+    targetCounts: [18, 15, 13, 11, 9, 8, 7, 6, 5, 4, 3, 2],
+    species: ["BabyAnt"],
+    rareSpawns: [],
   },
 };
 const MONSTER_RESPAWN_MS = 650;
@@ -593,8 +686,9 @@ const MONSTER_ATTACK_TIER_MULTIPLIER = 4.1;
 const MONSTER_EXPERIENCE_TIER_MULTIPLIER = 3.3;
 const RESPAWN_INVULNERABLE_MS = 1200;
 const MONSTER_SPAWN_SAFE_RADIUS = 700;
-const MAP_WIDTH = 38400;
-const MAP_HEIGHT = 38400;
+const MAP_SCALE = 2 / 3;
+const MAP_WIDTH = 38400 * MAP_SCALE;
+const MAP_HEIGHT = 38400 * MAP_SCALE;
 const MAP_HALF_WIDTH = MAP_WIDTH / 2;
 const MAP_HALF_HEIGHT = MAP_HEIGHT / 2;
 const MINIMAP_WIDTH = 170;
@@ -610,7 +704,9 @@ const THUNDER_HAMMER_LEADERBOARD_TIER_NUMBER = 16;
 const THUNDER_HAMMER_REFERENCE_TIER_NUMBER = 16;
 const THUNDER_HAMMER_REFERENCE_ATTACK = 656000000;
 const THUNDER_HAMMER_REFERENCE_DURABILITY = 328000000;
-const LEADERBOARD_MIN_LEVEL = 21;
+const LEADERBOARD_MIN_LEVEL = 51;
+const BASE_VIEW_RANGE_MULTIPLIER = 1.2;
+const VISION_TALENT_RANGE_BONUS = 0.05;
 const CRAFT_CHANCES = [
   0.7,
   0.64,
@@ -645,10 +741,17 @@ const PETAL_MONSTER_PUSH_STRENGTH = 0.72;
 const PETAL_DURABILITY_TIER_MULTIPLIER = 2;
 const PETAL_BASE_DURABILITY = 10;
 const PETAL_BASE_ATTACK = 10;
-const LENTIL_BASE_HOMING_RANGE = 1050;
+const LENTIL_BASE_HOMING_RANGE = 120;
+const LENTIL_HOMING_RANGE_PER_TIER = 18;
+const LENTIL_MAX_TOTAL_HOMING_RANGE = 720;
 const LENTIL_HOMING_IMPACT_INSET_RATIO = 0.35;
 const LENTIL_HOMING_SPEED_PER_RADIAN = 165;
-const LENTIL_HOMING_START_RADIUS_RATIO = 0.55;
+const LENTIL_CHAIN_HOMING_SPEED_MULTIPLIER = 0.8;
+const LENTIL_CHAIN_TURN_RESPONSE = 6.2;
+const LENTIL_RETURN_SPEED_MULTIPLIER = LENTIL_CHAIN_HOMING_SPEED_MULTIPLIER;
+const CHAT_MAX_MESSAGES = 30;
+const CHAT_HEARING_RANGE = 2200;
+const CHAT_AUDIBILITY_REFRESH_MS = 450;
 const PETAL_DEFINITIONS = {
   Basic: {
     labelKey: "petalBasic",
@@ -749,23 +852,98 @@ const GARDEN2_CIRCLE_TEXTURE_LAYERS = [
   { type: "darkCircle", color: "#52ad5f", cell: 178, jitter: 0.72, seed: 41, order: 0, minRadius: 8, maxRadius: 22 },
   { type: "lightCircle", color: "#78d284", cell: 148, jitter: 0.72, seed: 47, order: 1, minRadius: 7, maxRadius: 20 },
 ];
+const ANT_HELL_FLOOR_COLOR = "#9a6428";
+const ANT_HELL_OUTER_COLOR = "#3d2917";
+const ANT_HELL_FLOOR_WAVE_LIGHT = "rgba(205, 147, 71, 0.5)";
+const ANT_HELL_FLOOR_WAVE_DARK = "rgba(91, 52, 22, 0.36)";
+const ANT_HELL_FLOOR_WAVE_MID = "rgba(145, 84, 32, 0.31)";
+const ANT_HELL_WALL_COLOR = "#523e30";
+const ANT_HELL_WALL_STROKE_COLOR = "#563618";
+const ANT_HELL_WALL_CHIP_COLOR = "#402f24";
 const MAP_ART_SIZE = 2048;
 const MAP_TILE_COLUMNS = 64;
 const MAP_TILE_ROWS = 64;
 const MAP_ROUTE_HALF_WIDTH = 10.2;
 const MAP_ROUTE_POINTS = [
-  { x: 9, y: 13 },
-  { x: 18, y: 11.7 },
-  { x: 31, y: 14.3 },
-  { x: 44, y: 12.4 },
-  { x: 55, y: 13.4 },
-  { x: 56.6, y: 24 },
-  { x: 54.2, y: 36 },
-  { x: 55, y: 47 },
-  { x: 42, y: 48.3 },
-  { x: 29, y: 45.9 },
-  { x: 18, y: 48.4 },
-  { x: 11, y: 47 },
+  { x: 8.5, y: 5.5 },
+  { x: 18.5, y: 6.2 },
+  { x: 31.5, y: 6.2 },
+  { x: 45.5, y: 5.6 },
+  { x: 57.0, y: 6.5 },
+  { x: 56.5, y: 16.5 },
+  { x: 51.5, y: 25.5 },
+  { x: 42.5, y: 27.5 },
+  { x: 31.5, y: 29.5 },
+  { x: 36.5, y: 36.5 },
+  { x: 48.5, y: 37.5 },
+  { x: 56.5, y: 43.5 },
+  { x: 57.0, y: 56.0 },
+];
+const MAP_GARDEN_TILE_MASK = [
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111110001111111011000000000000000011111",
+  "1111111111110000011100011100000000000000000000000000000000011111",
+  "1111111100000000000000000000000000000000000000000000000000011111",
+  "1111111000000000000000000000000000000000000000000000000000011111",
+  "1111110000000000000000000000000000000000000000000000000000011111",
+  "1111100000000000000000000000000000000000000000000000000000011111",
+  "1111000000000000000000000000000000000000000000000000000000111111",
+  "1111000000000000000000000000000000000000000000000000000000111111",
+  "1111000000000000000000000000000000000000000000000000000000111111",
+  "1111000001111111111111000000000111111111100000000000000000111111",
+  "1111000001111111111111100000011111111111111111111111000000111111",
+  "1111000001111111111111100000001111111111111111111111000000111111",
+  "1111100000111111111111000000001111111111111111111111000000111111",
+  "1111100000111111111111000010001111111111111111111111000000111111",
+  "1111100000111111111111000110000111111111111111111110000001111111",
+  "1111100000111111111111000111000111111111111111111110000001111111",
+  "1111110000111111111111000111000111111111111111111110000011111111",
+  "1111110000111111111110000111100111111111111111111110000011111111",
+  "1111110000111111111110000111100011111111111111111100000111111111",
+  "1111110000111111111110000111100011111111111111111100001111111111",
+  "1111111000011111111100000111100011111111111111111100011111111111",
+  "1111111000001110111100000001000011111111111111111000011111111111",
+  "1111111000000000000000000000000011111111111111110000111111111111",
+  "1111111000000000000000000000000011111111111000000001111111111111",
+  "1111111100000000000000000000000001111111000000000011111111111111",
+  "1111111111100000000000000000000001101100000000000111111111111111",
+  "1111111111111111111000000000000000000000000001111111100111111111",
+  "1111111111111111111110000000000000000000011111111111000011111111",
+  "1111111111111111111111111000000000111111111111111100000001111111",
+  "1111111111111111111111111100000011111111111111110000000001111111",
+  "1111111111111111111111111100000111111111111100000000000000111111",
+  "1111111111111111111111111100000111111100000000000000000000111111",
+  "1111111110000000011111111100000011000000000000000000000000111111",
+  "1111111100000000001111111100000000000010000000000000000001111111",
+  "1111111000000000000001111100000000000000000000000001000001111111",
+  "1111110000000000000001111110000000000001111100000000000001111111",
+  "1111110000000000000000111110000000000011111100000000000000111111",
+  "1111100000000000000000011110000000000111111000000000000000111111",
+  "1111100000000000011000001111001000001111110000000000000000111111",
+  "1111100000000000011000001111000000011111110000000000000000111111",
+  "1111100000000000011000001111000000111111100010000000000000111111",
+  "1111100000000000011100000111000001111110000011000110000000111111",
+  "1111000100000000011110000001000011111110000000000110000000111111",
+  "1111001100000000011111000000000111111100000000000110000000111111",
+  "1111000000000000011111100000001111111000110000000000000000111111",
+  "1111000000000000001111111000111111100000000000000000000000111111",
+  "1111000000000000001111111111111111000000000100010000000000111111",
+  "1111000000000110000111111111111110000000000110010000000000111111",
+  "1111100000000110010011111111110001100000000110000000000000111111",
+  "1111100001000000010000111101100000000000000010000000100000111111",
+  "1111100001100000000000000000000000001110000010000000110000111111",
+  "1111100001100000000000000000000000000100000000011000010000111111",
+  "1111100000000110000000000000001000000000000000000000000000111111",
+  "1111110000000011000001100010001000001100000100000000000000111111",
+  "1111111000000000000000100010000000000000000100000000000001111111",
+  "1111111111000000000000000000000000000000000000000000000011111111",
+  "1111111111111111111111100000000000111110000000000000001111111111",
+  "1111111111111111111111111101111111111111101100000001111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
 ];
 const MAP_SMALL_WALLS = [
   { progress: 0.08, offset: 4.8, progressRadius: 0.012, offsetRadius: 0.9, seed: 1.2 },
@@ -804,6 +982,89 @@ const MAP_GARDEN2_ROUTE_POINTS = [
   { x: 47.0, y: 11.0 },
   { x: 54.0, y: 8.0 },
   { x: 54.0, y: 4.0 },
+];
+const MAP_ANT_HELL_ROUTE_POINTS = [
+  { x: 11.0, y: 10.0 },
+  { x: 17.0, y: 9.0 },
+  { x: 16.5, y: 20.0 },
+  { x: 12.0, y: 30.0 },
+  { x: 17.0, y: 42.0 },
+  { x: 16.0, y: 54.0 },
+  { x: 28.0, y: 56.0 },
+  { x: 33.0, y: 42.0 },
+  { x: 31.0, y: 27.0 },
+  { x: 35.0, y: 13.0 },
+  { x: 48.0, y: 13.0 },
+  { x: 52.0, y: 29.0 },
+  { x: 46.0, y: 40.0 },
+  { x: 54.0, y: 53.0 },
+];
+const ANT_HELL_SPAWN_POINT = { x: 30.6, y: 36.2 };
+const ANT_HELL_REFERENCE_TILE_MASK = [
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111110000011",
+  "1111111111111000011111111110000000000111111111111111111100000011",
+  "1111111000000000000011111000000000000111111111111111111100000011",
+  "1111110000000000000001100000000001111100000001110000001100000011",
+  "1111100001111110000111001100000011110000000001110000001100000011",
+  "1111100011111111000111011100000110000000000000110000001100000111",
+  "1111110011111001000110011100001100000011111000110000001100000011",
+  "1111110001110000001110000000011100000111111000100000001100000011",
+  "1111110001100000001100100000011110000111111001000110001001000111",
+  "1111110000000111001100110001111111000011111000001110011011100111",
+  "1111110011111111101110011111111111000001100000001110011011100111",
+  "1111100011111001101100011111110011110000000010011100011011100111",
+  "1111110011110000100110001111100011110000001111011100111011110111",
+  "1111110001000110110110000111100001111100011111001000111011110111",
+  "1111111000011110110011000111100000111110011110000000000011100111",
+  "1111111111111000011011000011100000011110011110000000000011100111",
+  "1111111111100000011101100011100000000010111100000000110001000111",
+  "1111111111000000011101110011111000000000011100000001110000000111",
+  "1111111000000000011001110011111100000010011100000001100010000111",
+  "1111110000000000111001100001111111111111011100011001100111000111",
+  "1111110000000000011001100001111111111111011100111011101111100111",
+  "1111100001111100011001100011110111111111011100011011100111100011",
+  "1111100001111100111001001111100000001110011100111001101111100011",
+  "1111110001110000111001011111000000000000011100110000001111100011",
+  "1111110001100000110011011000000000000000111000100011001111110011",
+  "1111110001000111110010010010111000000000111000000011001111100011",
+  "1111110000001111100011000111111110000001111000000111001111100011",
+  "1111111000001111100111110111111111000000111100001110001111000011",
+  "1111111100001111100011110011100011100000111111111110000111000011",
+  "1111111110000111000000111011000000100000111111111110000000000011",
+  "1111111110000111100000111000000000110000111111111110000000000011",
+  "1111111110001111100000111100000000110000111111111111000000000111",
+  "1111111100111111111100111110000001110001111111111111100000000111",
+  "1111111101111111111100111110000001110000111101111111110000000111",
+  "1111111001111111111100111110000001111000111000111111111110001111",
+  "1111110011111111111100111110000011111001110000111111111111111111",
+  "1111110011111111111100111110000111111000000000111101111111111111",
+  "1111110011111111111000111111001111100000000000111110111111111111",
+  "1111110001111111111000111111101111000000000000111110111101111111",
+  "1111110000000000000001111111101110000000000001111100011100111111",
+  "1111111100000000000011111111101110000000000001111000011100111111",
+  "1111111111110000111111111111101110000000111101110000011000011111",
+  "1111111111111100111111111111100111000011111110100000111000011111",
+  "1111111111111100111111111111100111111111111110000000111000011111",
+  "1111111111111100111111111111110001111111111000000000110001011111",
+  "1111111111110000000001111111110000001111110000000001110011011111",
+  "1111111100000000011000111111110000001111000000000111100011001111",
+  "1111111100000000111100111111111000001110000000011111000111011111",
+  "1111111100000000111100111111111000001110000011111100001110011111",
+  "1111111100000000111001111111111000001111100111111000011110011111",
+  "1111111100010001111001111111111000001111110011110000011100001111",
+  "1111111000111111110000111111110000001111110011100000111100001111",
+  "1111111000011111100000111111100011101111110011000011111000001111",
+  "1111111000011111000000001111100011101111110000001111111000001111",
+  "1111111000001000000000000011000011001111100000111111110000001111",
+  "1111111100000000000000000000000000001111100011111111100000001111",
+  "1111111110000111001101100000000000011111100000000000000000011111",
+  "1111111111111111111111111111110000011111100000000000001111011111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
+  "1111111111111111111111111111111111111111111111111111111111111111",
 ];
 const MAP_GARDEN2_SMALL_WALLS = [
   { progress: 0.07, offset: 3.6, progressRadius: 0.018, offsetRadius: 0.95, seed: 21.1 },
@@ -899,12 +1160,216 @@ const MAP_GARDEN2_TILE_MASK = [
   "1111111111111111111111111111111111111111111111111111111111111111",
   "1111111111111111111111111111111111111111111111111111111111111111",
 ];
+
+function antHellMaskHash(x, y, seed = 0) {
+  const value = Math.sin(x * 19.319 + y * 41.173 + seed * 97.731) * 43758.5453;
+  return value - Math.floor(value);
+}
+
+function createFilledTileGrid(fill = "1") {
+  return Array.from({ length: MAP_TILE_ROWS }, () => Array(MAP_TILE_COLUMNS).fill(fill));
+}
+
+function setAntHellTile(grid, x, y, value) {
+  if (x <= 0 || y <= 0 || x >= MAP_TILE_COLUMNS - 1 || y >= MAP_TILE_ROWS - 1) return;
+  grid[y][x] = value;
+}
+
+function carveAntHellCell(grid, x, y, radius, seed = 0) {
+  const minX = Math.max(1, Math.floor(x - radius - 2));
+  const maxX = Math.min(MAP_TILE_COLUMNS - 2, Math.ceil(x + radius + 2));
+  const minY = Math.max(1, Math.floor(y - radius - 2));
+  const maxY = Math.min(MAP_TILE_ROWS - 2, Math.ceil(y + radius + 2));
+
+  for (let tileY = minY; tileY <= maxY; tileY++) {
+    for (let tileX = minX; tileX <= maxX; tileX++) {
+      const dx = tileX + 0.5 - x;
+      const dy = tileY + 0.5 - y;
+      const blockNoise = (antHellMaskHash(tileX >> 1, tileY >> 1, seed) - 0.5) * 0.72;
+      const jaggedRadius = radius + blockNoise + (antHellMaskHash(tileX, tileY, seed + 7) > 0.84 ? 0.75 : 0);
+      if (Math.hypot(dx, dy) <= jaggedRadius) {
+        setAntHellTile(grid, tileX, tileY, "0");
+      }
+    }
+  }
+}
+
+function carveAntHellRect(grid, x, y, width, height, seed = 0) {
+  const minX = Math.max(1, Math.floor(x));
+  const maxX = Math.min(MAP_TILE_COLUMNS - 2, Math.ceil(x + width));
+  const minY = Math.max(1, Math.floor(y));
+  const maxY = Math.min(MAP_TILE_ROWS - 2, Math.ceil(y + height));
+
+  for (let tileY = minY; tileY <= maxY; tileY++) {
+    for (let tileX = minX; tileX <= maxX; tileX++) {
+      const edge =
+        tileX === minX ||
+        tileX === maxX ||
+        tileY === minY ||
+        tileY === maxY;
+      if (edge && antHellMaskHash(tileX, tileY, seed) < 0.32) continue;
+      setAntHellTile(grid, tileX, tileY, "0");
+    }
+  }
+}
+
+function carveAntHellLine(grid, from, to, radius, seed = 0) {
+  const distance = Math.hypot(to.x - from.x, to.y - from.y);
+  const steps = Math.max(1, Math.ceil(distance * 2.2));
+
+  for (let index = 0; index <= steps; index++) {
+    const progress = index / steps;
+    const bend = Math.sin(progress * Math.PI * 2 + seed) * 0.9;
+    const x = from.x + (to.x - from.x) * progress + Math.sin(progress * Math.PI + seed * 1.7) * bend;
+    const y = from.y + (to.y - from.y) * progress + Math.cos(progress * Math.PI + seed * 1.3) * bend;
+    carveAntHellCell(grid, x, y, radius, seed + index * 0.17);
+  }
+}
+
+function carveAntHellChamber(grid, x, y, radiusX, radiusY, seed = 0) {
+  const minX = Math.max(1, Math.floor(x - radiusX - 2));
+  const maxX = Math.min(MAP_TILE_COLUMNS - 2, Math.ceil(x + radiusX + 2));
+  const minY = Math.max(1, Math.floor(y - radiusY - 2));
+  const maxY = Math.min(MAP_TILE_ROWS - 2, Math.ceil(y + radiusY + 2));
+
+  for (let tileY = minY; tileY <= maxY; tileY++) {
+    for (let tileX = minX; tileX <= maxX; tileX++) {
+      const dx = (tileX + 0.5 - x) / radiusX;
+      const dy = (tileY + 0.5 - y) / radiusY;
+      const edgeNoise = (antHellMaskHash(tileX >> 1, tileY >> 1, seed) - 0.5) * 0.22;
+      if (dx * dx + dy * dy <= 1 + edgeNoise) {
+        setAntHellTile(grid, tileX, tileY, "0");
+      }
+    }
+  }
+}
+
+function fillAntHellIsland(grid, x, y, radiusX, radiusY, seed = 0) {
+  const minX = Math.max(2, Math.floor(x - radiusX - 1));
+  const maxX = Math.min(MAP_TILE_COLUMNS - 3, Math.ceil(x + radiusX + 1));
+  const minY = Math.max(2, Math.floor(y - radiusY - 1));
+  const maxY = Math.min(MAP_TILE_ROWS - 3, Math.ceil(y + radiusY + 1));
+
+  for (let tileY = minY; tileY <= maxY; tileY++) {
+    for (let tileX = minX; tileX <= maxX; tileX++) {
+      const dx = (tileX + 0.5 - x) / radiusX;
+      const dy = (tileY + 0.5 - y) / radiusY;
+      const blockNoise = (antHellMaskHash(tileX, tileY, seed) - 0.5) * 0.18;
+      if (dx * dx + dy * dy <= 1 + blockNoise) {
+        grid[tileY][tileX] = "1";
+      }
+    }
+  }
+}
+
+function roughenAntHellEdges(grid, seed = 0) {
+  const nextGrid = grid.map((row) => [...row]);
+
+  for (let tileY = 2; tileY < MAP_TILE_ROWS - 2; tileY++) {
+    for (let tileX = 2; tileX < MAP_TILE_COLUMNS - 2; tileX++) {
+      const neighbors = [
+        grid[tileY - 1][tileX],
+        grid[tileY + 1][tileX],
+        grid[tileY][tileX - 1],
+        grid[tileY][tileX + 1],
+      ];
+      const floorNeighbors = neighbors.filter((value) => value === "0").length;
+      const wallNeighbors = neighbors.length - floorNeighbors;
+      const roll = antHellMaskHash(tileX, tileY, seed);
+
+      if (grid[tileY][tileX] === "0" && wallNeighbors > 0 && roll < 0.16) {
+        nextGrid[tileY][tileX] = "1";
+      } else if (grid[tileY][tileX] === "1" && floorNeighbors > 0 && roll > 0.87) {
+        nextGrid[tileY][tileX] = "0";
+      }
+    }
+  }
+
+  for (let tileY = 2; tileY < MAP_TILE_ROWS - 2; tileY++) {
+    for (let tileX = 2; tileX < MAP_TILE_COLUMNS - 2; tileX++) {
+      grid[tileY][tileX] = nextGrid[tileY][tileX];
+    }
+  }
+}
+
+function createAntHellTileMask() {
+  return ANT_HELL_REFERENCE_TILE_MASK.map((row) => row);
+}
+
+const MAP_ANT_HELL_TILE_MASK = createAntHellTileMask();
+
+function findNearestFloorTile(tileMask, startX, startY) {
+  const originX = clamp(Math.floor(startX), 0, MAP_TILE_COLUMNS - 1);
+  const originY = clamp(Math.floor(startY), 0, MAP_TILE_ROWS - 1);
+  if (tileMask[originY]?.[originX] === "0") return { x: originX, y: originY };
+
+  for (let radius = 1; radius < Math.max(MAP_TILE_COLUMNS, MAP_TILE_ROWS); radius++) {
+    for (let y = Math.max(0, originY - radius); y <= Math.min(MAP_TILE_ROWS - 1, originY + radius); y++) {
+      for (let x = Math.max(0, originX - radius); x <= Math.min(MAP_TILE_COLUMNS - 1, originX + radius); x++) {
+        if (Math.max(Math.abs(x - originX), Math.abs(y - originY)) !== radius) continue;
+        if (tileMask[y]?.[x] === "0") return { x, y };
+      }
+    }
+  }
+
+  return { x: originX, y: originY };
+}
+
+function buildTileMaskDistanceField(tileMask, spawnPoint) {
+  const distances = Array.from({ length: MAP_TILE_ROWS }, () => Array(MAP_TILE_COLUMNS).fill(Infinity));
+  const start = findNearestFloorTile(tileMask, spawnPoint.x, spawnPoint.y);
+  const queue = [start];
+  let readIndex = 0;
+  let maxDistance = 0;
+  distances[start.y][start.x] = 0;
+
+  while (readIndex < queue.length) {
+    const current = queue[readIndex];
+    readIndex += 1;
+    const baseDistance = distances[current.y][current.x];
+
+    for (const neighbor of [
+      { x: current.x + 1, y: current.y, cost: 1 },
+      { x: current.x - 1, y: current.y, cost: 1 },
+      { x: current.x, y: current.y + 1, cost: 1 },
+      { x: current.x, y: current.y - 1, cost: 1 },
+      { x: current.x + 1, y: current.y + 1, cost: 1 },
+      { x: current.x - 1, y: current.y + 1, cost: 1 },
+      { x: current.x + 1, y: current.y - 1, cost: 1 },
+      { x: current.x - 1, y: current.y - 1, cost: 1 },
+    ]) {
+      if (
+        neighbor.x < 0 ||
+        neighbor.y < 0 ||
+        neighbor.x >= MAP_TILE_COLUMNS ||
+        neighbor.y >= MAP_TILE_ROWS ||
+        tileMask[neighbor.y]?.[neighbor.x] !== "0" ||
+        Number.isFinite(distances[neighbor.y][neighbor.x])
+      ) {
+        continue;
+      }
+
+      const nextDistance = baseDistance + neighbor.cost;
+      distances[neighbor.y][neighbor.x] = nextDistance;
+      maxDistance = Math.max(maxDistance, nextDistance);
+      queue.push(neighbor);
+    }
+  }
+
+  return { distances, maxDistance };
+}
+
+const MAP_ANT_HELL_DEPTH_FIELD = buildTileMaskDistanceField(MAP_ANT_HELL_TILE_MASK, ANT_HELL_SPAWN_POINT);
 const MAP_DEFINITIONS = {
   garden: {
     routePoints: MAP_ROUTE_POINTS,
-    smallWalls: MAP_SMALL_WALLS,
-    denseWalls: MAP_DENSE_WALL_FIELDS,
-    routeHalfWidth: MAP_ROUTE_HALF_WIDTH,
+    smallWalls: [],
+    denseWalls: [],
+    routeHalfWidth: 5.4,
+    tileMask: MAP_GARDEN_TILE_MASK,
+    diagonalProgress: true,
+    diagonalProgressMin: 12,
+    diagonalProgressMax: 113,
   },
   garden2: {
     routePoints: MAP_GARDEN2_ROUTE_POINTS,
@@ -913,10 +1378,31 @@ const MAP_DEFINITIONS = {
     routeHalfWidth: 6.4,
     tileMask: MAP_GARDEN2_TILE_MASK,
   },
+  antHell: {
+    routePoints: MAP_ANT_HELL_ROUTE_POINTS,
+    spawnPoint: ANT_HELL_SPAWN_POINT,
+    smallWalls: [],
+    denseWalls: [],
+    routeHalfWidth: 4.9,
+    tileMask: MAP_ANT_HELL_TILE_MASK,
+    depthField: MAP_ANT_HELL_DEPTH_FIELD,
+    evenTierProgress: true,
+    groundColor: ANT_HELL_FLOOR_COLOR,
+    wallColor: ANT_HELL_WALL_COLOR,
+    wallStrokeColor: ANT_HELL_WALL_STROKE_COLOR,
+    wallChipColor: ANT_HELL_WALL_CHIP_COLOR,
+  },
 };
 const GARDEN2_PORTAL_RADIUS = 150;
-const GARDEN2_PORTAL_DURATION_MS = 180;
-const GARDEN2_PORTAL_SWITCH_DELAY_MS = 45;
+const AUTHOR_PORTAL_RADIUS = 125;
+const GARDEN2_PORTAL_DURATION_MS = 130;
+const GARDEN2_PORTAL_SWITCH_DELAY_MS = 18;
+const AUTHOR_PORTAL_PASSWORDS = new Set([
+  "11010520130125",
+  "110105201301258114",
+  "wangyiran",
+  "王怡然",
+]);
 const MAP_EDGE_DISTORT_AMPLITUDE = 2.35;
 const MAP_EDGE_DISTORT_STEP = 3.5;
 const MAP_WALL_LUMA_THRESHOLD = 110;
@@ -935,10 +1421,17 @@ const MONSTER_COLLISION_SAMPLE_COUNT = 14;
 const MONSTER_FULL_SIMULATE_MARGIN = 1200;
 const MONSTER_PLAYER_ACTIVE_RADIUS = 2300;
 const MONSTER_FAR_UPDATE_MS = 720;
-const MONSTER_SPAWN_EXTRA_SPACING = 72;
+const MONSTER_SPAWN_EXTRA_SPACING = 96;
+const HIGH_TIER_SPAWN_SPACING_START_LEVEL = 10;
+const HIGH_TIER_SPAWN_EXTRA_SPACING_PER_LEVEL = 42;
+const RARE_MONSTER_SPAWN_EXTRA_SPACING = 220;
 const BASE_PLAYER_BODY_DAMAGE = 50;
 const PLAYER_BODY_DAMAGE_TALENT_BONUS = 0.28;
 const PLAYER_BODY_DAMAGE_COOLDOWN_MS = 100;
+const PLAYER_MONSTER_HIT_RECOIL_DISTANCE = 92;
+const MONSTER_DROP_MIN_PLAYER_LIFE_DAMAGE_RATIO = 0.05;
+const MONSTER_HEALTH_TRAIL_HOLD_MS = 350;
+const MONSTER_HEALTH_TRAIL_DECAY_PER_SECOND = 0.55;
 const MONSTER_BOSS_BAR_MIN_TIER_NUMBER = 12;
 const MAX_MONSTER_BOSS_BARS = 4;
 const DRAW_CULL_MARGIN = 650;
@@ -954,8 +1447,10 @@ const AUTHOR_TELEPORT_PUSH_RADIUS = 760;
 const AUTHOR_TELEPORT_PUSH_STEP = 90;
 const NORMAL_MONSTER_SIZE_GROWTH = 1.3;
 const HIGH_TIER_MONSTER_SIZE_GROWTH = 1.12;
-const CYAN_TIER_INDEX = TIERS.findIndex((tier) => tier.color === "#28f0ff");
+const NORMAL_MONSTER_SIZE_GROWTH_TIER_COUNT = 6;
 const MONSTER_COLLISION_CELL_SIZE = 1400;
+const RESPAWN_HOME_ZONE_MAX_TIER_INDEX = 1;
+const RESPAWN_TIER_ROUTE_SAMPLE_COUNT = 180;
 const TALENT_DEFINITIONS = [
   { id: "maxHealth", labelKey: "talentMaxHealth", maxLevel: 10 },
   { id: "vision", labelKey: "talentVision", maxLevel: 10 },
@@ -973,10 +1468,10 @@ const TALENT_DEFINITIONS = [
   { id: "craftChance", labelKey: "talentCraftChance", maxLevel: 10 },
   { id: "attackRange", labelKey: "talentAttackRange", maxLevel: 10 },
 ];
-let antHellNoticeTimeout = 0;
 let gameNoticeTimeout = 0;
 let talentHoldTimer = 0;
 let nextDamageNumberId = 1;
+let nextChatMessageId = 1;
 let backgroundTickTimer = 0;
 let nextItemId = 1;
 let nextMonsterId = 1;
@@ -1035,7 +1530,7 @@ function getMonsterExperienceReward(tierIndex) {
 
 function scaleSizeByTier(baseValue, tierIndex) {
   const index = getTier(tierIndex).index;
-  const highTierStartIndex = CYAN_TIER_INDEX < 0 ? TIERS.length : CYAN_TIER_INDEX;
+  const highTierStartIndex = NORMAL_MONSTER_SIZE_GROWTH_TIER_COUNT;
 
   if (index < highTierStartIndex) {
     return baseValue * NORMAL_MONSTER_SIZE_GROWTH ** index;
@@ -1085,10 +1580,10 @@ function getPetalAttack(name, tierIndex) {
 
 function getLightOrbCount(tierIndex = 0) {
   const tierNumber = getTier(tierIndex).index + 1;
-  if (tierNumber <= 4) return 1;
-  if (tierNumber <= 10) return 2;
-  if (tierNumber <= 15) return 13;
-  return 14;
+  if (tierNumber <= 3) return 1;
+  if (tierNumber <= 6) return 2;
+  if (tierNumber <= 12) return 4;
+  return 5;
 }
 
 function getPetalOrbitUnitCount(petal) {
@@ -1162,6 +1657,8 @@ function createPetalItem(name = "Basic", tierIndex = 0) {
     tierIndex: tier.index,
     tier: tier.name,
     tierColor: tier.color,
+    tierFill: getTierCssFill(tier),
+    tierBorderColor: getTierBorderColor(tier),
     baseMaxDurability: maxDurability,
     fixedDurability: Boolean(definition.fixedDurability),
     maxDurability,
@@ -1237,6 +1734,8 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
     tierIndex: tier.index,
     tier: tier.name,
     tierColor: tier.color,
+    tierFill: getTierCssFill(tier),
+    tierBorderColor: getTierBorderColor(tier),
     x,
     y,
     anchorX: x,
@@ -1249,6 +1748,8 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
     hitRadiusX: stats.hitRadiusX * sizeScale,
     hitRadiusY: stats.hitRadiusY * sizeScale,
     stationary: Boolean(stats.stationary),
+    passive: Boolean(stats.passive),
+    lazyWander: Boolean(stats.lazyWander),
     maxHealth,
     health: maxHealth,
     attack: scaleStatByTier(stats.attack, MONSTER_ATTACK_TIER_MULTIPLIER, tier.index),
@@ -1266,6 +1767,7 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
     speed: 16 + Math.random() * 40,
     targetSpeed: 16 + Math.random() * 40,
     nextDecisionAt: Math.random() * 900,
+    wanderMovingUntil: 0,
     hitFlash: 0,
     lastPlayerHitAt: 0,
     alive: true,
@@ -1432,6 +1934,10 @@ const state = {
     deathStartedAt: 0,
     deathDuration: DEATH_ANIMATION_MS,
     invulnerableUntil: 0,
+    lifeId: 0,
+    lastDeathX: null,
+    lastDeathY: null,
+    lastDeathMapId: "garden",
   },
   weapon: {
     count: BASE_EQUIPMENT_SLOTS,
@@ -1479,11 +1985,27 @@ const state = {
     selectedY: 0,
     hasSelection: false,
   },
+  chat: {
+    open: false,
+    messages: [],
+    lastAudibleRefreshAt: 0,
+    visibleSignature: "",
+  },
   drops: [],
   damageNumbers: [],
   monsters: [],
+  mapMonsterStates: {},
   monsterSpawnSequence: Array(TIERS.length).fill(0),
+  nextRareMonsterSpawnAt: Array(TIERS.length).fill(0),
+  monsterBackfillQueue: [],
   menuPetals: [],
+  menuMapWipe: {
+    active: false,
+    startedAt: 0,
+    duration: 320,
+    fromMapId: "garden",
+    toMapId: "garden",
+  },
   nextMonsterSpawnAt: 0,
   portalTransition: {
     active: false,
@@ -1494,6 +2016,8 @@ const state = {
     y: 0,
   },
   nextPortalNoticeAt: 0,
+  nextAuthorPortalPromptAt: 0,
+  authorPortalPromptOpen: false,
   pointer: { x: 0, y: 0, worldX: 0, worldY: 0, active: false },
   eyeLook: { x: 0, y: -0.3 },
   controls: { attack: false, defend: false },
@@ -1772,13 +2296,13 @@ function buildMapArtCanvas() {
 
   const artCtx = artCanvas.getContext("2d");
   artCtx.imageSmoothingEnabled = false;
-  artCtx.fillStyle = MAP_WALL_COLOR;
-  artCtx.strokeStyle = MAP_WALL_STROKE_COLOR;
+  artCtx.fillStyle = getActiveMapWallColor();
+  artCtx.strokeStyle = getActiveMapWallStrokeColor();
   drawMapWallShapes(artCtx, {
     drawStroke: true,
     fillSeams: true,
     clipStrokeToFill: true,
-    strokeStyle: MAP_WALL_STROKE_COLOR,
+    strokeStyle: getActiveMapWallStrokeColor(),
     lineWidth: 1.15,
   });
   state.mapArtCanvas = artCanvas;
@@ -1852,8 +2376,29 @@ function getActiveMapDefinition() {
   return MAP_DEFINITIONS[state.mapId] || MAP_DEFINITIONS.garden;
 }
 
+function getActiveMapGroundColor() {
+  return getActiveMapDefinition().groundColor || GARDEN_BASE_GREEN;
+}
+
+function getActiveMapWallColor() {
+  return getActiveMapDefinition().wallColor || MAP_WALL_COLOR;
+}
+
+function getActiveMapWallStrokeColor() {
+  return getActiveMapDefinition().wallStrokeColor || MAP_WALL_STROKE_COLOR;
+}
+
+function getActiveMapWallChipColor() {
+  return getActiveMapDefinition().wallChipColor || MAP_WALL_HEX_COLOR;
+}
+
 function getCurrentMonsterTierConfig() {
   return MAP_MONSTER_TIER_CONFIGS[state.mapId] || MAP_MONSTER_TIER_CONFIGS.garden;
+}
+
+function getActiveMonsterSpecies() {
+  const species = getCurrentMonsterTierConfig().species;
+  return Array.isArray(species) && species.length ? species : DEFAULT_MONSTER_SPECIES;
 }
 
 function getActiveMonsterMinTierIndex() {
@@ -1872,6 +2417,7 @@ function getActiveMonsterTierCount() {
 }
 
 function getHighestMonsterTierProgressStart() {
+  if (getActiveMapDefinition().diagonalProgress) return 1;
   return getActiveMonsterTierCount() > 1 ? 0.84 : 0;
 }
 
@@ -1886,8 +2432,20 @@ function getMonsterTierTargetCounts() {
   });
 }
 
+function getRareMonsterSpawnConfigs() {
+  const config = getCurrentMonsterTierConfig();
+  return (config.rareSpawns || [])
+    .map((entry) => ({
+      ...entry,
+      tierIndex: getTierIndexByName(entry.tierName),
+    }))
+    .filter((entry) => entry.tierIndex >= 0);
+}
+
 function getMaxMonstersForCurrentMap() {
-  return getMonsterTierTargetCounts().reduce((total, count) => total + count, 0);
+  const baseTotal = getMonsterTierTargetCounts().reduce((total, count) => total + count, 0);
+  const rareTotal = getRareMonsterSpawnConfigs().reduce((total, entry) => total + (entry.maxCount || 0), 0);
+  return baseTotal + rareTotal;
 }
 
 function getRouteSegments(routePoints = getActiveMapDefinition().routePoints) {
@@ -1962,6 +2520,32 @@ function routeTileToWorld(tileX, tileY) {
   };
 }
 
+function getDepthFieldProgress(tileX, tileY, depthField) {
+  const x = clamp(Math.floor(tileX), 0, MAP_TILE_COLUMNS - 1);
+  const y = clamp(Math.floor(tileY), 0, MAP_TILE_ROWS - 1);
+  const directDistance = depthField.distances[y]?.[x];
+  if (Number.isFinite(directDistance)) {
+    return clamp(directDistance / Math.max(1, depthField.maxDistance), 0, 1);
+  }
+
+  let bestDistance = Infinity;
+  for (let offsetY = -3; offsetY <= 3; offsetY++) {
+    for (let offsetX = -3; offsetX <= 3; offsetX++) {
+      const sampleX = x + offsetX;
+      const sampleY = y + offsetY;
+      if (sampleX < 0 || sampleY < 0 || sampleX >= MAP_TILE_COLUMNS || sampleY >= MAP_TILE_ROWS) continue;
+      const distance = depthField.distances[sampleY]?.[sampleX];
+      if (Number.isFinite(distance)) bestDistance = Math.min(bestDistance, distance);
+    }
+  }
+
+  if (Number.isFinite(bestDistance)) {
+    return clamp(bestDistance / Math.max(1, depthField.maxDistance), 0, 1);
+  }
+
+  return 0;
+}
+
 function getRouteWorldPosition(progress, sideOffset = 0) {
   const routeDistance = clamp(progress, 0, 1) * MAP_ROUTE.totalLength;
   const segment =
@@ -1983,9 +2567,24 @@ function getRouteProgressForWorld(x, y) {
   return getRouteProjection(point.x, point.y).progress;
 }
 
+function getMonsterProgressForWorld(x, y) {
+  const activeMap = getActiveMapDefinition();
+  const point = worldToRouteTilePoint(x, y);
+  if (activeMap.depthField) {
+    return getDepthFieldProgress(point.x, point.y, activeMap.depthField);
+  }
+  if (activeMap.diagonalProgress) {
+    const min = activeMap.diagonalProgressMin ?? 0;
+    const max = activeMap.diagonalProgressMax ?? MAP_TILE_COLUMNS + MAP_TILE_ROWS;
+    return clamp((point.x + point.y - min) / Math.max(1, max - min), 0, 1);
+  }
+  return getRouteProjection(point.x, point.y).progress;
+}
+
 function getPlayerSpawnWorldPosition() {
-  const firstPoint = getActiveMapDefinition().routePoints[0];
-  return routeTileToWorld(firstPoint.x, firstPoint.y);
+  const activeMap = getActiveMapDefinition();
+  const spawnPoint = activeMap.spawnPoint || activeMap.routePoints[0];
+  return routeTileToWorld(spawnPoint.x, spawnPoint.y);
 }
 
 function isMapWallTile(tileX, tileY) {
@@ -2065,6 +2664,13 @@ function isDenseMapWallFieldTile(tileX, tileY) {
 }
 
 function distortMapEdge(x0, y0, x1, y1, normalX, normalY) {
+  if (getActiveMapDefinition().pixelCave) {
+    return [
+      { x: x0, y: y0 },
+      { x: x1, y: y1 },
+    ];
+  }
+
   const points = [{ x: x0, y: y0 }];
   const deltaX = x1 - x0;
   const deltaY = y1 - y0;
@@ -2211,6 +2817,116 @@ function drawMapWallBoundaries(targetCtx, strokeStyle, lineWidth) {
   }
 }
 
+function drawAntHellGroundDecorations(
+  targetCtx,
+  visibleWorldLeft,
+  visibleWorldTop,
+  visibleWorldRight,
+  visibleWorldBottom,
+  viewScale,
+  cameraX = state.camera.x,
+  cameraY = state.camera.y,
+  includeWallTiles = false,
+) {
+  const tileSize = MAP_WIDTH / MAP_TILE_COLUMNS;
+  const decorCellSize = tileSize * 1.42;
+  const minCellX = Math.floor((visibleWorldLeft + MAP_HALF_WIDTH) / decorCellSize) - 1;
+  const minCellY = Math.floor((visibleWorldTop + MAP_HALF_HEIGHT) / decorCellSize) - 1;
+  const maxCellX = Math.ceil((visibleWorldRight + MAP_HALF_WIDTH) / decorCellSize) + 1;
+  const maxCellY = Math.ceil((visibleWorldBottom + MAP_HALF_HEIGHT) / decorCellSize) + 1;
+
+  targetCtx.save();
+  targetCtx.lineCap = "round";
+  targetCtx.lineJoin = "round";
+  const toScreen = (worldX, worldY) => ({
+    x: (worldX - cameraX) * viewScale + state.width / 2,
+    y: (worldY - cameraY) * viewScale + state.height / 2,
+  });
+  for (let cellY = minCellY; cellY <= maxCellY; cellY++) {
+    for (let cellX = minCellX; cellX <= maxCellX; cellX++) {
+      const stripeRoll = antHellMaskHash(cellX, cellY, 90);
+      if (stripeRoll < 0.38) continue;
+
+      const centerWorldX =
+        -MAP_HALF_WIDTH + cellX * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 101) * 0.4);
+      const centerWorldY =
+        -MAP_HALF_HEIGHT + cellY * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 105) * 0.4);
+      const tileX = Math.floor((centerWorldX + MAP_HALF_WIDTH) / tileSize);
+      const tileY = Math.floor((centerWorldY + MAP_HALF_HEIGHT) / tileSize);
+      if (
+        tileX < 0 ||
+        tileX >= MAP_TILE_COLUMNS ||
+        tileY < 0 ||
+        tileY >= MAP_TILE_ROWS ||
+        (!includeWallTiles && isMapWallTile(tileX, tileY))
+      ) {
+        continue;
+      }
+
+      const angle = antHellMaskHash(cellX, cellY, 115) * Math.PI * 2;
+      const normalAngle = angle + Math.PI / 2;
+      const length = decorCellSize * (0.38 + antHellMaskHash(cellX, cellY, 123) * 0.2);
+      const bendA = (antHellMaskHash(cellX, cellY, 131) - 0.5) * decorCellSize * 0.24;
+      const bendB = (antHellMaskHash(cellX, cellY, 137) - 0.5) * decorCellSize * 0.24;
+      const startWorldX = centerWorldX - Math.cos(angle) * length * 0.5;
+      const startWorldY = centerWorldY - Math.sin(angle) * length * 0.5;
+      const endWorldX = centerWorldX + Math.cos(angle) * length * 0.5;
+      const endWorldY = centerWorldY + Math.sin(angle) * length * 0.5;
+      const cp1WorldX = centerWorldX - Math.cos(angle) * length * 0.18 + Math.cos(normalAngle) * bendA;
+      const cp1WorldY = centerWorldY - Math.sin(angle) * length * 0.18 + Math.sin(normalAngle) * bendA;
+      const cp2WorldX = centerWorldX + Math.cos(angle) * length * 0.18 + Math.cos(normalAngle) * bendB;
+      const cp2WorldY = centerWorldY + Math.sin(angle) * length * 0.18 + Math.sin(normalAngle) * bendB;
+      const start = toScreen(startWorldX, startWorldY);
+      const cp1 = toScreen(cp1WorldX, cp1WorldY);
+      const cp2 = toScreen(cp2WorldX, cp2WorldY);
+      const end = toScreen(endWorldX, endWorldY);
+
+      targetCtx.strokeStyle = stripeRoll > 0.78
+        ? ANT_HELL_FLOOR_WAVE_LIGHT
+        : stripeRoll > 0.56
+          ? ANT_HELL_FLOOR_WAVE_MID
+          : ANT_HELL_FLOOR_WAVE_DARK;
+      targetCtx.lineWidth = Math.max(8, decorCellSize * viewScale * (0.1 + antHellMaskHash(cellX, cellY, 141) * 0.055));
+      targetCtx.beginPath();
+      targetCtx.moveTo(start.x, start.y);
+      targetCtx.bezierCurveTo(cp1.x, cp1.y, cp2.x, cp2.y, end.x, end.y);
+      targetCtx.stroke();
+    }
+  }
+  targetCtx.restore();
+}
+
+function drawMenuMapWipeOverlay() {
+  if (!state.menuMapWipe.active || state.spawned) return;
+
+  const elapsed = performance.now() - state.menuMapWipe.startedAt;
+  const progress = clamp(elapsed / state.menuMapWipe.duration, 0, 1);
+  const eased = 1 - (1 - progress) ** 3;
+  const bandWidth = state.width * 0.34;
+  const x = state.width - eased * (state.width + bandWidth);
+  const toAntHell = state.menuMapWipe.toMapId === "antHell";
+
+  ctx.save();
+  ctx.globalAlpha = 0.9 * (1 - progress * 0.35);
+  const gradient = ctx.createLinearGradient(x, 0, x + bandWidth, 0);
+  if (toAntHell) {
+    gradient.addColorStop(0, "rgba(61, 41, 23, 0)");
+    gradient.addColorStop(0.45, "rgba(138, 87, 33, 0.82)");
+    gradient.addColorStop(1, "rgba(61, 41, 23, 0)");
+  } else {
+    gradient.addColorStop(0, "rgba(24, 96, 68, 0)");
+    gradient.addColorStop(0.45, "rgba(98, 186, 112, 0.76)");
+    gradient.addColorStop(1, "rgba(24, 96, 68, 0)");
+  }
+  ctx.fillStyle = gradient;
+  ctx.fillRect(x, 0, bandWidth, state.height);
+  ctx.restore();
+
+  if (progress >= 1) {
+    state.menuMapWipe.active = false;
+  }
+}
+
 function artPointToScreen(point, mapLeft, mapTop, mapScreenWidth, mapScreenHeight) {
   return {
     x: mapLeft + (point.x / MAP_ART_SIZE) * mapScreenWidth,
@@ -2325,12 +3041,27 @@ function traceVisibleWallPath(targetCtx, minTileX, minTileY, maxTileX, maxTileY,
 }
 
 function drawVisibleWallTexture(targetCtx, visibleWorldLeft, visibleWorldTop, visibleWorldRight, visibleWorldBottom, viewScale) {
+  if (getActiveMapDefinition().pixelCave) {
+    drawVisibleAntHellWallTexture(
+      targetCtx,
+      visibleWorldLeft,
+      visibleWorldTop,
+      visibleWorldRight,
+      visibleWorldBottom,
+      viewScale,
+      textureCameraX,
+      textureCameraY,
+      !state.spawned,
+    );
+    return;
+  }
+
   const startCellX = Math.floor(visibleWorldLeft / MAP_WALL_HEX_CELL) - 1;
   const endCellX = Math.ceil(visibleWorldRight / MAP_WALL_HEX_CELL) + 1;
   const startCellY = Math.floor(visibleWorldTop / MAP_WALL_HEX_CELL) - 1;
   const endCellY = Math.ceil(visibleWorldBottom / MAP_WALL_HEX_CELL) + 1;
 
-  targetCtx.fillStyle = MAP_WALL_HEX_COLOR;
+  targetCtx.fillStyle = getActiveMapWallChipColor();
 
   for (let gridY = startCellY; gridY <= endCellY; gridY++) {
     for (let gridX = startCellX; gridX <= endCellX; gridX++) {
@@ -2350,6 +3081,48 @@ function drawVisibleWallTexture(targetCtx, visibleWorldLeft, visibleWorldTop, vi
       drawRoundHex(targetCtx, screen.x, screen.y, candidate.radius * viewScale, candidate.rotate, MAP_WALL_HEX_ROUND);
     }
   }
+}
+
+function drawVisibleAntHellWallTexture(
+  targetCtx,
+  visibleWorldLeft,
+  visibleWorldTop,
+  visibleWorldRight,
+  visibleWorldBottom,
+  viewScale,
+) {
+  const cellSize = 92;
+  const startCellX = Math.floor(visibleWorldLeft / cellSize) - 1;
+  const endCellX = Math.ceil(visibleWorldRight / cellSize) + 1;
+  const startCellY = Math.floor(visibleWorldTop / cellSize) - 1;
+  const endCellY = Math.ceil(visibleWorldBottom / cellSize) + 1;
+
+  targetCtx.save();
+  targetCtx.imageSmoothingEnabled = false;
+  for (let gridY = startCellY; gridY <= endCellY; gridY++) {
+    for (let gridX = startCellX; gridX <= endCellX; gridX++) {
+      const roll = wallTextureHash(gridX, gridY, 91);
+      if (roll < 0.36) continue;
+
+      const worldX = gridX * cellSize + (wallTextureHash(gridX, gridY, 92) - 0.5) * cellSize * 0.45;
+      const worldY = gridY * cellSize + (wallTextureHash(gridX, gridY, 93) - 0.5) * cellSize * 0.45;
+      if (
+        worldX < visibleWorldLeft ||
+        worldY < visibleWorldTop ||
+        worldX > visibleWorldRight ||
+        worldY > visibleWorldBottom
+      ) {
+        continue;
+      }
+
+      const screen = worldToScreen(worldX, worldY);
+      const width = Math.max(2, Math.round((14 + wallTextureHash(gridX, gridY, 94) * 42) * viewScale));
+      const height = Math.max(2, Math.round((7 + wallTextureHash(gridX, gridY, 95) * 30) * viewScale));
+      targetCtx.fillStyle = roll > 0.74 ? ANT_HELL_WALL_CHIP_COLOR : "rgba(87, 58, 34, 0.48)";
+      targetCtx.fillRect(Math.round(screen.x), Math.round(screen.y), width, height);
+    }
+  }
+  targetCtx.restore();
 }
 
 function drawVisibleMapWallShapes(
@@ -2373,7 +3146,7 @@ function drawVisibleMapWallShapes(
   targetCtx.save();
   targetCtx.lineJoin = "miter";
   targetCtx.lineCap = "butt";
-  targetCtx.fillStyle = MAP_WALL_COLOR;
+  targetCtx.fillStyle = getActiveMapWallColor();
 
   for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
     for (let tileX = minTileX; tileX <= maxTileX; tileX++) {
@@ -2416,7 +3189,7 @@ function drawVisibleMapWallShapes(
   );
   targetCtx.restore();
 
-  targetCtx.strokeStyle = MAP_WALL_STROKE_COLOR;
+  targetCtx.strokeStyle = getActiveMapWallStrokeColor();
   targetCtx.lineWidth = Math.max(1.2, 2.2 * getViewScale());
 
   for (let tileY = minTileY; tileY <= maxTileY; tileY++) {
@@ -2552,6 +3325,38 @@ function darkenHexColor(hexColor, amount = 0.34) {
   return `#${toHex(red)}${toHex(green)}${toHex(blue)}`;
 }
 
+function normalizeTier(tierOrIndex) {
+  if (typeof tierOrIndex === "number") return getTier(tierOrIndex);
+  return tierOrIndex || getTier(0);
+}
+
+function getTierCssFill(tierOrIndex) {
+  const tier = normalizeTier(tierOrIndex);
+  return tier.gradient || tier.color;
+}
+
+function getTierBorderColor(tierOrIndex) {
+  const tier = normalizeTier(tierOrIndex);
+  return tier.borderColor || darkenHexColor(tier.color);
+}
+
+function createTierCanvasFill(targetCtx, tierOrIndex, x0, y0, x1, y1) {
+  const tier = normalizeTier(tierOrIndex);
+  if (!tier.gradientStops?.length) return tier.color;
+
+  const gradient = targetCtx.createLinearGradient(x0, y0, x1, y1);
+  tier.gradientStops.forEach((color, index) => {
+    const stop =
+      typeof color === "object"
+        ? clamp(color.offset, 0, 1)
+        : tier.gradientStops.length === 1
+          ? 0
+          : index / (tier.gradientStops.length - 1);
+    gradient.addColorStop(stop, typeof color === "object" ? color.color : color);
+  });
+  return gradient;
+}
+
 function getPetalDisplayName(item) {
   const definition = PETAL_DEFINITIONS[item?.name];
   const text = getCurrentText();
@@ -2582,6 +3387,8 @@ function createPetalPreviewItem(name, tierIndex) {
     tierIndex: tier.index,
     tier: tier.name,
     tierColor: tier.color,
+    tierFill: getTierCssFill(tier),
+    tierBorderColor: getTierBorderColor(tier),
     maxDurability,
     durability: maxDurability,
     baseRespawnMs: definition.baseRespawnMs,
@@ -2597,8 +3404,8 @@ function createMonsterTooltipDrop(name, tierIndex, count) {
   const item = createPetalPreviewItem(name, tierIndex);
   const drop = document.createElement("div");
   drop.className = "monster-tooltip-drop";
-  drop.style.setProperty("--drop-color", item.tierColor);
-  drop.style.setProperty("--drop-border-color", darkenHexColor(item.tierColor));
+  drop.style.setProperty("--drop-color", getTierCssFill(item.tierIndex));
+  drop.style.setProperty("--drop-border-color", getTierBorderColor(item.tierIndex));
 
   const image = document.createElement("img");
   image.src = ASSETS[item.asset];
@@ -2618,6 +3425,8 @@ function getMonsterDisplayName(speciesName) {
 }
 
 function getMonsterSpeciesSpawnChance(speciesName, tierIndex) {
+  if (speciesName === "BabyAnt") return state.mapId === "antHell" ? 1 : 0;
+
   const tierNumber = getTier(tierIndex).index + 1;
   const rockChance = 0.16;
   const ladybugChance = tierNumber >= 4 ? 0.52 : 0.42;
@@ -2630,7 +3439,7 @@ function getMonsterSpeciesSpawnChance(speciesName, tierIndex) {
 
 function getMonsterSpeciesTargetCounts(tierIndex) {
   const totalTarget = getMonsterTierTargetCounts()[tierIndex] || 0;
-  const weightedCounts = MONSTER_SPECIES.map((speciesName) => {
+  const weightedCounts = getActiveMonsterSpecies().map((speciesName) => {
     const exact = totalTarget * getMonsterSpeciesSpawnChance(speciesName, tierIndex);
     return {
       speciesName,
@@ -2685,8 +3494,8 @@ function showMonsterDexTooltip(entry, event) {
 
   itemTooltip.innerHTML = "";
   itemTooltip.className = "item-tooltip monster-tooltip";
-  itemTooltip.style.setProperty("--tier-color", entry.tier.color);
-  itemTooltip.style.setProperty("--tier-border-color", darkenHexColor(entry.tier.color));
+  itemTooltip.style.setProperty("--tier-color", getTierCssFill(entry.tier));
+  itemTooltip.style.setProperty("--tier-border-color", getTierBorderColor(entry.tier));
 
   const header = document.createElement("div");
   header.className = "item-tooltip-head";
@@ -2774,8 +3583,8 @@ function renderMonsterDexUi() {
       const tierCell = document.createElement("button");
       tierCell.className = "monsterdex-tier-cell";
       tierCell.type = "button";
-      tierCell.style.setProperty("--tier-color", entry.tier.color);
-      tierCell.style.setProperty("--tier-border-color", darkenHexColor(entry.tier.color));
+      tierCell.style.setProperty("--tier-color", getTierCssFill(entry.tier));
+      tierCell.style.setProperty("--tier-border-color", getTierBorderColor(entry.tier));
       tierCell.title = `${entry.tier.name} ${entry.label}`;
 
       const image = document.createElement("img");
@@ -2806,7 +3615,7 @@ function getPetalDexEntry(petalName, tierIndex) {
     label: getPetalDisplayName(item),
     cooldown: item.baseRespawnMs,
     orbCount: item.name === "Light" ? getLightOrbCount(item.tierIndex) : 1,
-    homingRange: definition.homingRange ? scaleStatByTier(definition.homingRange, 1.18, item.tierIndex) : 0,
+    homingRange: definition.homingRange ? getLentilHomingRangeBonus(item) : 0,
   };
 }
 
@@ -2815,6 +3624,8 @@ function showPetalDexTooltip(entry, event) {
 
   itemTooltip.innerHTML = "";
   itemTooltip.className = "item-tooltip monster-tooltip";
+  itemTooltip.style.setProperty("--tier-color", getTierCssFill(entry.tierIndex));
+  itemTooltip.style.setProperty("--tier-border-color", getTierBorderColor(entry.tierIndex));
 
   const header = document.createElement("div");
   header.className = "item-tooltip-head";
@@ -2886,8 +3697,8 @@ function renderPetalDexUi() {
       const tierCell = document.createElement("button");
       tierCell.className = "monsterdex-tier-cell";
       tierCell.type = "button";
-      tierCell.style.setProperty("--tier-color", entry.tierColor);
-      tierCell.style.setProperty("--tier-border-color", darkenHexColor(entry.tierColor));
+      tierCell.style.setProperty("--tier-color", getTierCssFill(entry.tierIndex));
+      tierCell.style.setProperty("--tier-border-color", getTierBorderColor(entry.tierIndex));
       tierCell.title = `${entry.tier} ${entry.label}`;
 
       const image = document.createElement("img");
@@ -3010,10 +3821,151 @@ function recordMonsterKillForShopTasks(monster) {
   }
 }
 
+function addChatMessage(message, options = {}) {
+  state.chat.messages.push({
+    id: nextChatMessageId++,
+    createdAt: performance.now(),
+    ...message,
+  });
+  if (state.chat.messages.length > CHAT_MAX_MESSAGES) {
+    state.chat.messages.splice(0, state.chat.messages.length - CHAT_MAX_MESSAGES);
+  }
+  renderChatUi({ scrollToBottom: options.scrollToBottom || state.chat.open });
+}
+
+function shouldBroadcastMonsterTier(tierIndex) {
+  return getTier(tierIndex).index + 1 >= HIGH_TIER_MONSTER_BROADCAST_MIN_LEVEL;
+}
+
+function addMonsterSpawnChatBroadcast(monster, options = {}) {
+  const tier = getTier(monster.tierIndex);
+  if (!shouldBroadcastMonsterTier(tier.index)) return;
+
+  const count = Math.max(1, Math.floor(Number(options.count) || 1));
+  const countText = count > 1 ? ` x${count}` : "";
+  const tierLevelText = `${tier.name}（${tier.index + 1}级）`;
+  const authorText = options.author ? "作者生成" : options.rare ? "稀有生成" : "野外生成";
+  addChatMessage({
+    broadcast: true,
+    color: tier.color,
+    gradient: tier.gradient || "",
+    mapId: monster.mapId || state.mapId,
+    x: monster.x,
+    y: monster.y,
+    content: `${authorText}：${tierLevelText} ${getMonsterDisplayName(monster.name)}${countText}`,
+  });
+}
+
+function addMonsterKillChatBroadcast(monster) {
+  const tier = getTier(monster.tierIndex);
+  if (!shouldBroadcastMonsterTier(tier.index)) return;
+
+  const text = getCurrentText();
+  const playerNameText = state.player.name || nameInput.value.trim() || text.defaultPlayerName;
+  addChatMessage({
+    broadcast: true,
+    color: tier.color,
+    gradient: tier.gradient || "",
+    content: `${playerNameText} 打死一个 ${tier.name} ${getMonsterDisplayName(monster.name)}`,
+  });
+}
+
+function getCurrentChatSenderKey() {
+  return state.accountName || state.player.name || nameInput.value.trim() || "__current_player__";
+}
+
+function isChatMessageAudible(message) {
+  if (message.broadcast) return true;
+  if (!state.spawned) return true;
+  if (message.senderKey && message.senderKey === getCurrentChatSenderKey()) return true;
+  if (message.mapId && message.mapId !== state.mapId) return false;
+  if (!Number.isFinite(message.x) || !Number.isFinite(message.y)) return true;
+  const hearingRange = Number.isFinite(message.range) ? message.range : CHAT_HEARING_RANGE;
+  return Math.hypot(message.x - state.player.x, message.y - state.player.y) <= hearingRange;
+}
+
+function getVisibleChatMessages() {
+  return state.chat.messages.filter(isChatMessageAudible);
+}
+
+function getChatVisibleSignature(messages = getVisibleChatMessages()) {
+  return messages.map((message) => message.id).join("|");
+}
+
+function updateChatAudibility(time) {
+  if (time < state.chat.lastAudibleRefreshAt + CHAT_AUDIBILITY_REFRESH_MS) return;
+
+  state.chat.lastAudibleRefreshAt = time;
+  const visibleMessages = getVisibleChatMessages();
+  const signature = getChatVisibleSignature(visibleMessages);
+  if (signature !== state.chat.visibleSignature) {
+    renderChatUi({ visibleMessages });
+  }
+}
+
+function recordMonsterDamageForCurrentLife(monster, amount) {
+  if (!monster || amount <= 0) return;
+  const lifeId = state.player.lifeId || 0;
+  if (monster.playerDamageLifeId !== lifeId) {
+    monster.playerDamageLifeId = lifeId;
+    monster.playerLifeDamage = 0;
+  }
+  monster.playerLifeDamage = (monster.playerLifeDamage || 0) + amount;
+}
+
+function markMonsterHealthTrailDamage(monster, healthBefore, time) {
+  if (!monster?.maxHealth) return;
+
+  const previousRatio = clamp(healthBefore / monster.maxHealth, 0, 1);
+  const currentRatio = clamp((monster.health || 0) / monster.maxHealth, 0, 1);
+  monster.healthTrailRatio = Math.max(
+    Number.isFinite(monster.healthTrailRatio) ? monster.healthTrailRatio : currentRatio,
+    previousRatio,
+  );
+  monster.healthTrailHoldUntil = time + MONSTER_HEALTH_TRAIL_HOLD_MS;
+  monster.healthTrailUpdatedAt = time;
+}
+
+function getMonsterHealthBarRatios(monster, time = state.lastTime) {
+  const currentRatio = clamp((monster.health || 0) / Math.max(1, monster.maxHealth || 1), 0, 1);
+  let trailRatio = Number.isFinite(monster.healthTrailRatio) ? monster.healthTrailRatio : currentRatio;
+
+  if (trailRatio <= currentRatio) {
+    trailRatio = currentRatio;
+  } else if (time > (monster.healthTrailHoldUntil || 0)) {
+    const dt = clamp((time - (monster.healthTrailUpdatedAt || time)) / 1000, 0, 0.08);
+    trailRatio = Math.max(currentRatio, trailRatio - MONSTER_HEALTH_TRAIL_DECAY_PER_SECOND * dt);
+  }
+
+  monster.healthTrailRatio = trailRatio;
+  monster.healthTrailUpdatedAt = time;
+  return { currentRatio, trailRatio };
+}
+
+function damageMonsterByPlayer(monster, amount, time) {
+  const healthBefore = monster.health || 0;
+  const damaged = damageCreature(monster, amount, time);
+  if (!damaged) return false;
+
+  markMonsterHealthTrailDamage(monster, healthBefore, time);
+  recordMonsterDamageForCurrentLife(monster, Math.max(0, healthBefore - (monster.health || 0)));
+  return true;
+}
+
+function hasMonsterDropContribution(monster) {
+  return (
+    monster.playerDamageLifeId === (state.player.lifeId || 0) &&
+    (monster.playerLifeDamage || 0) >= (monster.maxHealth || 1) * MONSTER_DROP_MIN_PLAYER_LIFE_DAMAGE_RATIO
+  );
+}
+
 function rewardMonsterKill(monster) {
   addPlayerExperience(monster.experienceReward);
   recordMonsterKillForShopTasks(monster);
-  spawnMonsterDrops(monster);
+  if (hasMonsterDropContribution(monster)) {
+    spawnMonsterDrops(monster);
+  }
+  addMonsterKillChatBroadcast(monster);
 }
 
 function renderDailyTaskList() {
@@ -3025,8 +3977,8 @@ function renderDailyTaskList() {
     const row = document.createElement("div");
     row.className = "daily-task-row";
     row.classList.toggle("is-complete", task.completed);
-    row.style.setProperty("--tier-color", tier.color);
-    row.style.setProperty("--tier-border-color", darkenHexColor(tier.color));
+    row.style.setProperty("--tier-color", getTierCssFill(tier));
+    row.style.setProperty("--tier-border-color", getTierBorderColor(tier));
 
     const icon = document.createElement("div");
     icon.className = "daily-task-icon";
@@ -3069,8 +4021,8 @@ function renderShopItemList() {
     const tier = getTier(tierIndex);
     const tierRow = document.createElement("section");
     tierRow.className = "shop-tier-row";
-    tierRow.style.setProperty("--tier-color", tier.color);
-    tierRow.style.setProperty("--tier-border-color", darkenHexColor(tier.color));
+    tierRow.style.setProperty("--tier-color", getTierCssFill(tier));
+    tierRow.style.setProperty("--tier-border-color", getTierBorderColor(tier));
 
     const tierLabel = document.createElement("div");
     tierLabel.className = "shop-tier-label";
@@ -3086,8 +4038,8 @@ function renderShopItemList() {
       button.className = "shop-buy-button";
       button.type = "button";
       button.disabled = state.shop.points < price;
-      button.style.setProperty("--tier-color", item.tierColor);
-      button.style.setProperty("--tier-border-color", darkenHexColor(item.tierColor));
+      button.style.setProperty("--tier-color", getTierCssFill(item.tierIndex));
+      button.style.setProperty("--tier-border-color", getTierBorderColor(item.tierIndex));
       button.title = `${item.tier} ${getPetalDisplayName(item)} · ${text.shopCost}: ${price}`;
 
       const preview = document.createElement("div");
@@ -3201,8 +4153,8 @@ function showEquipmentTooltip(item, event) {
 
   itemTooltip.innerHTML = "";
   itemTooltip.className = "item-tooltip";
-  itemTooltip.style.setProperty("--tier-color", item.tierColor);
-  itemTooltip.style.setProperty("--tier-border-color", darkenHexColor(item.tierColor));
+  itemTooltip.style.setProperty("--tier-color", getTierCssFill(item.tierIndex));
+  itemTooltip.style.setProperty("--tier-border-color", getTierBorderColor(item.tierIndex));
 
   const header = document.createElement("div");
   header.className = "item-tooltip-head";
@@ -3239,7 +4191,7 @@ function showEquipmentTooltip(item, event) {
     tooltipRows.push(
       createTooltipRow(
         text.petalHomingRange,
-        formatPetalStat(scaleStatByTier(itemDefinition.homingRange, 1.18, item.tierIndex)),
+        formatPetalStat(getLentilHomingRangeBonus(item)),
       ),
     );
   }
@@ -3295,8 +4247,8 @@ function renderItemContent(slot, item, quantity = 1) {
   slot.classList.toggle("is-empty", !item);
   slot.classList.toggle("is-light-stack", item?.name === "Light");
   slot.draggable = Boolean(item);
-  slot.style.setProperty("--tier-color", item ? item.tierColor : "#24743f");
-  slot.style.setProperty("--tier-border-color", item ? darkenHexColor(item.tierColor) : "#18522c");
+  slot.style.setProperty("--tier-color", item ? getTierCssFill(item.tierIndex) : "#24743f");
+  slot.style.setProperty("--tier-border-color", item ? getTierBorderColor(item.tierIndex) : "#18522c");
   setItemSlotWearState(slot, item);
 
   if (!item) return;
@@ -3368,9 +4320,7 @@ function getEquipmentArray(source) {
 function movePetalToInventory(item) {
   if (!item) return;
 
-  item.active = true;
-  item.readyAt = 0;
-  resetPetalPlacement(item);
+  resetPetalForInventory(item);
   state.inventory.push(item);
   sortInventory();
 }
@@ -3389,6 +4339,27 @@ function startItemDrag(source, index, event) {
   event.dataTransfer.effectAllowed = "move";
   event.dataTransfer.setData("text/plain", `${source}:${index}`);
   event.currentTarget.classList.add("is-dragging");
+}
+
+function resetPetalForInventory(item) {
+  if (!item) return;
+
+  item.active = true;
+  item.durability = item.maxDurability;
+  item.readyAt = 0;
+  item.cooldownStartedAt = 0;
+  resetPetalPlacement(item);
+
+  if (item.name === "Light") {
+    ensureLightOrbStates(item);
+    item.orbs.forEach((orb) => {
+      orb.active = true;
+      orb.durability = item.maxDurability;
+      orb.readyAt = 0;
+      orb.cooldownStartedAt = 0;
+    });
+    syncPetalActiveState(item);
+  }
 }
 
 function moveEquipmentToInventory(index) {
@@ -3438,7 +4409,7 @@ function dropDraggedItemToEquipment(targetIndex, targetSource = "equipment") {
     const sourceItem = state.inventory.splice(dragData.index, 1)[0];
     const replacedItem = targetArray[targetIndex];
     targetArray[targetIndex] = sourceItem;
-    if (replacedItem) state.inventory.push(replacedItem);
+    if (replacedItem) movePetalToInventory(replacedItem);
     sortInventory();
   }
 
@@ -3611,7 +4582,8 @@ function renderCraftingUi() {
     button.className = "craft-stack-button";
     button.type = "button";
     button.disabled = state.crafting.animating;
-    button.style.setProperty("--tier-color", entry.item.tierColor);
+    button.style.setProperty("--tier-color", getTierCssFill(entry.item.tierIndex));
+    button.style.setProperty("--tier-border-color", getTierBorderColor(entry.item.tierIndex));
     button.classList.toggle("is-selected", entry.stackKey === state.crafting.stackKey);
     button.title = `${entry.item.tier} ${getPetalDisplayName(entry.item)} · ${entry.quantity}`;
 
@@ -3697,6 +4669,8 @@ function createCraftPreviewItem(sourceItem, tierIndex) {
     tierIndex: tier.index,
     tier: tier.name,
     tierColor: tier.color,
+    tierFill: getTierCssFill(tier),
+    tierBorderColor: getTierBorderColor(tier),
   };
 }
 
@@ -3706,8 +4680,8 @@ function showCraftResultEffect(sourceItem, successes) {
   if (successes > 0) {
     const burst = document.createElement("div");
     burst.className = "craft-result-burst";
-    burst.style.setProperty("--tier-color", getTier(sourceItem.tierIndex + 1).color);
-    burst.style.setProperty("--tier-border-color", darkenHexColor(getTier(sourceItem.tierIndex + 1).color));
+    burst.style.setProperty("--tier-color", getTierCssFill(sourceItem.tierIndex + 1));
+    burst.style.setProperty("--tier-border-color", getTierBorderColor(sourceItem.tierIndex + 1));
 
     const image = document.createElement("img");
     image.src = ASSETS[sourceItem.asset];
@@ -3859,8 +4833,8 @@ function renderForgingUi() {
     button.className = "craft-stack-button";
     button.type = "button";
     button.disabled = state.forging.animating;
-    button.style.setProperty("--tier-color", entry.item.tierColor);
-    button.style.setProperty("--tier-border-color", darkenHexColor(entry.item.tierColor));
+    button.style.setProperty("--tier-color", getTierCssFill(entry.item.tierIndex));
+    button.style.setProperty("--tier-border-color", getTierBorderColor(entry.item.tierIndex));
     button.classList.toggle("is-selected", entry.stackKey === state.forging.stackKey);
     button.title = `${entry.item.tier} ${getPetalDisplayName(entry.item)} · ${entry.quantity}`;
 
@@ -3927,8 +4901,8 @@ function showForgeResultEffect(resultItem, count) {
 
   const burst = document.createElement("div");
   burst.className = "craft-result-burst forge-result-burst";
-  burst.style.setProperty("--tier-color", resultItem.tierColor);
-  burst.style.setProperty("--tier-border-color", darkenHexColor(resultItem.tierColor));
+  burst.style.setProperty("--tier-color", getTierCssFill(resultItem.tierIndex));
+  burst.style.setProperty("--tier-border-color", getTierBorderColor(resultItem.tierIndex));
 
   const image = document.createElement("img");
   image.src = ASSETS[resultItem.asset];
@@ -4170,6 +5144,17 @@ function hitShapesOverlap(a, b) {
   return ellipseEllipseOverlap(a, b);
 }
 
+function recoilPlayerFromMonster(angle, basePush = 0) {
+  const recoilDistance = Math.max(PLAYER_MONSTER_HIT_RECOIL_DISTANCE, basePush);
+  moveCircleEntityWithMapCollision(
+    state.player,
+    state.player.x + Math.cos(angle) * recoilDistance,
+    state.player.y + Math.sin(angle) * recoilDistance,
+    state.player.hitRadius,
+  );
+  clampEntityToMap(state.player, state.player.radius);
+}
+
 function resolvePlayerMonsterCollisions(time = performance.now()) {
   if (!state.spawned) return;
   if (!state.player.alive || state.player.hidden || state.player.dying) return;
@@ -4193,7 +5178,7 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
     if (time >= (monster.nextPlayerBodyDamageAt || 0)) {
       const wasAlive = monster.alive;
       const bodyDamage = getPlayerBodyDamage();
-      if (damageCreature(monster, bodyDamage, time)) {
+      if (damageMonsterByPlayer(monster, bodyDamage, time)) {
         addDamageNumber(monster, bodyDamage, time);
         monster.lastPlayerHitAt = time;
         if (wasAlive && !monster.alive) {
@@ -4211,14 +5196,17 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
       state.player.hitRadius + hitShapeRadiusToward(monsterShape, angle) + 0.5;
     const push = Math.max(1, targetDistance - distance);
 
-    moveCircleEntityWithMapCollision(
-      state.player,
-      state.player.x + Math.cos(angle) * push,
-      state.player.y + Math.sin(angle) * push,
-      state.player.hitRadius,
-    );
-
-    clampEntityToMap(state.player, state.player.radius);
+    if (playerWasHit) {
+      recoilPlayerFromMonster(angle, push + PLAYER_MONSTER_HIT_RECOIL_DISTANCE);
+    } else {
+      moveCircleEntityWithMapCollision(
+        state.player,
+        state.player.x + Math.cos(angle) * push,
+        state.player.y + Math.sin(angle) * push,
+        state.player.hitRadius,
+      );
+      clampEntityToMap(state.player, state.player.radius);
+    }
   }
 }
 
@@ -4256,11 +5244,53 @@ function isDeathScreenOpen() {
   return !deathScreen.classList.contains("is-hidden");
 }
 
+function getRouteWorldPositionForMonsterTier(tierIndex) {
+  const tierRange = getMonsterTierProgressRange(tierIndex);
+  const targetProgress = (tierRange.min + tierRange.max) / 2;
+  let bestPosition = getRouteWorldPosition(targetProgress, 0);
+  let bestScore = Infinity;
+
+  for (let index = 0; index <= RESPAWN_TIER_ROUTE_SAMPLE_COUNT; index++) {
+    const routeProgress = index / RESPAWN_TIER_ROUTE_SAMPLE_COUNT;
+    const position = getRouteWorldPosition(routeProgress, 0);
+    const monsterProgress = getMonsterProgressForWorld(position.x, position.y);
+    if (monsterProgress < tierRange.min || monsterProgress >= tierRange.max) continue;
+
+    const score = Math.abs(monsterProgress - targetProgress);
+    if (score < bestScore) {
+      bestScore = score;
+      bestPosition = position;
+    }
+  }
+
+  return bestPosition;
+}
+
+function getPlayerRespawnWorldPosition() {
+  const spawnPosition = getPlayerSpawnWorldPosition();
+  const deathX = state.player.lastDeathX;
+  const deathY = state.player.lastDeathY;
+  const deathMapId = state.player.lastDeathMapId;
+
+  if (!Number.isFinite(deathX) || !Number.isFinite(deathY) || deathMapId !== state.mapId) {
+    return spawnPosition;
+  }
+
+  const activeMinTierIndex = getActiveMonsterMinTierIndex();
+  const deathTierIndex = getMonsterTierIndexForPosition(deathX, deathY);
+  if (deathTierIndex <= RESPAWN_HOME_ZONE_MAX_TIER_INDEX || deathTierIndex <= activeMinTierIndex) {
+    return spawnPosition;
+  }
+
+  return getRouteWorldPositionForMonsterTier(deathTierIndex - 1);
+}
+
 function respawnPlayer() {
   const now = performance.now();
-  const routeSpawn = getPlayerSpawnWorldPosition();
+  const routeSpawn = getPlayerRespawnWorldPosition();
   const spawnPoint = findNearestFloorPosition(routeSpawn.x, routeSpawn.y, state.player.hitRadius);
 
+  state.player.lifeId = (state.player.lifeId || 0) + 1;
   state.player.x = spawnPoint.x;
   state.player.y = spawnPoint.y;
   state.player.health = state.player.maxHealth;
@@ -4321,19 +5351,49 @@ function startGame() {
   document.body.classList.add("is-playing");
   startScreen.classList.add("is-hidden");
   nameInput.blur();
+  if (MAP_DEFINITIONS[state.mode] && state.mapId !== state.mode) {
+    switchActiveMap(state.mode);
+  } else if (MAP_DEFINITIONS[state.mapId]) {
+    restoreMonsterMapState(state.mapId, {
+      seed: true,
+      immediateLimit: state.mapId === "garden2" ? Infinity : 180,
+    });
+  }
   respawnPlayer();
   if (!state.accountName) {
     openAccountPanel("accountLoginRequired");
   }
 }
 
-function showAntHellNotice() {
-  window.clearTimeout(antHellNoticeTimeout);
-  antHellNotice.textContent = getCurrentText().antHellUnavailable;
-  antHellNotice.classList.remove("is-hidden");
-  antHellNoticeTimeout = window.setTimeout(() => {
-    antHellNotice.classList.add("is-hidden");
-  }, 2400);
+function returnToMainMenu() {
+  if (!state.spawned) return;
+
+  saveActiveMonsterMapState(state.mapId);
+  closeFloatingPanels();
+  state.spawned = false;
+  state.pointer.active = false;
+  state.uiLockMovement = false;
+  state.controls.attack = false;
+  state.controls.defend = false;
+  state.input.attack = false;
+  state.input.defend = false;
+  state.input.up = false;
+  state.input.down = false;
+  state.input.left = false;
+  state.input.right = false;
+  resetJoystick();
+  state.weapon.homingUnits = Object.create(null);
+  nameInput.value = state.player.name || nameInput.value;
+  if (state.mapId === "garden" || state.mapId === "antHell") {
+    selectMode(state.mapId);
+  } else {
+    selectMode("garden");
+  }
+  document.body.classList.add("is-menu");
+  document.body.classList.remove("is-playing");
+  startScreen.classList.remove("is-hidden");
+  syncDeathScreen();
+  syncCombatControls();
 }
 
 function showGameNotice(messageKeyOrText, duration = 2200) {
@@ -4347,17 +5407,29 @@ function showGameNotice(messageKeyOrText, duration = 2200) {
 }
 
 function selectMode(mode) {
-  if (mode === "antHell") {
-    showAntHellNotice();
-    mode = "garden";
-  } else {
-    antHellNotice.classList.add("is-hidden");
-  }
+  if (!MAP_DEFINITIONS[mode]) mode = "garden";
 
+  const previousMapId = state.mapId;
   state.mode = mode;
   modeButtons.forEach((button) => {
     button.classList.toggle("is-selected", button.dataset.mode === mode);
   });
+
+  if (!state.spawned && previousMapId !== mode) {
+    state.menuMapWipe = {
+      active: true,
+      startedAt: performance.now(),
+      duration: 320,
+      fromMapId: previousMapId,
+      toMapId: mode,
+    };
+    applyMapStaticData(mode);
+    const previewCenter = getPlayerSpawnWorldPosition();
+    state.camera.x = previewCenter.x;
+    state.camera.y = previewCenter.y;
+    state.camera.freeX = previewCenter.x;
+    state.camera.freeY = previewCenter.y;
+  }
 }
 
 function applyLayoutMode() {
@@ -4387,6 +5459,7 @@ function applyLanguage() {
     const key = element.dataset.i18n;
     if (text[key]) element.textContent = text[key];
   });
+  mainMenuButton.setAttribute("aria-label", text.mainMenu);
   settingsButton.setAttribute("aria-label", text.settings);
   settingsPanel.setAttribute("aria-label", text.settings);
   leaderboardPanel.setAttribute("aria-label", text.leaderboard);
@@ -4407,13 +5480,20 @@ function applyLanguage() {
   forgeButton.setAttribute("aria-label", text.forge);
   forgePanel.setAttribute("aria-label", text.forge);
   authorPanel.setAttribute("aria-label", text.authorPanel);
+  authorQuickButton.setAttribute("aria-label", text.authorQuick);
+  authorPortalPanel.setAttribute("aria-label", text.authorPortalTitle);
   inventoryPanel.setAttribute("aria-label", text.inventory);
+  chatInput.placeholder = text.chatPlaceholder;
+  chatWidget.setAttribute("aria-label", text.chatPrompt);
+  chatPanel.setAttribute("aria-label", text.chatPrompt);
   touchAttackButton.setAttribute("aria-label", text.attack);
   touchDefendButton.setAttribute("aria-label", text.defend);
   populateAuthorControls();
   updateAuthorPanelUi();
   renderPetalDexUi();
   renderShopUi();
+  renderChatUi();
+  syncAuthorQuickButton();
   updateLeaderboard(performance.now(), true);
 }
 
@@ -4422,8 +5502,16 @@ function rebuildActiveMap() {
 }
 
 function switchActiveMap(mapId) {
-  state.mapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  const nextMapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  if (MAP_DEFINITIONS[state.mapId]) {
+    saveActiveMonsterMapState(state.mapId);
+  }
+  state.mapId = nextMapId;
   rebuildActiveMap();
+  restoreMonsterMapState(nextMapId, {
+    seed: true,
+    immediateLimit: nextMapId === "garden2" ? Infinity : 180,
+  });
   const spawn = findNearestFloorPosition(
     getPlayerSpawnWorldPosition().x,
     getPlayerSpawnWorldPosition().y,
@@ -4437,20 +5525,83 @@ function switchActiveMap(mapId) {
   state.pointer.y = state.height / 2;
   updatePointerWorld();
   state.drops = [];
-  state.monsters = [];
   state.weapon.homingUnits = Object.create(null);
-  seedMonsterPopulation();
   renderMonsterDexUi();
 }
 
 function getMapPortalDefinitions(mapId = state.mapId) {
   if (mapId === "garden") {
-    return [{ targetMapId: "garden2", ...routeTileToWorld(12.2, 15.4) }];
+    return [
+      { type: "map", targetMapId: "garden2", ...routeTileToWorld(10.3, 6.6) },
+      { type: "author", radius: AUTHOR_PORTAL_RADIUS, ...routeTileToWorld(8.7, 7.5) },
+    ];
   }
   if (mapId === "garden2") {
-    return [{ targetMapId: "garden", ...routeTileToWorld(23.5, 57.5) }];
+    return [{ type: "map", targetMapId: "garden", ...routeTileToWorld(23.5, 57.5) }];
   }
   return [];
+}
+
+function isAuthorPortalPassword(value) {
+  return AUTHOR_PORTAL_PASSWORDS.has(`${value || ""}`.trim().toLowerCase());
+}
+
+function syncAuthorQuickButton() {
+  authorQuickButton.classList.toggle("is-hidden", !state.author.verified);
+}
+
+function closeAuthorPortalPanel() {
+  authorPortalPanel.classList.add("is-hidden");
+  authorPortalPasswordInput.value = "";
+  authorPortalMessage.textContent = "";
+  state.authorPortalPromptOpen = false;
+  if (!dragData) state.uiLockMovement = false;
+}
+
+function openAuthorPortalPrompt(time) {
+  if (state.authorPortalPromptOpen || !state.spawned) return;
+  if (time < state.nextAuthorPortalPromptAt) return;
+
+  if (state.author.verified) {
+    if (authorPanel.classList.contains("is-hidden")) {
+      openAuthorPanel();
+    }
+    state.nextAuthorPortalPromptAt = time + 1200;
+    return;
+  }
+
+  state.nextAuthorPortalPromptAt = time + 1200;
+  const text = getCurrentText();
+  closeFloatingPanels();
+  state.authorPortalPromptOpen = true;
+  authorPortalMessage.textContent = text.authorPortalPrompt;
+  authorPortalPanel.classList.remove("is-hidden");
+  state.uiLockMovement = true;
+  requestAnimationFrame(() => authorPortalPasswordInput.focus());
+}
+
+function unlockAuthorMode() {
+  const text = getCurrentText();
+  state.author.verified = true;
+  state.author.hasSelection = false;
+  authorMessage.textContent = text.authorReady;
+  syncAuthorQuickButton();
+  drawAuthorMapPreview();
+  updateAuthorPanelUi();
+}
+
+function verifyAuthorPortalPassword() {
+  const text = getCurrentText();
+  if (isAuthorPortalPassword(authorPortalPasswordInput.value)) {
+    unlockAuthorMode();
+    state.nextAuthorPortalPromptAt = performance.now() + 1200;
+    closeAuthorPortalPanel();
+    openAuthorPanel();
+    return;
+  }
+
+  authorPortalMessage.textContent = text.authorPortalWrong;
+  authorPortalPasswordInput.select();
 }
 
 function startMapPortalTransition(portal, time) {
@@ -4489,7 +5640,12 @@ function updateMapPortals(time) {
   if (!state.spawned || state.portalTransition.active) return;
 
   for (const portal of getMapPortalDefinitions()) {
-    if (Math.hypot(state.player.x - portal.x, state.player.y - portal.y) <= GARDEN2_PORTAL_RADIUS) {
+    const radius = portal.radius || GARDEN2_PORTAL_RADIUS;
+    if (Math.hypot(state.player.x - portal.x, state.player.y - portal.y) <= radius) {
+      if (portal.type === "author") {
+        openAuthorPortalPrompt(time);
+        return;
+      }
       startMapPortalTransition(portal, time);
       return;
     }
@@ -4593,11 +5749,14 @@ function closeFloatingPanels() {
   monsterDexButton.classList.remove("is-active");
   shopPanel.classList.add("is-hidden");
   shopButton.classList.remove("is-active");
+  closeAuthorPortalPanel();
   authorPanel.classList.add("is-hidden");
+  closeChatPanel();
 }
 
 function isFloatingPanelTarget(target) {
   return (
+    mainMenuButton.contains(target) ||
     settingsPanel.contains(target) ||
     settingsButton.contains(target) ||
     talentPanel.contains(target) ||
@@ -4616,6 +5775,9 @@ function isFloatingPanelTarget(target) {
     monsterDexButton.contains(target) ||
     shopPanel.contains(target) ||
     shopButton.contains(target) ||
+    chatWidget.contains(target) ||
+    authorQuickButton.contains(target) ||
+    authorPortalCard.contains(target) ||
     authorCard.contains(target)
   );
 }
@@ -4637,6 +5799,7 @@ function drawAuthorMapPreview() {
 function updateAuthorPanelUi() {
   const text = getCurrentText();
 
+  syncAuthorQuickButton();
   authorGate.classList.toggle("is-hidden", state.author.verified);
   authorTeleportArea.classList.toggle("is-hidden", !state.author.verified);
   authorMessage.textContent = state.author.verified ? text.authorReady : "";
@@ -4782,6 +5945,7 @@ function spawnAuthorMonsters() {
   const center = getAuthorSelectedPoint(spawnRadius);
   const goldenAngle = Math.PI * (3 - Math.sqrt(5));
   let spawnedCount = 0;
+  let firstSpawnedMonster = null;
 
   for (let index = 0; index < quantity; index++) {
     const ringRadius = Math.sqrt(index) * Math.max(54, spawnRadius * 1.4);
@@ -4801,9 +5965,16 @@ function spawnAuthorMonsters() {
     monster.anchorX = point.x;
     monster.anchorY = point.y;
     state.monsters.push(monster);
+    if (!firstSpawnedMonster) firstSpawnedMonster = monster;
     spawnedCount += 1;
   }
 
+  if (firstSpawnedMonster) {
+    addMonsterSpawnChatBroadcast(firstSpawnedMonster, {
+      author: true,
+      count: spawnedCount,
+    });
+  }
   authorMessage.textContent = `已生成 ${TIERS[tierIndex].name} ${getMonsterDisplayName(speciesName)} x${spawnedCount}`;
 }
 
@@ -4833,11 +6004,7 @@ function verifyAuthorAccess() {
     .replace(".0", ".");
 
   if (name === "张高远" && (normalizedBirthday === "1.25" || birthday === "1月25")) {
-    state.author.verified = true;
-    state.author.hasSelection = false;
-    authorMessage.textContent = text.authorReady;
-    drawAuthorMapPreview();
-    updateAuthorPanelUi();
+    unlockAuthorMode();
     return;
   }
 
@@ -4936,13 +6103,7 @@ function isTextEntryTarget(target) {
 
 function handleAuthorCodeKey(event) {
   if (!state.spawned || isTextEntryTarget(event.target)) return;
-  if (event.key.length !== 1) return;
-
-  state.author.codeBuffer = `${state.author.codeBuffer}${event.key.toLowerCase()}`.slice(-8);
-  if (state.author.codeBuffer === "haoshuai") {
-    event.preventDefault();
-    openAuthorPanel();
-  }
+  state.author.codeBuffer = "";
 }
 
 function isBlockedBrowserShortcut(event) {
@@ -5084,7 +6245,11 @@ function getCurrentLeaderboardKey() {
   return state.accountName || "__current_player__";
 }
 
-function getLeaderboardEntries() {
+function isLeaderboardQualifiedLevel(level) {
+  return Math.max(1, Math.floor(level || 1)) >= LEADERBOARD_MIN_LEVEL;
+}
+
+function getAllLeaderboardEntries() {
   const accounts = readAccounts();
   const entriesByKey = new Map();
 
@@ -5103,13 +6268,18 @@ function getLeaderboardEntries() {
     level: Math.max(1, Math.floor(state.player.level || 1)),
   });
 
-  return [...entriesByKey.values()]
-    .filter((entry) => entry.level >= LEADERBOARD_MIN_LEVEL)
+  return [...entriesByKey.values()];
+}
+
+function getLeaderboardEntries() {
+  return getAllLeaderboardEntries()
+    .filter((entry) => isLeaderboardQualifiedLevel(entry.level))
     .sort((a, b) => b.level - a.level || a.name.localeCompare(b.name));
 }
 
-function isCurrentPlayerLeaderboardChampion(entries = getLeaderboardEntries()) {
-  return entries[0]?.key === getCurrentLeaderboardKey();
+function isCurrentPlayerOnLeaderboard(entries = getLeaderboardEntries()) {
+  const currentKey = getCurrentLeaderboardKey();
+  return entries.some((entry) => entry.key === currentKey);
 }
 
 function isLeaderboardRewardPetal(item) {
@@ -5149,7 +6319,7 @@ function hasLeaderboardRewardPetal() {
 }
 
 function syncLeaderboardReward(entries = getLeaderboardEntries()) {
-  if (!state.spawned || !isCurrentPlayerLeaderboardChampion(entries)) {
+  if (!state.spawned || !isCurrentPlayerOnLeaderboard(entries)) {
     removeLeaderboardRewardPetals();
     return;
   }
@@ -5174,9 +6344,12 @@ function renderLeaderboardUi(entries = getLeaderboardEntries()) {
   const text = getCurrentText();
   leaderboardList.innerHTML = "";
   if (entries.length === 0) {
+    const totalPlayers = getAllLeaderboardEntries().length;
     const empty = document.createElement("div");
     empty.className = "leaderboard-empty";
-    empty.textContent = text.leaderboardEmpty;
+    empty.textContent = totalPlayers > 0
+      ? text.leaderboardNoQualified.replace("{count}", `${totalPlayers}`)
+      : text.leaderboardEmpty;
     leaderboardList.append(empty);
     return;
   }
@@ -5256,6 +6429,113 @@ function openShopPanel() {
   shopPanel.classList.remove("is-hidden");
   shopButton.classList.add("is-active");
   state.uiLockMovement = true;
+}
+
+function collapseInventoryPanel() {
+  inventoryPanel.classList.add("is-collapsed");
+  inventoryToggleButton.textContent = "+";
+}
+
+function createChatMessageRow(message) {
+  const row = document.createElement("div");
+  row.className = "chat-message";
+  if (message.broadcast) {
+    row.classList.add("is-broadcast");
+    row.classList.toggle("has-gradient", Boolean(message.gradient));
+    row.style.setProperty("--chat-broadcast-color", message.color || "var(--paper)");
+    if (message.gradient) {
+      row.style.setProperty("--chat-broadcast-gradient", message.gradient);
+    }
+
+    const content = document.createElement("span");
+    content.className = "chat-message-content";
+    content.textContent = message.content;
+    row.append(content);
+    return row;
+  }
+
+  const name = document.createElement("span");
+  name.className = "chat-message-name";
+  name.textContent = `${message.name}:`;
+
+  const content = document.createElement("span");
+  content.className = "chat-message-content";
+  content.textContent = message.content;
+
+  row.append(name, content);
+  return row;
+}
+
+function renderChatPreview(visibleMessages) {
+  if (!chatPreview) return;
+  const previewMessages = visibleMessages.slice(-5);
+  chatPreview.innerHTML = "";
+  chatPreview.classList.toggle("is-hidden", state.chat.open || previewMessages.length === 0);
+  if (state.chat.open) return;
+
+  for (const message of previewMessages) {
+    chatPreview.append(createChatMessageRow(message));
+  }
+}
+
+function renderChatUi({ scrollToBottom = false, visibleMessages = getVisibleChatMessages() } = {}) {
+  const text = getCurrentText();
+  chatWidget.classList.toggle("is-open", state.chat.open);
+  chatWidget.classList.toggle("is-collapsed", !state.chat.open);
+  chatPanel.classList.toggle("is-hidden", !state.chat.open);
+  chatPrompt.classList.toggle("is-hidden", state.chat.open);
+  chatInput.placeholder = text.chatPlaceholder;
+  chatWidget.setAttribute("aria-label", text.chatPrompt);
+  chatPanel.setAttribute("aria-label", text.chatPrompt);
+
+  chatLog.innerHTML = "";
+  state.chat.visibleSignature = getChatVisibleSignature(visibleMessages);
+  renderChatPreview(visibleMessages);
+  for (const message of visibleMessages) {
+    chatLog.append(createChatMessageRow(message));
+  }
+
+  if (scrollToBottom) {
+    requestAnimationFrame(() => {
+      chatLog.scrollTop = chatLog.scrollHeight;
+    });
+  }
+}
+
+function openChatPanel() {
+  if (!state.spawned) return;
+  closeFloatingPanels();
+  collapseInventoryPanel();
+  state.chat.open = true;
+  state.uiLockMovement = true;
+  renderChatUi({ scrollToBottom: true });
+  requestAnimationFrame(() => chatInput.focus());
+}
+
+function closeChatPanel() {
+  state.chat.open = false;
+  renderChatUi();
+}
+
+function submitChatMessage() {
+  const content = chatInput.value.trim();
+  if (!content) return;
+
+  const text = getCurrentText();
+  const name = state.player.name || nameInput.value.trim() || text.defaultPlayerName;
+  addChatMessage(
+    {
+      name,
+      content,
+      senderKey: getCurrentChatSenderKey(),
+      mapId: state.mapId,
+      x: state.player.x,
+      y: state.player.y,
+      range: CHAT_HEARING_RANGE,
+    },
+    { scrollToBottom: true },
+  );
+  chatInput.value = "";
 }
 
 function saveActiveAccount() {
@@ -5378,7 +6658,7 @@ function getPlayerMaxHealth() {
 }
 
 function getViewScale() {
-  return 1 / (1 + getTalentLevel("vision") * 0.04);
+  return 1 / (BASE_VIEW_RANGE_MULTIPLIER + getTalentLevel("vision") * VISION_TALENT_RANGE_BONUS);
 }
 
 function getPetalCooldownMs(petal = null) {
@@ -5732,6 +7012,11 @@ function damageCreature(creature, amount, time) {
   creature.hitFlash = HIT_FLASH_SECONDS;
 
   if (creature.health <= 0) {
+    if (creature === state.player) {
+      creature.lastDeathX = creature.x;
+      creature.lastDeathY = creature.y;
+      creature.lastDeathMapId = state.mapId;
+    }
     creature.alive = false;
     creature.dying = true;
     creature.deathStartedAt = time;
@@ -5861,6 +7146,38 @@ function updateDistantMonster(monster, dt, time) {
   }
 }
 
+function updateLazyWanderMonster(monster, dt, time) {
+  if (time >= monster.nextDecisionAt) {
+    monster.targetMoveAngle = Math.random() * Math.PI * 2;
+    monster.targetSpeed = 34 + Math.random() * 24;
+    monster.wanderMovingUntil = time + 760 + Math.random() * 420;
+    monster.nextDecisionAt = time + 5000;
+  }
+
+  if (time >= (monster.wanderMovingUntil || 0)) {
+    monster.targetSpeed = 0;
+  }
+
+  monster.speed += (monster.targetSpeed - monster.speed) * Math.min(1, dt * 5.5);
+  monster.moveAngle = lerpAngle(monster.moveAngle, monster.targetMoveAngle, Math.min(1, dt * 3.6));
+  const nextX = monster.x + Math.cos(monster.moveAngle) * monster.speed * dt;
+  const nextY = monster.y + Math.sin(monster.moveAngle) * monster.speed * dt;
+  const moved = moveCircleEntityWithMapCollision(
+    monster,
+    nextX,
+    nextY,
+    monster.radius,
+    MONSTER_COLLISION_SAMPLE_COUNT,
+  );
+  if (!moved) {
+    monster.targetSpeed = 0;
+    monster.nextDecisionAt = time + 1200;
+  }
+  clampEntityToMap(monster, monster.radius);
+  monster.direction = Math.cos(monster.moveAngle) >= 0 ? 1 : -1;
+  monster.faceAngle = lerpAngle(monster.faceAngle, monster.moveAngle + Math.PI / 2, Math.min(1, dt * 7));
+}
+
 function updateMonsters(dt, time) {
   if (!state.spawned) return;
 
@@ -5872,6 +7189,10 @@ function updateMonsters(dt, time) {
     if (!monster.alive) continue;
     if (monster.stationary) {
       monster.speed = 0;
+      continue;
+    }
+    if (monster.lazyWander) {
+      updateLazyWanderMonster(monster, dt, time);
       continue;
     }
 
@@ -6049,11 +7370,22 @@ function updateMonsterRegeneration(dt, time) {
   }
 }
 
-function isMonsterSpawnClear(x, y, tierIndex = 0, speciesName = "Bee") {
+function getMonsterSpawnExtraSpacing(tierIndex = 0, options = {}) {
+  const tierLevel = getTier(tierIndex).index + 1;
+  const highTierSpacing = Math.max(0, tierLevel - HIGH_TIER_SPAWN_SPACING_START_LEVEL + 1)
+    * HIGH_TIER_SPAWN_EXTRA_SPACING_PER_LEVEL;
+  return MONSTER_SPAWN_EXTRA_SPACING
+    + highTierSpacing
+    + (options.rare ? RARE_MONSTER_SPAWN_EXTRA_SPACING : 0);
+}
+
+function isMonsterSpawnClear(x, y, tierIndex = 0, speciesName = "Bee", options = {}) {
   const stats = MONSTER_DEFINITIONS[speciesName]?.stats || BEE_STATS;
   const sizeScale = scaleSizeByTier(1, tierIndex);
   const spawnRadius = stats.radius * sizeScale;
+  const spawnSpacing = getMonsterSpawnExtraSpacing(tierIndex, options) + (stats.spawnExtraSpacing || 0);
   if (isCircleBlockedByMap(x, y, spawnRadius)) return false;
+  if (!isPointOutsideSpawnSafeZone(x, y, spawnRadius, stats.spawnSafeRadius ?? MONSTER_SPAWN_SAFE_RADIUS)) return false;
 
   const candidateShape =
     stats.hitShape === "circle"
@@ -6069,17 +7401,18 @@ function isMonsterSpawnClear(x, y, tierIndex = 0, speciesName = "Bee") {
 
   return state.monsters.every((monster) => {
     if (monster.hidden || monster.dying || !monster.alive) return true;
-    const reach = spawnRadius + monster.radius + MONSTER_SPAWN_EXTRA_SPACING;
+    const reach = spawnRadius + monster.radius + spawnSpacing;
     if (Math.abs(monster.x - x) > reach || Math.abs(monster.y - y) > reach) return true;
     return !hitShapesOverlap(candidateShape, getMonsterHitbox(monster));
   });
 }
 
-function getMonsterTierCounts() {
+function getMonsterTierCounts({ includeRare = true } = {}) {
   const counts = Array(TIERS.length).fill(0);
 
   for (const monster of state.monsters) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
+    if (!includeRare && monster.rareSpawn) continue;
     counts[monster.tierIndex] += 1;
   }
 
@@ -6087,7 +7420,7 @@ function getMonsterTierCounts() {
 }
 
 function getMonsterSpeciesCounts(tierIndex) {
-  const counts = Object.fromEntries(MONSTER_SPECIES.map((speciesName) => [speciesName, 0]));
+  const counts = Object.fromEntries(getActiveMonsterSpecies().map((speciesName) => [speciesName, 0]));
 
   for (const monster of state.monsters) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
@@ -6099,7 +7432,7 @@ function getMonsterSpeciesCounts(tierIndex) {
 }
 
 function chooseMonsterSpawnTierIndex() {
-  const counts = getMonsterTierCounts();
+  const counts = getMonsterTierCounts({ includeRare: false });
   const availableTierIndexes = getMonsterTierTargetCounts()
     .map((targetCount, tierIndex) => ({ targetCount, tierIndex, currentCount: counts[tierIndex] }))
     .filter(({ targetCount, currentCount }) => currentCount < targetCount)
@@ -6117,6 +7450,15 @@ function getMonsterTierProgressRange(tierIndex) {
   const activeMinTierIndex = getActiveMonsterMinTierIndex();
   const activeTierCount = getActiveMonsterTierCount();
   const highestProgressStart = getHighestMonsterTierProgressStart();
+
+  if (getActiveMapDefinition().diagonalProgress || getActiveMapDefinition().evenTierProgress) {
+    const zoneIndex = clamp(tierIndex - activeMinTierIndex, 0, activeTierCount - 1);
+    const zoneSize = 1 / Math.max(1, activeTierCount);
+    return {
+      min: zoneIndex * zoneSize,
+      max: (zoneIndex + 1) * zoneSize,
+    };
+  }
 
   if (tierIndex >= activeMaxTierIndex) {
     return {
@@ -6140,11 +7482,16 @@ function getMonsterTierProgressRange(tierIndex) {
 }
 
 function getMonsterTierIndexForPosition(x, y) {
-  const progress = getRouteProgressForWorld(x, y);
+  const progress = getMonsterProgressForWorld(x, y);
   const activeMinTierIndex = getActiveMonsterMinTierIndex();
   const activeMaxTierIndex = getActiveMonsterMaxTierIndex();
   const activeTierCount = getActiveMonsterTierCount();
   const highestProgressStart = getHighestMonsterTierProgressStart();
+
+  if (getActiveMapDefinition().diagonalProgress || getActiveMapDefinition().evenTierProgress) {
+    const zoneIndex = clamp(Math.floor(progress * activeTierCount), 0, activeTierCount - 1);
+    return activeMinTierIndex + zoneIndex;
+  }
 
   if (progress >= highestProgressStart) {
     return activeMaxTierIndex;
@@ -6162,7 +7509,8 @@ function getMonsterTierIndexForPosition(x, y) {
 
 function chooseMonsterSpeciesForTier(tierIndex) {
   const counts = getMonsterSpeciesCounts(tierIndex);
-  const missingSpecies = MONSTER_SPECIES
+  const activeSpecies = getActiveMonsterSpecies();
+  const missingSpecies = activeSpecies
     .map((speciesName) => ({
       speciesName,
       missing: Math.max(0, getMonsterSpeciesTargetCount(speciesName, tierIndex) - (counts[speciesName] || 0)),
@@ -6176,12 +7524,12 @@ function chooseMonsterSpeciesForTier(tierIndex) {
 
   const roll = Math.random();
   let cursor = 0;
-  for (const speciesName of MONSTER_SPECIES) {
+  for (const speciesName of activeSpecies) {
     cursor += getMonsterSpeciesSpawnChance(speciesName, tierIndex);
     if (roll <= cursor) return speciesName;
   }
 
-  return "Bee";
+  return activeSpecies[0] || "Bee";
 }
 
 function isPointInsideMap(x, y, padding = BEE_STATS.radius) {
@@ -6193,8 +7541,9 @@ function isPointInsideMap(x, y, padding = BEE_STATS.radius) {
   );
 }
 
-function isPointOutsideSpawnSafeZone(x, y, padding = 0) {
-  return Math.hypot(x, y) >= MONSTER_SPAWN_SAFE_RADIUS + padding;
+function isPointOutsideSpawnSafeZone(x, y, padding = 0, safeRadius = MONSTER_SPAWN_SAFE_RADIUS) {
+  const origin = state.spawned ? state.player : getPlayerSpawnWorldPosition();
+  return Math.hypot(x - origin.x, y - origin.y) >= safeRadius + padding;
 }
 
 function nextMonsterSpawnSequence(tierIndex) {
@@ -6226,10 +7575,38 @@ function createGarden2UpperSpawnPoint(tierIndex, sequence, spawnPadding) {
   return null;
 }
 
-function createGarden2DistributedSpawnPoint(tierIndex, sequence, spawnPadding) {
-  if (state.mapId !== "garden2") return null;
+function createAntHellHubSpawnPoint(tierIndex, sequence, spawnPadding) {
+  if (state.mapId !== "antHell" || tierIndex !== getActiveMonsterMinTierIndex()) return null;
 
-  for (let attempt = 0; attempt < 520; attempt++) {
+  const center = routeTileToWorld(ANT_HELL_SPAWN_POINT.x, ANT_HELL_SPAWN_POINT.y);
+  const tileWorldSize = MAP_WIDTH / MAP_TILE_COLUMNS;
+  const goldenAngle = Math.PI * (3 - Math.sqrt(5));
+
+  for (let attempt = 0; attempt < 72; attempt++) {
+    const ring = (sequence + attempt) % 5;
+    const angle = sequence * goldenAngle + attempt * 0.82;
+    const radius = tileWorldSize * (0.9 + ring * 0.34 + attempt * 0.018);
+    const x = center.x + Math.cos(angle) * radius;
+    const y = center.y + Math.sin(angle) * radius;
+
+    if (
+      isPointInsideMap(x, y, spawnPadding) &&
+      !isCircleBlockedByMap(x, y, spawnPadding) &&
+      getMonsterTierIndexForPosition(x, y) === tierIndex
+    ) {
+      return { x, y };
+    }
+  }
+
+  return null;
+}
+
+function createTileMaskDistributedSpawnPoint(tierIndex, sequence, spawnPadding) {
+  const activeMap = getActiveMapDefinition();
+  if (!activeMap.tileMask) return null;
+
+  const maxAttempts = activeMap.depthField ? 1600 : 520;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const tileIndex = (sequence * 131 + attempt * 157 + tierIndex * 263) % (MAP_TILE_COLUMNS * MAP_TILE_ROWS);
     const baseTileX = tileIndex % MAP_TILE_COLUMNS;
     const baseTileY = Math.floor(tileIndex / MAP_TILE_COLUMNS);
@@ -6249,6 +7626,54 @@ function createGarden2DistributedSpawnPoint(tierIndex, sequence, spawnPadding) {
   return null;
 }
 
+function getRareMonsterProgressTarget(tierIndex) {
+  const activeMaxTierIndex = getActiveMonsterMaxTierIndex();
+  const overflow = Math.max(0, tierIndex - activeMaxTierIndex);
+  if (state.mapId === "antHell") {
+    return {
+      center: clamp(0.9 + Math.min(overflow, 5) * 0.016, 0.9, 0.985),
+      spread: clamp(0.12 - Math.min(overflow, 5) * 0.012, 0.055, 0.12),
+    };
+  }
+  return {
+    center: clamp(0.76 + overflow * 0.034, 0.76, 0.985),
+    spread: clamp(0.16 - overflow * 0.014, 0.045, 0.16),
+  };
+}
+
+function createRareMonsterSpawnPoint(tierIndex, sequence, spawnPadding) {
+  const activeMap = getActiveMapDefinition();
+  if (!activeMap.tileMask) return null;
+
+  const { center, spread } = getRareMonsterProgressTarget(tierIndex);
+  for (let attempt = 0; attempt < 780; attempt++) {
+    const tileIndex =
+      (sequence * 193 + attempt * 211 + tierIndex * 307) % (MAP_TILE_COLUMNS * MAP_TILE_ROWS);
+    const baseTileX = tileIndex % MAP_TILE_COLUMNS;
+    const baseTileY = Math.floor(tileIndex / MAP_TILE_COLUMNS);
+    if (activeMap.tileMask[baseTileY]?.[baseTileX] !== "0") continue;
+
+    const jitterX = 0.16 + wallTextureHash(baseTileX, baseTileY, sequence + attempt * 0.23) * 0.68;
+    const jitterY = 0.16 + wallTextureHash(baseTileX, baseTileY, tierIndex + attempt * 0.29) * 0.68;
+    const { x, y } = routeTileToWorld(baseTileX + jitterX, baseTileY + jitterY);
+    const progress = getMonsterProgressForWorld(x, y);
+    const distance = Math.abs(progress - center);
+    const acceptance = Math.exp(-((distance / spread) ** 2) * 5.4);
+    const roll = wallTextureHash(baseTileX + sequence * 0.13, baseTileY - attempt * 0.17, tierIndex);
+
+    if (
+      distance <= spread * 1.35 &&
+      roll <= acceptance &&
+      isPointInsideMap(x, y, spawnPadding) &&
+      !isCircleBlockedByMap(x, y, spawnPadding)
+    ) {
+      return { x, y };
+    }
+  }
+
+  return null;
+}
+
 function createTierSpawnPoint(tierIndex) {
   const { min, max } = getMonsterTierProgressRange(tierIndex);
   const spawnPadding = scaleSizeByTier(BEE_STATS.radius, tierIndex);
@@ -6259,7 +7684,9 @@ function createTierSpawnPoint(tierIndex) {
   );
   const sequence = nextMonsterSpawnSequence(tierIndex);
   const laneCount = 9;
-  const distributedSpawn = createGarden2DistributedSpawnPoint(tierIndex, sequence, spawnPadding);
+  const antHellHubSpawn = createAntHellHubSpawnPoint(tierIndex, sequence, spawnPadding);
+  if (antHellHubSpawn) return antHellHubSpawn;
+  const distributedSpawn = createTileMaskDistributedSpawnPoint(tierIndex, sequence, spawnPadding);
   if (distributedSpawn) return distributedSpawn;
   const upperSpawn = createGarden2UpperSpawnPoint(tierIndex, sequence, spawnPadding);
   if (upperSpawn) return upperSpawn;
@@ -6289,7 +7716,7 @@ function createTierSpawnPoint(tierIndex) {
   };
 }
 
-function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesName = null) {
+function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesName = null, options = {}) {
   if (tierIndex == null) return null;
   const monsterSpecies = speciesName || chooseMonsterSpeciesForTier(tierIndex);
 
@@ -6297,21 +7724,29 @@ function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesN
   let fallbackY = 0;
   let fallbackDirection = 1;
 
-  const maxSpawnAttempts = state.mapId === "garden2" ? 96 : 32;
+  const maxSpawnAttempts = options.rare ? 120 : state.mapId === "garden2" ? 96 : 48;
   for (let attempt = 0; attempt < maxSpawnAttempts; attempt++) {
-    const { x, y } = createTierSpawnPoint(tierIndex);
+    const spawnPadding = scaleSizeByTier(MONSTER_DEFINITIONS[monsterSpecies]?.stats?.radius || BEE_STATS.radius, tierIndex);
+    const rareSpawn = options.rare
+      ? createRareMonsterSpawnPoint(tierIndex, nextMonsterSpawnSequence(tierIndex), spawnPadding)
+      : null;
+    const { x, y } = rareSpawn || createTierSpawnPoint(tierIndex);
     const direction = Math.random() < 0.5 ? -1 : 1;
     fallbackX = x;
     fallbackY = y;
     fallbackDirection = direction;
 
-    if (isMonsterSpawnClear(x, y, tierIndex, monsterSpecies)) {
-      return createMonster(monsterSpecies, x, y, direction, tierIndex);
+    if (isMonsterSpawnClear(x, y, tierIndex, monsterSpecies, options)) {
+      const monster = createMonster(monsterSpecies, x, y, direction, tierIndex);
+      if (options.rare) monster.rareSpawn = true;
+      return monster;
     }
   }
 
-  if (isMonsterSpawnClear(fallbackX, fallbackY, tierIndex, monsterSpecies)) {
-    return createMonster(monsterSpecies, fallbackX, fallbackY, fallbackDirection, tierIndex);
+  if (isMonsterSpawnClear(fallbackX, fallbackY, tierIndex, monsterSpecies, options)) {
+    const monster = createMonster(monsterSpecies, fallbackX, fallbackY, fallbackDirection, tierIndex);
+    if (options.rare) monster.rareSpawn = true;
+    return monster;
   }
 
   return null;
@@ -6321,15 +7756,101 @@ function createRandomBee(tierIndex = chooseMonsterSpawnTierIndex()) {
   return createRandomMonster(tierIndex, "Bee");
 }
 
-function seedMonsterPopulation() {
+function getInitialRareMonsterCount(config) {
+  const maxCount = Math.max(0, Math.floor(Number(config.maxCount) || 0));
+  const initialCount = config.initialCount ?? Math.ceil(maxCount * 0.28);
+  return clamp(Math.floor(Number(initialCount) || 0), 0, maxCount);
+}
+
+function seedRareMonsterPopulation({ immediateLimit = Infinity } = {}) {
+  let immediateCount = 0;
+
+  for (const config of getRareMonsterSpawnConfigs()) {
+    const tierIndex = config.tierIndex;
+    const targetCount = getInitialRareMonsterCount(config);
+    let spawnedCount = 0;
+
+    for (let count = 0; count < targetCount; count++) {
+      if (immediateCount >= immediateLimit) break;
+      const monster = createRandomMonster(tierIndex, null, { rare: true });
+      if (!monster) continue;
+      state.monsters.push(monster);
+      spawnedCount += 1;
+      immediateCount += 1;
+    }
+
+    if (spawnedCount > 0) {
+      const intervalMs = config.intervalMs || 30000;
+      state.nextRareMonsterSpawnAt[tierIndex] = (state.lastTime || performance.now()) + intervalMs;
+    }
+  }
+}
+
+function seedMonsterPopulation({ immediateLimit = Infinity } = {}) {
   state.monsterSpawnSequence = Array(TIERS.length).fill(0);
+  state.nextRareMonsterSpawnAt = Array(TIERS.length).fill(0);
+  state.monsterBackfillQueue = [];
   const targetCounts = getMonsterTierTargetCounts();
+  let immediateCount = 0;
+
   for (let tierIndex = 0; tierIndex < targetCounts.length; tierIndex++) {
     const targetCount = targetCounts[tierIndex];
 
     for (let count = 0; count < targetCount; count++) {
+      if (immediateCount >= immediateLimit) {
+        state.monsterBackfillQueue.push(tierIndex);
+        continue;
+      }
       const monster = createRandomMonster(tierIndex);
-      if (monster) state.monsters.push(monster);
+      if (monster) {
+        state.monsters.push(monster);
+        immediateCount += 1;
+      } else {
+        state.monsterBackfillQueue.push(tierIndex);
+      }
+    }
+  }
+
+  seedRareMonsterPopulation({ immediateLimit: Math.max(0, immediateLimit - immediateCount) });
+}
+
+function updateMonsterBackfill() {
+  if (!state.monsterBackfillQueue.length) return;
+
+  const perTick = state.mapId === "garden" ? 5 : 7;
+  for (let index = 0; index < perTick && state.monsterBackfillQueue.length; index++) {
+    const tierIndex = state.monsterBackfillQueue.shift();
+    const monster = createRandomMonster(tierIndex);
+    if (monster) state.monsters.push(monster);
+  }
+}
+
+function updateRareMonsterSpawns(time) {
+  const counts = Array(TIERS.length).fill(0);
+  for (const monster of state.monsters) {
+    if (monster.hidden || monster.dying || !monster.alive || !monster.rareSpawn) continue;
+    counts[monster.tierIndex] += 1;
+  }
+
+  for (const config of getRareMonsterSpawnConfigs()) {
+    const tierIndex = config.tierIndex;
+    const currentCount = counts[tierIndex] || 0;
+    const intervalMs = config.intervalMs || 30000;
+    if (!state.nextRareMonsterSpawnAt[tierIndex]) {
+      const stagger = 0.35 + wallTextureHash(tierIndex, state.mapId === "garden" ? 1.3 : 2.7, 44) * 0.65;
+      state.nextRareMonsterSpawnAt[tierIndex] = time + intervalMs * stagger;
+      continue;
+    }
+    if (time < state.nextRareMonsterSpawnAt[tierIndex]) continue;
+
+    state.nextRareMonsterSpawnAt[tierIndex] = time + intervalMs;
+    if (currentCount >= (config.maxCount || 0)) continue;
+
+    const monster = createRandomMonster(tierIndex, null, { rare: true });
+    if (monster) {
+      state.monsters.push(monster);
+      addMonsterSpawnChatBroadcast(monster, { rare: true });
+      counts[tierIndex] = currentCount + 1;
     }
   }
 }
@@ -6338,14 +7859,108 @@ function updateMonsterSpawns(time) {
   if (!state.spawned) return;
 
   state.monsters = state.monsters.filter((monster) => !monster.hidden);
-  if (state.monsters.length >= getMaxMonstersForCurrentMap()) return;
+  updateMonsterBackfill();
+  updateRareMonsterSpawns(time);
   if (time < state.nextMonsterSpawnAt) return;
 
   const monster = createRandomMonster();
   if (monster) {
     state.monsters.push(monster);
+    addMonsterSpawnChatBroadcast(monster);
   }
   state.nextMonsterSpawnAt = time + MONSTER_RESPAWN_MS;
+}
+
+function createMonsterMapSnapshot() {
+  return {
+    monsters: state.monsters,
+    monsterSpawnSequence: [...state.monsterSpawnSequence],
+    nextRareMonsterSpawnAt: [...state.nextRareMonsterSpawnAt],
+    monsterBackfillQueue: [...state.monsterBackfillQueue],
+    nextMonsterSpawnAt: state.nextMonsterSpawnAt,
+    monsterConfigKey: getMonsterPopulationConfigKey(),
+    seeded: true,
+  };
+}
+
+function applyMonsterMapSnapshot(snapshot) {
+  state.monsters = snapshot?.monsters || [];
+  state.monsterSpawnSequence = [...(snapshot?.monsterSpawnSequence || Array(TIERS.length).fill(0))];
+  state.nextRareMonsterSpawnAt = [...(snapshot?.nextRareMonsterSpawnAt || Array(TIERS.length).fill(0))];
+  state.monsterBackfillQueue = [...(snapshot?.monsterBackfillQueue || [])];
+  state.nextMonsterSpawnAt = snapshot?.nextMonsterSpawnAt || 0;
+}
+
+function getMonsterPopulationConfigKey() {
+  const config = getCurrentMonsterTierConfig();
+  return JSON.stringify({
+    mapId: state.mapId,
+    minTierName: config.minTierName,
+    maxTierName: config.maxTierName,
+    targetCounts: config.targetCounts,
+    species: getActiveMonsterSpecies(),
+  });
+}
+
+function saveActiveMonsterMapState(mapId = state.mapId) {
+  const safeMapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  state.mapMonsterStates[safeMapId] = createMonsterMapSnapshot();
+}
+
+function hasViableMonsterMapSnapshot(snapshot) {
+  if (!snapshot?.seeded) return false;
+  if (snapshot.monsterConfigKey !== getMonsterPopulationConfigKey()) return false;
+
+  const targetTotal = getMonsterTierTargetCounts().reduce((total, count) => total + count, 0);
+  if (targetTotal <= 0) return true;
+
+  const activeSpecies = new Set(getActiveMonsterSpecies());
+  return (snapshot.monsters || []).some(
+    (monster) => activeSpecies.has(monster.name) && monster.alive && !monster.hidden && !monster.dying,
+  );
+}
+
+function restoreMonsterMapState(mapId, options = {}) {
+  const safeMapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  const snapshot = state.mapMonsterStates[safeMapId];
+  if (hasViableMonsterMapSnapshot(snapshot)) {
+    applyMonsterMapSnapshot(snapshot);
+    return true;
+  }
+
+  state.monsters = [];
+  state.monsterSpawnSequence = Array(TIERS.length).fill(0);
+  state.nextRareMonsterSpawnAt = Array(TIERS.length).fill(0);
+  state.monsterBackfillQueue = [];
+  state.nextMonsterSpawnAt = 0;
+  if (options.seed) {
+    seedMonsterPopulation({ immediateLimit: options.immediateLimit ?? Infinity });
+    saveActiveMonsterMapState(safeMapId);
+  }
+  return false;
+}
+
+function ensureMonsterMapPopulation(mapId, options = {}) {
+  const safeMapId = MAP_DEFINITIONS[mapId] ? mapId : "garden";
+  if (state.mapMonsterStates[safeMapId]?.seeded) return;
+
+  const previousMapId = state.mapId;
+  const previousRoute = MAP_ROUTE;
+  const previousCollision = state.mapCollision;
+  const previousArtCanvas = state.mapArtCanvas;
+  const previousMonsterSnapshot = createMonsterMapSnapshot();
+
+  applyMapStaticData(safeMapId);
+  restoreMonsterMapState(safeMapId, {
+    seed: true,
+    immediateLimit: options.immediateLimit ?? Infinity,
+  });
+
+  state.mapId = previousMapId;
+  MAP_ROUTE = previousRoute;
+  state.mapCollision = previousCollision;
+  state.mapArtCanvas = previousArtCanvas;
+  applyMonsterMapSnapshot(previousMonsterSnapshot);
 }
 
 function getWeaponHomingKey(petal, unitIndex = 0) {
@@ -6365,6 +7980,58 @@ function movePointToward(x, y, targetX, targetY, maxStep) {
     y: y + (dy / distance) * maxStep,
     arrived: false,
   };
+}
+
+function moveHomingStateToward(homingState, targetX, targetY, speed, dt, useInertia = false) {
+  const dx = targetX - homingState.x;
+  const dy = targetY - homingState.y;
+  const distance = Math.hypot(dx, dy);
+  if (distance <= Math.max(2, speed * dt) || distance <= 0.001) {
+    homingState.x = targetX;
+    homingState.y = targetY;
+    homingState.vx = 0;
+    homingState.vy = 0;
+    return true;
+  }
+
+  if (!useInertia) {
+    const nextPoint = movePointToward(homingState.x, homingState.y, targetX, targetY, speed * dt);
+    homingState.vx = dt > 0 ? (nextPoint.x - homingState.x) / dt : 0;
+    homingState.vy = dt > 0 ? (nextPoint.y - homingState.y) / dt : 0;
+    homingState.x = nextPoint.x;
+    homingState.y = nextPoint.y;
+    return nextPoint.arrived;
+  }
+
+  const desiredVx = (dx / distance) * speed;
+  const desiredVy = (dy / distance) * speed;
+  if (!Number.isFinite(homingState.vx) || !Number.isFinite(homingState.vy)) {
+    homingState.vx = desiredVx;
+    homingState.vy = desiredVy;
+  }
+
+  const turnAmount = 1 - Math.exp(-LENTIL_CHAIN_TURN_RESPONSE * dt);
+  homingState.vx += (desiredVx - homingState.vx) * turnAmount;
+  homingState.vy += (desiredVy - homingState.vy) * turnAmount;
+
+  const velocity = Math.hypot(homingState.vx, homingState.vy) || 1;
+  if (velocity > speed) {
+    homingState.vx = (homingState.vx / velocity) * speed;
+    homingState.vy = (homingState.vy / velocity) * speed;
+  }
+
+  const nextX = homingState.x + homingState.vx * dt;
+  const nextY = homingState.y + homingState.vy * dt;
+  const nextDistance = Math.hypot(targetX - nextX, targetY - nextY);
+  if (nextDistance > distance && distance < speed * dt * 1.4) {
+    homingState.x = targetX;
+    homingState.y = targetY;
+    return true;
+  }
+
+  homingState.x = nextX;
+  homingState.y = nextY;
+  return false;
 }
 
 function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state.lastTime) {
@@ -6398,15 +8065,26 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
     let homingStartX = orbitX;
     let homingStartY = orbitY;
     const homingKey = getWeaponHomingKey(unit.petal, unit.unitIndex);
+    const unitActive = isPetalUnitActive(unit.petal, unit.unitIndex);
+    const rechargeAtPlayerCenter = unit.petal.name === "Lentil" && !unitActive;
 
-    if (lentilHomingRange > 0 && isPetalUnitActive(unit.petal, unit.unitIndex)) {
+    if (rechargeAtPlayerCenter) {
+      x = state.player.x;
+      y = state.player.y;
+      delete state.weapon.homingUnits[homingKey];
+    }
+
+    if (lentilHomingRange > 0 && unitActive) {
+      let homingState = state.weapon.homingUnits[homingKey];
       const target = getNearestMonsterToPoint(
         state.player.x,
         state.player.y,
-        lentilHomingRange + orbitRadius + hitRadius,
+        lentilHomingRange,
       );
       if (target) {
-        const targetAngle = Math.atan2(target.y - state.player.y, target.x - state.player.x);
+        const originX = homingState ? homingState.x : state.player.x;
+        const originY = homingState ? homingState.y : state.player.y;
+        const targetAngle = Math.atan2(target.y - originY, target.x - originX);
         const monsterShape = getMonsterHitbox(target);
         const bodyRadius = hitShapeRadiusToward(monsterShape, targetAngle + Math.PI);
         const impactInset = Math.min(
@@ -6415,47 +8093,60 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
         );
         const targetX = target.x - Math.cos(targetAngle) * impactInset;
         const targetY = target.y - Math.sin(targetAngle) * impactInset;
-        const startDistance = Math.min(
-          orbitRadius * LENTIL_HOMING_START_RADIUS_RATIO,
-          Math.hypot(targetX - state.player.x, targetY - state.player.y) * 0.35,
-        );
-        homingStartX = state.player.x + Math.cos(targetAngle) * startDistance;
-        homingStartY = state.player.y + Math.sin(targetAngle) * startDistance;
-        const homingSpeed = Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN);
-        let homingState = state.weapon.homingUnits[homingKey];
+        const previousTargetId = homingState?.targetId;
         if (!homingState) {
           homingState = {
-            x: orbitX,
-            y: orbitY,
+            x: state.player.x,
+            y: state.player.y,
             targetId: target.id,
+            startX: state.player.x,
+            startY: state.player.y,
+            chainTargetId: null,
+            vx: Math.cos(targetAngle) * Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN),
+            vy: Math.sin(targetAngle) * Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN),
           };
           state.weapon.homingUnits[homingKey] = homingState;
+        } else if (previousTargetId !== target.id) {
+          homingState.targetId = target.id;
+          homingState.startX = homingState.x;
+          homingState.startY = homingState.y;
+          homingState.chainTargetId = target.id;
         }
 
+        const chainSpeedMultiplier = homingState.chainTargetId === target.id
+          ? LENTIL_CHAIN_HOMING_SPEED_MULTIPLIER
+          : 1;
+        const homingSpeed =
+          Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN) * chainSpeedMultiplier;
         if (shouldUpdateHoming) {
-          const nextPoint = movePointToward(
-            homingState.x,
-            homingState.y,
+          moveHomingStateToward(
+            homingState,
             targetX,
             targetY,
-            homingSpeed * homingDt,
+            homingSpeed,
+            homingDt,
+            homingState.chainTargetId === target.id,
           );
-          homingState.x = nextPoint.x;
-          homingState.y = nextPoint.y;
           homingState.targetId = target.id;
         }
 
         x = homingState.x;
         y = homingState.y;
-        drawAngle = Math.atan2(targetY - y, targetX - x) || targetAngle;
+        homingStartX = homingState.startX ?? state.player.x;
+        homingStartY = homingState.startY ?? state.player.y;
+        const velocitySpeed = Math.hypot(homingState.vx || 0, homingState.vy || 0);
+        drawAngle = velocitySpeed > 1
+          ? Math.atan2(homingState.vy, homingState.vx)
+          : Math.atan2(targetY - y, targetX - x) || targetAngle;
         homing = true;
         activeHomingKeys.add(homingKey);
       }
     }
 
-    if (!homing && state.weapon.homingUnits[homingKey]) {
+    if (!homing && !rechargeAtPlayerCenter && state.weapon.homingUnits[homingKey]) {
       const homingState = state.weapon.homingUnits[homingKey];
-      const homingSpeed = Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN);
+      const homingSpeed = Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN) *
+        LENTIL_RETURN_SPEED_MULTIPLIER;
       if (shouldUpdateHoming) {
         const nextPoint = movePointToward(homingState.x, homingState.y, orbitX, orbitY, homingSpeed * homingDt);
         homingState.x = nextPoint.x;
@@ -6585,10 +8276,11 @@ function addDropToInventory(drop) {
 
 function getMonsterDropCount(tierIndex) {
   const tierNumber = tierIndex + 1;
-  if (tierNumber >= 17) return 40;
-  if (tierNumber >= 14) return 20;
-  if (tierNumber >= 10) return 10;
-  return 5;
+  if (tierNumber >= 16) return 80;
+  if (tierNumber >= 13) return 50;
+  if (tierNumber >= 10) return 40;
+  if (tierNumber >= 6) return 20;
+  return 10;
 }
 
 function spawnMonsterDrops(monster) {
@@ -6709,19 +8401,26 @@ function breakPlacedPollen(petal, time) {
   resetPetalPlacement(petal);
 }
 
-function getLentilHomingRange() {
-  return state.weapon.petals.reduce((total, petal) => {
-    if (!petal || petal.name !== "Lentil") return total;
-    return total + scaleStatByTier(PETAL_DEFINITIONS.Lentil.homingRange, 1.18, petal.tierIndex);
-  }, 0);
+function getLentilHomingRangeBonus(petal) {
+  if (!petal || petal.name !== "Lentil") return 0;
+  return LENTIL_BASE_HOMING_RANGE + getTier(petal.tierIndex).index * LENTIL_HOMING_RANGE_PER_TIER;
 }
 
-function getNearestMonsterToPoint(x, y, maxDistance) {
+function getLentilHomingRange() {
+  const total = state.weapon.petals.reduce((sum, petal) => {
+    if (!petal || petal.name !== "Lentil") return sum;
+    return sum + getLentilHomingRangeBonus(petal);
+  }, 0);
+  return Math.min(LENTIL_MAX_TOTAL_HOMING_RANGE, total);
+}
+
+function getNearestMonsterToPoint(x, y, maxDistance, excludedMonsterId = null) {
   let bestMonster = null;
   let bestDistance = maxDistance;
 
   for (const monster of state.monsters) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
+    if (monster.id === excludedMonsterId) continue;
 
     const distance = Math.hypot(monster.x - x, monster.y - y) - monster.radius;
     if (distance < bestDistance) {
@@ -6731,6 +8430,38 @@ function getNearestMonsterToPoint(x, y, maxDistance) {
   }
 
   return bestMonster;
+}
+
+function retargetLentilAfterKill(weapon, killedMonster, time) {
+  if (weapon.petal?.name !== "Lentil") return;
+  if (!isPetalUnitActive(weapon.petal, weapon.unitIndex)) return;
+
+  const homingKey = getWeaponHomingKey(weapon.petal, weapon.unitIndex);
+  const chainStartX = Number.isFinite(weapon.x) ? weapon.x : state.player.x;
+  const chainStartY = Number.isFinite(weapon.y) ? weapon.y : state.player.y;
+  const target = getNearestMonsterToPoint(
+    state.player.x,
+    state.player.y,
+    getLentilHomingRange(),
+    killedMonster?.id ?? null,
+  );
+
+  if (!target) {
+    delete state.weapon.homingUnits[homingKey];
+    return;
+  }
+
+  state.weapon.homingUnits[homingKey] = {
+    x: chainStartX,
+    y: chainStartY,
+    targetId: target.id,
+    startX: chainStartX,
+    startY: chainStartY,
+    chainTargetId: target.id,
+    retargetedAt: time,
+    vx: Math.cos(weapon.angle || 0) * Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN),
+    vy: Math.sin(weapon.angle || 0) * Math.max(80, getPetalSpinSpeed() * LENTIL_HOMING_SPEED_PER_RADIAN),
+  };
 }
 
 function resolvePlacedPollenBarriers(time) {
@@ -6785,7 +8516,7 @@ function resolvePlacedPollenBarriers(time) {
 
       if (time >= (petal.nextBarrierDamageAt || 0)) {
         const wasAlive = monster.alive;
-        if (damageCreature(monster, petal.attack, time)) {
+        if (damageMonsterByPlayer(monster, petal.attack, time)) {
           addDamageNumber(monster, petal.attack, time);
           monster.lastPlayerHitAt = time;
           if (wasAlive && !monster.alive) {
@@ -6846,10 +8577,12 @@ function updateWeaponHits(time) {
 
       pushMonsterAwayFromWeapon(weapon, monster, monsterShape);
       const wasAlive = monster.alive;
-      if (damageCreature(monster, weapon.petal.attack, time)) {
+      let killedByThisHit = false;
+      if (damageMonsterByPlayer(monster, weapon.petal.attack, time)) {
         addDamageNumber(monster, weapon.petal.attack, time);
         monster.lastPlayerHitAt = time;
         if (wasAlive && !monster.alive) {
+          killedByThisHit = true;
           rewardMonsterKill(monster);
         }
       }
@@ -6860,6 +8593,9 @@ function updateWeaponHits(time) {
         startPetalUnitCooldown(weapon.petal, weapon.unitIndex, time);
       } else {
         syncPetalActiveState(weapon.petal);
+      }
+      if (killedByThisHit && isPetalUnitActive(weapon.petal, weapon.unitIndex)) {
+        retargetLentilAfterKill(weapon, monster, time);
       }
 
       break;
@@ -6872,6 +8608,7 @@ function update(dt, time) {
   updateCreatureEffects(state.player, dt, time);
   syncDeathScreen();
   if (updatePortalTransition(time)) return;
+  updateChatAudibility(time);
 
   const toTargetX = state.pointer.worldX - state.player.x;
   const toTargetY = state.pointer.worldY - state.player.y;
@@ -7248,6 +8985,7 @@ function drawGardenGroundDecorations(
 
 function drawBackground() {
   const viewScale = getViewScale();
+  const activeMap = getActiveMapDefinition();
   const textureCameraX = state.spawned ? state.camera.x : state.camera.x + state.lastTime * 0.18 / viewScale;
   const textureCameraY = state.camera.y;
   const mapLeft = (-MAP_HALF_WIDTH - state.camera.x) * viewScale + state.width / 2;
@@ -7257,12 +8995,24 @@ function drawBackground() {
   const visibleWorldRight = Math.min(MAP_HALF_WIDTH, textureCameraX + state.width / (2 * viewScale));
   const visibleWorldBottom = Math.min(MAP_HALF_HEIGHT, textureCameraY + state.height / (2 * viewScale));
 
-  ctx.fillStyle = "#186044";
+  ctx.fillStyle = state.mapId === "antHell" ? ANT_HELL_OUTER_COLOR : "#186044";
   ctx.fillRect(0, 0, state.width, state.height);
-  ctx.fillStyle = GARDEN_BASE_GREEN;
+  ctx.fillStyle = getActiveMapGroundColor();
   ctx.fillRect(mapLeft, mapTop, MAP_WIDTH * viewScale, MAP_HEIGHT * viewScale);
 
-  if (state.mapId === "garden2") {
+  if (state.mapId === "antHell") {
+    drawAntHellGroundDecorations(
+      ctx,
+      visibleWorldLeft,
+      visibleWorldTop,
+      visibleWorldRight,
+      visibleWorldBottom,
+      viewScale,
+      textureCameraX,
+      textureCameraY,
+      !state.spawned,
+    );
+  } else if (state.mapId === "garden2") {
     drawGarden2CircleGroundDecorations(
       ctx,
       mapLeft,
@@ -7295,6 +9045,7 @@ function drawBackground() {
   }
 
   if (!state.spawned) {
+    drawMenuMapWipeOverlay();
     drawMenuFloatingPetals();
     return;
   }
@@ -7352,15 +9103,23 @@ function drawMapPortals() {
   for (const portal of portals) {
     const point = worldToScreen(portal.x, portal.y);
     for (const layer of layers) {
-      ctx.fillStyle = `rgba(255, 255, 255, ${layer.alpha})`;
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.68)";
+      if (portal.type === "author") {
+        const pulse = Math.sin(time * 2.4 + layer.size * 0.03);
+        const hue = 210 + pulse * 24;
+        const lightness = 68 + pulse * 10;
+        ctx.fillStyle = `hsla(${hue}, 12%, ${lightness}%, ${layer.alpha})`;
+        ctx.strokeStyle = `hsla(${hue}, 18%, ${Math.max(42, lightness - 18)}%, 0.76)`;
+      } else {
+        ctx.fillStyle = `rgba(255, 255, 255, ${layer.alpha})`;
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.68)";
+      }
       ctx.lineWidth = Math.max(1.2, 2 * viewScale);
       drawRoundTri(
         ctx,
         point.x,
         point.y,
-        layer.size * viewScale,
-        time * layer.speed,
+        layer.size * (portal.type === "author" ? 0.88 : 1) * viewScale,
+        time * layer.speed + (portal.type === "author" ? Math.PI / 3 : 0),
         0.24,
       );
       ctx.stroke();
@@ -7402,9 +9161,10 @@ function drawDropQuantityLabel(quantity, x, y, size) {
   ctx.restore();
 }
 
-function drawRockMonsterShape(targetCtx, width, height, seed, redAlpha = 0) {
+function drawRockMonsterShape(targetCtx, width, height, seed, redAlpha = 0, tierIndex = 0) {
   const radius = Math.min(width, height) * 0.42;
-  const sides = 5 + Math.floor(gardenHash(seed, 2.4, 18.6) * 8);
+  const tierLevel = getTier(tierIndex).index;
+  const sides = Math.min(24, 5 + tierLevel);
   const points = [];
 
   for (let index = 0; index < sides; index++) {
@@ -7426,7 +9186,9 @@ function drawRockMonsterShape(targetCtx, width, height, seed, redAlpha = 0) {
   targetCtx.lineJoin = "round";
   targetCtx.fillStyle = redAlpha > 0 ? "#ff2f2f" : "#787878";
   targetCtx.strokeStyle = redAlpha > 0 ? "rgba(255, 47, 47, 0.78)" : "#545454";
-  targetCtx.lineWidth = Math.max(2, Math.min(width, height) * 0.16);
+  const tierScale = scaleSizeByTier(1, tierIndex);
+  const baseSize = Math.min(width, height) / Math.max(0.001, tierScale);
+  targetCtx.lineWidth = Math.max(1.5, baseSize * 0.09 * 1.05 ** getTier(tierIndex).index);
   targetCtx.fill();
   targetCtx.stroke();
 }
@@ -7448,7 +9210,14 @@ function drawDrops() {
     ctx.fillStyle = "#64a8dc";
     ctx.fill();
     ctx.lineWidth = Math.max(1.5, 4 * viewScale);
-    ctx.strokeStyle = drop.item.tierColor;
+    ctx.strokeStyle = createTierCanvasFill(
+      ctx,
+      drop.item.tierIndex,
+      point.x - half,
+      point.y,
+      point.x + half,
+      point.y,
+    );
     ctx.stroke();
     const image = state.assets[drop.item.asset] || state.assets.basic;
     ctx.drawImage(image, point.x - imageSize / 2, point.y - imageSize / 2, imageSize, imageSize);
@@ -7490,7 +9259,7 @@ function drawMonsters() {
         : monster.faceAngle + sway;
     ctx.rotate(drawAngle);
     if (monster.name === "Rock") {
-      drawRockMonsterShape(ctx, drawWidth, drawHeight, monster.wobbleSeed);
+      drawRockMonsterShape(ctx, drawWidth, drawHeight, monster.wobbleSeed, 0, monster.tierIndex);
     } else {
       ctx.drawImage(
         image,
@@ -7504,7 +9273,7 @@ function drawMonsters() {
       ctx.save();
       ctx.globalAlpha = redAlpha;
       if (monster.name === "Rock") {
-        drawRockMonsterShape(ctx, drawWidth, drawHeight, monster.wobbleSeed, redAlpha);
+        drawRockMonsterShape(ctx, drawWidth, drawHeight, monster.wobbleSeed, redAlpha, monster.tierIndex);
       } else if (monster.hitShape === "circle") {
         ctx.fillStyle = "#ff2f2f";
         ctx.beginPath();
@@ -7528,7 +9297,7 @@ function drawMonsters() {
       point.x,
       point.y + bob + (drawHeight * scale) / 2 + 15 * viewScale,
       Math.max(11, 13 * viewScale),
-      monster.tierColor,
+      createTierCanvasFill(ctx, monster.tierIndex, point.x - 42 * viewScale, point.y, point.x + 42 * viewScale, point.y),
     );
 
     if (monster.health >= monster.maxHealth) continue;
@@ -7537,11 +9306,16 @@ function drawMonsters() {
     const barHeight = 8 * viewScale;
     const barX = point.x - barWidth / 2;
     const barY = point.y - drawHeight / 2 - 18 * viewScale;
+    const { currentRatio, trailRatio } = getMonsterHealthBarRatios(monster, state.lastTime);
     ctx.fillStyle = "rgba(17, 18, 23, 0.42)";
     ctx.fillRect(barX, barY, barWidth, barHeight);
-    ctx.fillStyle = "#e84d4d";
-    ctx.fillRect(barX, barY, barWidth * (monster.health / monster.maxHealth), barHeight);
-    ctx.strokeStyle = monster.tierColor;
+    if (trailRatio > currentRatio) {
+      ctx.fillStyle = "#ef3f3f";
+      ctx.fillRect(barX, barY, barWidth * trailRatio, barHeight);
+    }
+    ctx.fillStyle = "#35d661";
+    ctx.fillRect(barX, barY, barWidth * currentRatio, barHeight);
+    ctx.strokeStyle = createTierCanvasFill(ctx, monster.tierIndex, barX, barY, barX + barWidth, barY);
     ctx.lineWidth = Math.max(1.5, 3 * viewScale);
     ctx.strokeRect(barX, barY, barWidth, barHeight);
   }
@@ -7688,12 +9462,34 @@ function drawHighTierPetalTrail(weapon, center, viewScale, petalSize, screenX, s
   ctx.save();
   ctx.fillStyle = color;
   if (weapon.homing) {
+    if (weapon.petal.tierIndex < HIGH_TIER_TRAIL_START_INDEX) {
+      ctx.restore();
+      return;
+    }
+
     const start = worldToScreen(weapon.homingStartX, weapon.homingStartY);
     const dx = screenX - start.x;
     const dy = screenY - start.y;
     const length = Math.hypot(dx, dy);
 
     if (length > 4) {
+      if (weapon.petal.name === "Lentil") {
+        const lineGradient = ctx.createLinearGradient(start.x, start.y, screenX, screenY);
+        lineGradient.addColorStop(0, "rgba(23, 23, 25, 0)");
+        lineGradient.addColorStop(0.22, "rgba(23, 23, 25, 0.42)");
+        lineGradient.addColorStop(1, "rgba(23, 23, 25, 0.88)");
+        ctx.strokeStyle = lineGradient;
+        ctx.lineWidth = Math.max(2.2, petalSize * 0.13);
+        ctx.lineCap = "round";
+        ctx.globalAlpha = 0.92;
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.lineTo(screenX, screenY);
+        ctx.stroke();
+        ctx.restore();
+        return;
+      }
+
       const lineAngle = Math.atan2(dy, dx);
       const normalAngle = lineAngle + Math.PI / 2;
       const clusterCount = weapon.petal.tierIndex >= HIGH_TIER_TRAIL_START_INDEX ? 16 : 9;
@@ -7829,6 +9625,8 @@ function drawWeapons() {
     const x = center.x + (weaponX - state.player.x) * viewScale;
     const y = center.y + (weaponY - state.player.y) * viewScale;
     const petalSize = state.weapon.size * (weapon.sizeScale || 1) * viewScale;
+    const unitActive = isPetalUnitActive(weapon.petal, weapon.unitIndex);
+    if (!unitActive) continue;
 
     drawHighTierPetalTrail(weapon, center, viewScale, petalSize, x, y);
 
@@ -7836,20 +9634,7 @@ function drawWeapons() {
     ctx.translate(x, y);
     ctx.rotate(weapon.angle + Math.PI / 2);
     const image = state.assets[weapon.petal.asset] || state.assets.basic;
-    const unitActive = isPetalUnitActive(weapon.petal, weapon.unitIndex);
-    if (!unitActive) ctx.globalAlpha = 0.35;
     ctx.drawImage(image, -petalSize / 2, -petalSize / 2, petalSize, petalSize);
-    if (!unitActive) {
-      const rechargeProgress = getPetalUnitRechargeProgress(weapon.petal, weapon.unitIndex);
-      ctx.globalAlpha = 0.62;
-      ctx.rotate(rechargeProgress * Math.PI * 2);
-      ctx.fillStyle = "rgba(60, 62, 66, 0.48)";
-      ctx.beginPath();
-      ctx.moveTo(0, 0);
-      ctx.arc(0, 0, petalSize * 0.62, -Math.PI / 2, Math.PI * 0.9);
-      ctx.closePath();
-      ctx.fill();
-    }
     ctx.restore();
   }
 }
@@ -7903,21 +9688,27 @@ function drawBossMonsterBars() {
   ctx.save();
   monsters.forEach((monster, index) => {
     const y = startY + index * rowHeight;
-    const ratio = Math.max(0, Math.min(1, monster.health / monster.maxHealth));
+    const { currentRatio, trailRatio } = getMonsterHealthBarRatios(monster, state.lastTime);
 
     drawOutlinedText(getMonsterDisplayName(monster.name), state.width / 2, y, 18, "#fffdf1");
 
     drawRoundedRect(startX, y + 14, panelWidth, barHeight, 6);
     ctx.fillStyle = "rgba(17, 18, 23, 0.62)";
     ctx.fill();
-    const fillWidth = panelWidth * ratio;
+    const trailWidth = panelWidth * trailRatio;
+    if (trailRatio > currentRatio && trailWidth > 0.5) {
+      drawRoundedRect(startX, y + 14, trailWidth, barHeight, Math.min(6, trailWidth / 2));
+      ctx.fillStyle = "#ef3f3f";
+      ctx.fill();
+    }
+    const fillWidth = panelWidth * currentRatio;
     if (fillWidth > 0.5) {
       drawRoundedRect(startX, y + 14, fillWidth, barHeight, Math.min(6, fillWidth / 2));
-      ctx.fillStyle = "#d84444";
+      ctx.fillStyle = "#35d661";
       ctx.fill();
     }
     ctx.lineWidth = 4;
-    ctx.strokeStyle = monster.tierColor || "#fffdf1";
+    ctx.strokeStyle = createTierCanvasFill(ctx, monster.tierIndex, startX, y + 14, startX + panelWidth, y + 14);
     drawRoundedRect(startX, y + 14, panelWidth, barHeight, 6);
     ctx.stroke();
 
@@ -7928,7 +9719,13 @@ function drawBossMonsterBars() {
       12,
       "#fffdf1",
     );
-    drawOutlinedText(monster.tier || TIERS[monster.tierIndex]?.name || "", state.width / 2, y + 45, 15, monster.tierColor);
+    drawOutlinedText(
+      monster.tier || TIERS[monster.tierIndex]?.name || "",
+      state.width / 2,
+      y + 45,
+      15,
+      createTierCanvasFill(ctx, monster.tierIndex, state.width / 2 - 58, y + 45, state.width / 2 + 58, y + 45),
+    );
   });
   ctx.restore();
 }
@@ -8112,6 +9909,8 @@ async function boot() {
   await loadAssets();
   syncAccountBackups();
   seedMonsterPopulation();
+  saveActiveMonsterMapState();
+  ensureMonsterMapPopulation("garden2");
   renderItemUi();
   renderMonsterDexUi();
   renderPetalDexUi();
@@ -8140,6 +9939,7 @@ window.addEventListener("pointermove", (event) => {
   }
   if (
     inventoryPanel.contains(event.target) ||
+    mainMenuButton.contains(event.target) ||
     settingsPanel.contains(event.target) ||
     settingsButton.contains(event.target) ||
     talentPanel.contains(event.target) ||
@@ -8156,6 +9956,9 @@ window.addEventListener("pointermove", (event) => {
     shopButton.contains(event.target) ||
     monsterDexPanel.contains(event.target) ||
     monsterDexButton.contains(event.target) ||
+    chatWidget.contains(event.target) ||
+    authorQuickButton.contains(event.target) ||
+    authorPortalPanel.contains(event.target) ||
     authorPanel.contains(event.target) ||
     dragData
   ) {
@@ -8167,6 +9970,7 @@ window.addEventListener("pointermove", (event) => {
 });
 window.addEventListener("pointerdown", (event) => {
   if (!state.spawned || isDeathScreenOpen() || event.target !== canvas) return;
+  if (state.chat.open) return;
   canvas.setPointerCapture?.(event.pointerId);
   if (usesTouchControls()) {
     event.preventDefault();
@@ -8224,10 +10028,58 @@ window.addEventListener("keydown", (event) => {
   if (!state.spawned) return;
 
   if (isTextEntryTarget(event.target)) {
+    if (authorPortalPanel.contains(event.target)) {
+      if (event.code === "Enter") {
+        event.preventDefault();
+        verifyAuthorPortalPassword();
+      }
+      if (event.code === "Escape") {
+        event.preventDefault();
+        closeAuthorPortalPanel();
+        state.uiLockMovement = false;
+      }
+      return;
+    }
+    if (event.target === chatInput) {
+      if (event.code === "Enter") {
+        event.preventDefault();
+        submitChatMessage();
+      }
+      if (event.code === "Escape") {
+        event.preventDefault();
+        closeChatPanel();
+        chatInput.blur();
+        state.uiLockMovement = false;
+      }
+      return;
+    }
     if (event.code === "Enter" && authorPanel.contains(event.target)) {
       event.preventDefault();
       verifyAuthorAccess();
     }
+    if (event.code === "Escape" && authorPanel.contains(event.target)) {
+      event.preventDefault();
+      closeFloatingPanels();
+    }
+    return;
+  }
+
+  if (state.chat.open) {
+    if (event.code === "Enter") {
+      event.preventDefault();
+      chatInput.focus();
+    }
+    if (event.code === "Escape") {
+      event.preventDefault();
+      closeChatPanel();
+      state.uiLockMovement = false;
+    }
+    return;
+  }
+
+  if (event.code === "Enter") {
+    event.preventDefault();
+    openChatPanel();
     return;
   }
 
@@ -8303,6 +10155,10 @@ window.addEventListener("blur", () => {
   syncCombatControls();
   state.uiLockMovement = false;
 });
+mainMenuButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  returnToMainMenu();
+});
 settingsButton.addEventListener("click", (event) => {
   event.stopPropagation();
   const isOpening = settingsPanel.classList.contains("is-hidden");
@@ -8352,6 +10208,11 @@ loginForm.addEventListener("submit", (event) => {
 registerForm.addEventListener("submit", (event) => {
   event.preventDefault();
   registerAccount();
+});
+chatPrompt.addEventListener("click", openChatPanel);
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  submitChatMessage();
 });
 wechatRegisterButton.addEventListener("click", registerAccount);
 appleRegisterButton.addEventListener("click", registerAccount);
@@ -8515,6 +10376,24 @@ shopPanel.addEventListener("pointerenter", () => {
 shopPanel.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
+authorQuickButton.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+authorQuickButton.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
+chatWidget.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+chatWidget.addEventListener("pointerleave", () => {
+  if (!dragData && !state.chat.open) state.uiLockMovement = false;
+});
+authorPortalPanel.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+authorPortalPanel.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
 authorPanel.addEventListener("pointerenter", () => {
   state.uiLockMovement = true;
 });
@@ -8581,6 +10460,15 @@ petalDexPanel.addEventListener("pointerdown", () => {
 shopPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
+authorQuickButton.addEventListener("pointerdown", () => {
+  state.uiLockMovement = true;
+});
+chatWidget.addEventListener("pointerdown", () => {
+  state.uiLockMovement = true;
+});
+authorPortalCard.addEventListener("pointerdown", () => {
+  state.uiLockMovement = true;
+});
 authorCard.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
@@ -8595,7 +10483,10 @@ window.addEventListener("pointerup", (event) => {
     !petalDexPanel.contains(event.target) &&
     !monsterDexPanel.contains(event.target) &&
     !shopPanel.contains(event.target) &&
+    !authorPortalCard.contains(event.target) &&
     !authorPanel.contains(event.target) &&
+    !authorQuickButton.contains(event.target) &&
+    !chatWidget.contains(event.target) &&
     !dragData
   ) {
     state.uiLockMovement = false;
@@ -8605,6 +10496,9 @@ monsterDexCloseButton.addEventListener("click", closeFloatingPanels);
 petalDexCloseButton.addEventListener("click", closeFloatingPanels);
 shopCloseButton.addEventListener("click", closeFloatingPanels);
 tutorialCloseButton.addEventListener("click", closeFloatingPanels);
+authorQuickButton.addEventListener("click", openAuthorPanel);
+authorPortalCloseButton.addEventListener("click", closeAuthorPortalPanel);
+authorPortalSubmitButton.addEventListener("click", verifyAuthorPortalPassword);
 authorCloseButton.addEventListener("click", closeFloatingPanels);
 authorVerifyButton.addEventListener("click", verifyAuthorAccess);
 authorMapPreview.addEventListener("click", selectAuthorTeleportPoint);

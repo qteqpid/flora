@@ -80,14 +80,13 @@
       <div class="spawn-panel">
         <label class="spawn-label" for="nameInput" data-i18n="namePrompt">这朵小花叫做...</label>
         <div class="spawn-row">
-          <input id="nameInput" class="name-input" type="text" value="cornwaves" maxlength="16" autocomplete="off" />
+          <input id="nameInput" class="name-input" type="text" value="" maxlength="16" autocomplete="off" />
           <button id="spawnButton" class="spawn-button" type="button" data-i18n="spawn">Spawn</button>
         </div>
         <div class="mode-row" aria-label="模式">
           <button class="mode-button is-selected" type="button" data-mode="garden" data-i18n="garden">Garden</button>
           <button class="mode-button" type="button" data-mode="antHell" data-i18n="antHell">Ant Hell</button>
         </div>
-        <div id="antHellNotice" class="mode-notice is-hidden" role="status" aria-live="polite"></div>
       </div>
       <div class="start-menu-buttons" aria-label="主菜单">
         <button id="tutorialButton" class="tutorial-menu-button" type="button" data-i18n="tutorial">新手教程</button>
@@ -99,6 +98,7 @@
     </section>
 
     <div id="gameNotice" class="game-notice is-hidden" role="status" aria-live="polite"></div>
+    <button id="authorQuickButton" class="author-quick-button is-hidden" type="button" data-i18n="authorQuick">作者模式</button>
 
     <section id="accountPanel" class="account-panel is-hidden" aria-label="登录">
       <div class="account-columns">
@@ -215,6 +215,7 @@
       </div>
     </div>
 
+    <button id="mainMenuButton" class="main-menu-button" type="button" aria-label="主界面" data-i18n="mainMenu">主界面</button>
     <button id="settingsButton" class="settings-button" type="button" aria-label="设置" data-i18n="settings">设置</button>
     <button id="talentButton" class="talent-button" type="button" aria-label="天赋" data-i18n="talents">天赋</button>
     <button id="craftButton" class="craft-button" type="button" aria-label="合成" data-i18n="craft">合成</button>
@@ -365,6 +366,17 @@
       </div>
     </section>
 
+    <section id="authorPortalPanel" class="author-portal-panel is-hidden" aria-label="作者传送门">
+      <div class="author-portal-card">
+        <button id="authorPortalCloseButton" class="author-close-button" type="button" aria-label="关闭">×</button>
+        <div class="author-title" data-i18n="authorPortalTitle">作者传送门</div>
+        <label class="author-label" for="authorPortalPasswordInput" data-i18n="authorPortalPrompt">此为作者传送门，请输入密码</label>
+        <input id="authorPortalPasswordInput" class="author-input author-secret-input" type="text" autocomplete="off" maxlength="32" />
+        <button id="authorPortalSubmitButton" class="author-main-button" type="button" data-i18n="confirm">确认</button>
+        <div id="authorPortalMessage" class="author-message"></div>
+      </div>
+    </section>
+
     <section id="authorPanel" class="author-panel is-hidden" aria-label="作者面板">
       <div class="author-card">
         <button id="authorCloseButton" class="author-close-button" type="button" aria-label="关闭">×</button>
@@ -424,6 +436,18 @@
         <button id="inventoryToggleButton" class="inventory-toggle-button" type="button" aria-label="收起背包">×</button>
       </div>
       <div id="inventoryGrid" class="inventory-grid"></div>
+    </div>
+
+    <div id="chatWidget" class="chat-widget is-collapsed" aria-label="聊天">
+      <div id="chatPreview" class="chat-preview is-hidden" aria-live="polite"></div>
+      <button id="chatPrompt" class="chat-prompt" type="button" data-i18n="chatPrompt">按Enter键聊天</button>
+      <section id="chatPanel" class="chat-panel is-hidden" aria-label="聊天记录">
+        <div id="chatLog" class="chat-log"></div>
+        <form id="chatForm" class="chat-form">
+          <input id="chatInput" class="chat-input" type="text" maxlength="120" autocomplete="off" placeholder="输入消息..." />
+          <button id="chatSendButton" class="chat-send-button" type="submit" data-i18n="chatSend">发送</button>
+        </form>
+      </section>
     </div>
 
     <div id="deathScreen" class="death-screen is-hidden" aria-live="assertive">

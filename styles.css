@@ -10,6 +10,10 @@
   box-sizing: border-box;
 }
 
+button {
+  box-shadow: none !important;
+}
+
 html,
 body {
   width: 100%;
@@ -25,6 +29,7 @@ body {
 }
 
 .is-menu .hud,
+.is-menu .main-menu-button,
 .is-menu .settings-button,
 .is-menu .talent-button,
 .is-menu .craft-button,
@@ -34,8 +39,11 @@ body {
 .is-menu .craft-panel,
 .is-menu .forge-panel,
 .is-menu .leaderboard-panel,
+.is-menu .author-quick-button,
+.is-menu .author-portal-panel,
 .is-menu .author-panel,
 .is-menu .inventory-panel,
+.is-menu .chat-widget,
 .is-menu .hotbar,
 .is-menu .minimap,
 .is-menu .tablet-controls {
@@ -274,8 +282,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: flex-end;
-  gap: 14px;
-  width: min(920px, calc(100vw - 28px));
+  gap: 10px;
+  width: min(940px, calc(100vw - 28px));
   transform: translateX(-50%);
 }
 
@@ -327,6 +335,22 @@ body {
   box-shadow: 0 5px 0 #183862, 0 8px 0 rgba(17, 18, 23, 0.3);
 }
 
+.start-menu-buttons .account-menu-button,
+.start-menu-buttons .petaldex-menu-button,
+.start-menu-buttons .monsterdex-menu-button,
+.start-menu-buttons .shop-menu-button,
+.start-menu-buttons .tutorial-menu-button {
+  flex: 0 0 170px;
+  width: 170px;
+  min-width: 170px;
+  height: 34px;
+  border: 4px solid #24743f;
+  border-radius: 0;
+  background: #94df72;
+  font-size: 15px;
+  line-height: 1;
+}
+
 .account-menu-button.is-active,
 .account-menu-button:active {
   background: #68bd58;
@@ -364,6 +388,20 @@ body {
   background: #86c8f7;
   transform: translateY(3px);
   box-shadow: 0 2px 0 #183862, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
+.start-menu-buttons .account-menu-button.is-active,
+.start-menu-buttons .account-menu-button:active,
+.start-menu-buttons .petaldex-menu-button.is-active,
+.start-menu-buttons .petaldex-menu-button:active,
+.start-menu-buttons .monsterdex-menu-button.is-active,
+.start-menu-buttons .monsterdex-menu-button:active,
+.start-menu-buttons .shop-menu-button.is-active,
+.start-menu-buttons .shop-menu-button:active,
+.start-menu-buttons .tutorial-menu-button.is-active,
+.start-menu-buttons .tutorial-menu-button:active {
+  background: #68bd58;
+  transform: translateY(2px);
 }
 
 .account-panel {
@@ -1204,10 +1242,10 @@ body {
   opacity: 1;
 }
 
+.main-menu-button,
 .settings-button {
   position: fixed;
   top: 28px;
-  left: 288px;
   z-index: 4;
   min-width: 62px;
   height: 44px;
@@ -1222,9 +1260,21 @@ body {
   paint-order: stroke fill;
 }
 
+.main-menu-button {
+  left: 300px;
+  min-width: 82px;
+  border-color: #621a20;
+  background: #e53e47;
+  box-shadow: 0 5px 0 #4a1117, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.settings-button {
+  left: 394px;
+}
+
 .talent-button {
   position: fixed;
-  top: 92px;
+  top: 128px;
   left: 18px;
   z-index: 4;
   min-width: 74px;
@@ -1243,7 +1293,7 @@ body {
 
 .craft-button {
   position: fixed;
-  top: 146px;
+  top: 182px;
   left: 18px;
   z-index: 4;
   min-width: 74px;
@@ -1262,7 +1312,7 @@ body {
 
 .forge-button {
   position: fixed;
-  top: 200px;
+  top: 236px;
   left: 18px;
   z-index: 4;
   min-width: 74px;
@@ -1302,9 +1352,21 @@ body {
   box-shadow: 0 2px 0 #060607, 0 4px 0 rgba(17, 18, 23, 0.25);
 }
 
+.talent-button,
+.craft-button,
+.forge-button {
+  width: 46px;
+  min-width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 1;
+}
+
 .inventory-panel.is-collapsed:active {
-  transform: translateY(3px);
-  box-shadow: 0 2px 0 #335577, 0 4px 0 rgba(17, 18, 23, 0.25);
+  transform: none;
+  box-shadow: none;
 }
 
 .leaderboard-panel {
@@ -1380,6 +1442,12 @@ body {
   place-items: center;
 }
 
+.main-menu-button:active {
+  background: #bb2d37;
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #4a1117, 0 4px 0 rgba(17, 18, 23, 0.25);
+}
+
 .settings-button.is-active,
 .settings-button:active {
   background: #747981;
@@ -1388,7 +1456,7 @@ body {
 .settings-panel {
   position: fixed;
   top: 82px;
-  left: 288px;
+  left: 394px;
   z-index: 7;
   display: grid;
   gap: 12px;
@@ -2087,7 +2155,30 @@ body {
   -webkit-text-stroke: 0;
 }
 
-.author-panel {
+.author-quick-button {
+  position: fixed;
+  top: 28px;
+  left: 360px;
+  z-index: 4;
+  min-width: 92px;
+  height: 44px;
+  border: 4px solid #13592f;
+  border-radius: 7px;
+  background: #39b75a;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 17px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.author-quick-button.is-hidden {
+  display: none;
+}
+
+.author-panel,
+.author-portal-panel {
   position: fixed;
   inset: 0;
   z-index: 8;
@@ -2098,11 +2189,13 @@ body {
   pointer-events: auto;
 }
 
-.author-panel.is-hidden {
+.author-panel.is-hidden,
+.author-portal-panel.is-hidden {
   display: none;
 }
 
-.author-card {
+.author-card,
+.author-portal-card {
   position: relative;
   display: grid;
   gap: 14px;
@@ -2114,6 +2207,10 @@ body {
   border-radius: 7px;
   background: #39b75a;
   box-shadow: 0 8px 0 #0d3f24, 0 14px 0 rgba(17, 18, 23, 0.34);
+}
+
+.author-portal-card {
+  width: min(420px, calc(100vw - 32px));
 }
 
 .author-title,
@@ -2350,15 +2447,19 @@ body {
 }
 
 .inventory-panel.is-collapsed {
-  display: grid;
-  place-items: center;
-  width: 74px;
-  height: 44px;
-  min-width: 74px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  top: 290px;
+  width: 46px;
+  height: 46px;
+  min-width: 46px;
   padding: 0;
   border: 4px solid #335577;
+  border-radius: 4px;
   cursor: pointer;
-  box-shadow: 0 5px 0 #254463, 0 8px 0 rgba(17, 18, 23, 0.3);
+  box-shadow: none;
+  overflow: hidden;
 }
 
 .inventory-head {
@@ -2415,26 +2516,32 @@ body {
 }
 
 .inventory-panel.is-collapsed .inventory-head {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: auto;
+  height: auto;
+  min-height: 0;
+  margin-bottom: 0;
+  border-bottom: 0;
+  pointer-events: none;
+}
+
+.inventory-panel.is-collapsed .inventory-title {
   display: grid;
   place-items: center;
   width: 100%;
   height: 100%;
-  min-height: 0;
-  margin-bottom: 0;
-  border-bottom: 0;
-}
-
-.inventory-panel.is-collapsed .inventory-title {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  font-size: 17px;
+  margin: 0;
+  padding: 0;
+  font-size: 12px;
   line-height: 1;
   text-align: center;
-  transform: translateY(1px);
-  -webkit-text-stroke-width: 2px;
+  white-space: nowrap;
+  transform: none;
+  -webkit-text-stroke-width: 1.4px;
 }
 
 .inventory-panel.is-collapsed .inventory-toggle-button {
@@ -2443,6 +2550,149 @@ body {
 
 .inventory-panel.is-collapsed .inventory-grid {
   display: none;
+}
+
+.chat-widget {
+  position: fixed;
+  left: 18px;
+  bottom: 18px;
+  z-index: 6;
+  pointer-events: auto;
+}
+
+.chat-preview {
+  display: grid;
+  gap: 4px;
+  width: min(340px, calc(100vw - 36px));
+  margin-bottom: 8px;
+  pointer-events: none;
+}
+
+.chat-preview.is-hidden {
+  display: none;
+}
+
+.chat-preview .chat-message {
+  min-height: 0;
+  padding: 5px 8px;
+  border: 2px solid rgba(23, 73, 37, 0.74);
+  border-radius: 7px;
+  background: rgba(15, 47, 25, 0.6);
+  backdrop-filter: blur(2px);
+}
+
+.chat-prompt {
+  width: 210px;
+  height: 42px;
+  border: 4px solid #174925;
+  border-radius: 8px;
+  background: rgba(48, 137, 69, 0.84);
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 16px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  -webkit-text-stroke: 1.8px var(--ink);
+  paint-order: stroke fill;
+}
+
+.chat-prompt.is-hidden,
+.chat-panel.is-hidden {
+  display: none;
+}
+
+.chat-panel {
+  display: grid;
+  gap: 8px;
+  width: min(360px, calc(100vw - 36px));
+  padding: 10px;
+  border: 4px solid #174925;
+  border-radius: 8px;
+  background: rgba(29, 95, 45, 0.58);
+  backdrop-filter: blur(2px);
+  color: var(--paper);
+}
+
+.chat-log {
+  display: grid;
+  align-content: end;
+  gap: 4px;
+  max-height: 330px;
+  min-height: 72px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px 6px;
+}
+
+.chat-message {
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  min-height: 18px;
+  color: var(--paper);
+  font: 800 14px/1.25 "Trebuchet MS", "Avenir Next", sans-serif;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  text-shadow: 0 2px 0 rgba(17, 18, 23, 0.55);
+}
+
+.chat-message-name {
+  flex: 0 0 auto;
+  color: #cfff94;
+}
+
+.chat-message-content {
+  min-width: 0;
+}
+
+.chat-message.is-broadcast {
+  color: var(--chat-broadcast-color);
+  font-weight: 500;
+  text-shadow: none;
+}
+
+.chat-message.is-broadcast .chat-message-content {
+  color: inherit;
+}
+
+.chat-message.is-broadcast.has-gradient .chat-message-content {
+  background: var(--chat-broadcast-gradient);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.chat-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px;
+  gap: 6px;
+}
+
+.chat-input {
+  min-width: 0;
+  height: 36px;
+  border: 3px solid #174925;
+  border-radius: 7px;
+  background: rgba(255, 253, 241, 0.88);
+  color: var(--ink);
+  padding: 0 10px;
+  font: 800 15px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  outline: none;
+}
+
+.chat-input:focus {
+  border-color: #cfff94;
+}
+
+.chat-send-button {
+  height: 36px;
+  border: 3px solid #174925;
+  border-radius: 7px;
+  background: #94df72;
+  color: var(--paper);
+  cursor: pointer;
+  font: 900 14px/1 "Trebuchet MS", "Avenir Next", sans-serif;
+  -webkit-text-stroke: 1.5px var(--ink);
+  paint-order: stroke fill;
 }
 
 .inventory-grid::-webkit-scrollbar {
@@ -2884,31 +3134,43 @@ body {
   width: 156px;
 }
 
-.is-tablet-ui .settings-button {
+  .is-tablet-ui .main-menu-button {
+    top: 22px;
+    left: 264px;
+    min-width: 78px;
+  }
+
+  .is-tablet-ui .settings-button {
+    top: 22px;
+    left: 354px;
+  }
+
+.is-tablet-ui .author-quick-button {
   top: 22px;
-  left: 248px;
+  left: 318px;
+  min-width: 82px;
 }
 
 .is-tablet-ui .talent-button {
-  top: 82px;
+  top: 118px;
   left: 14px;
 }
 
 .is-tablet-ui .craft-button {
-  top: 136px;
+  top: 172px;
   left: 14px;
 }
 
 .is-tablet-ui .forge-button {
-  top: 190px;
+  top: 226px;
   left: 14px;
 }
 
 .is-tablet-ui .inventory-panel.is-collapsed {
-  top: 244px;
+  top: 280px;
   left: 14px;
-  width: 74px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
 }
 
 .is-tablet-ui .talent-panel,
@@ -2949,8 +3211,8 @@ body {
 }
 
 .is-tablet-ui .inventory-panel.is-collapsed {
-  width: 74px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
 }
 
 .is-tablet-ui .hotbar {
@@ -2983,6 +3245,11 @@ body {
   top: 176px;
   right: 14px;
   width: min(220px, calc(100vw - 28px));
+}
+
+.is-tablet-ui .chat-widget {
+  left: 14px;
+  bottom: 188px;
 }
 
 @media (max-width: 430px) {
@@ -3038,9 +3305,21 @@ body {
   .monsterdex-menu-button,
   .shop-menu-button,
   .tutorial-menu-button {
-    height: 42px;
-    min-width: 120px;
+    height: 30px;
+    min-width: 150px;
     font-size: 18px;
+  }
+
+  .start-menu-buttons .account-menu-button,
+  .start-menu-buttons .petaldex-menu-button,
+  .start-menu-buttons .monsterdex-menu-button,
+  .start-menu-buttons .shop-menu-button,
+  .start-menu-buttons .tutorial-menu-button {
+    flex-basis: 150px;
+    width: 150px;
+    min-width: 150px;
+    height: 30px;
+    font-size: 14px;
   }
 
   .tutorial-menu-button,
@@ -3183,20 +3462,20 @@ body {
   }
 
   .craft-button {
-    top: 146px;
+    top: 182px;
     left: 12px;
   }
 
   .forge-button {
-    top: 200px;
+    top: 236px;
     left: 12px;
   }
 
   .inventory-panel.is-collapsed {
-    top: 254px;
+    top: 290px;
     left: 12px;
-    width: 74px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
     padding: 0;
     transform: none;
   }
@@ -3229,6 +3508,39 @@ body {
     top: 154px;
     right: 12px;
     width: min(206px, calc(100vw - 24px));
+  }
+
+  .author-quick-button {
+    top: 82px;
+    right: 12px;
+    left: auto;
+    min-width: 82px;
+    height: 38px;
+    font-size: 14px;
+  }
+
+  .chat-widget {
+    left: 12px;
+    bottom: 146px;
+  }
+
+  .chat-prompt {
+    width: 178px;
+    height: 38px;
+    font-size: 14px;
+  }
+
+  .chat-preview {
+    width: min(300px, calc(100vw - 24px));
+  }
+
+  .chat-panel {
+    width: min(320px, calc(100vw - 24px));
+    padding: 8px;
+  }
+
+  .chat-log {
+    max-height: 250px;
   }
 
   .craft-list {
@@ -3264,8 +3576,8 @@ body {
 
   .inventory-panel.is-collapsed {
     left: 12px;
-    width: 74px;
-    height: 44px;
+    width: 46px;
+    height: 46px;
     transform: none;
   }
 
