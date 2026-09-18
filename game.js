@@ -1,5 +1,7 @@
 const canvas = document.querySelector("#gameCanvas");
 const ctx = canvas.getContext("2d", { alpha: false });
+const tintCanvas = document.createElement("canvas");
+const tintCtx = tintCanvas.getContext("2d");
 const minimapCanvas = document.querySelector("#minimapCanvas");
 const minimapCtx = minimapCanvas.getContext("2d");
 const portraitCanvas = document.querySelector("#portraitCanvas");
@@ -54,6 +56,7 @@ const primaryHotbar = document.querySelector("#primaryHotbar");
 const secondaryHotbar = document.querySelector("#secondaryHotbar");
 const equipmentSlots = Array.from(document.querySelectorAll("#primaryHotbar .slot"));
 const secondaryEquipmentSlots = Array.from(document.querySelectorAll("#secondaryHotbar .slot"));
+const inventoryReturnDropzone = document.querySelector("#inventoryReturnDropzone");
 const inventoryPanel = document.querySelector("#inventoryPanel");
 const inventoryGrid = document.querySelector("#inventoryGrid");
 const inventoryToggleButton = document.querySelector("#inventoryToggleButton");
@@ -172,14 +175,25 @@ const ASSETS = {
   basic: "basic-clean.webp",
   stinger: "Stinger.webp",
   pollen: "pollen.webp",
+  rice: "rice.webp",
+  leaf: "leaf.webp",
+  corn: "corn.webp",
   rose: "rose.webp",
   light: "light1.webp",
   thunderHammer: "雷神之锤.webp",
   bee: "bee.webp",
   ladybug: "ladybug.webp",
-  babyAnt: "baby-ant-clean-hd.png",
+  babyAnt: "baby ant.webp",
+  workerAnt: "worker ant.webp",
   rock: createRockDataUrl(),
   lentil: createLentilDataUrl(),
+};
+
+const ASSET_SOURCE_RECTS = {
+  babyAnt: { x: 657, y: 654, width: 608, height: 609 },
+  workerAnt: { x: 565, y: 565, width: 731, height: 730 },
+  leaf: { x: 646, y: 454, width: 670, height: 925 },
+  corn: { x: 565, y: 565, width: 731, height: 730 },
 };
 
 const TIERS = [
@@ -273,6 +287,7 @@ const TEXT = {
     monsterBee: "蜜蜂",
     monsterLadybug: "瓢虫",
     monsterBabyAnt: "幼蚁",
+    monsterWorkerAnt: "工蚁",
     monsterRock: "石头",
     monsterHealth: "生命",
     monsterDamage: "体伤",
@@ -372,6 +387,9 @@ const TEXT = {
     petalBasic: "基础",
     petalStinger: "刺针",
     petalPollen: "花粉",
+    petalRice: "米",
+    petalLeaf: "叶子",
+    petalCorn: "玉米",
     petalRose: "玫瑰",
     petalLight: "Light",
     petalStone: "石头",
@@ -439,6 +457,7 @@ const TEXT = {
     monsterBee: "Bee",
     monsterLadybug: "Ladybug",
     monsterBabyAnt: "Baby Ant",
+    monsterWorkerAnt: "Worker Ant",
     monsterRock: "Rock",
     monsterHealth: "Health",
     monsterDamage: "Body Damage",
@@ -538,6 +557,9 @@ const TEXT = {
     petalBasic: "Basic",
     petalStinger: "Stinger",
     petalPollen: "Pollen",
+    petalRice: "Rice",
+    petalLeaf: "Leaf",
+    petalCorn: "Corn",
     petalRose: "Rose",
     petalLight: "Light",
     petalStone: "Stone",
@@ -600,17 +622,35 @@ const BABY_ANT_STATS = {
   attack: 10,
   experienceReward: 10,
   bodyDamageCooldown: 200,
-  radius: 30,
-  width: 82,
-  height: 82,
+  radius: 44,
+  width: 88,
+  height: 88,
   hitShape: "circle",
-  hitRadius: 27,
-  hitRadiusX: 27,
-  hitRadiusY: 27,
+  hitRadius: 44,
+  hitRadiusX: 44,
+  hitRadiusY: 44,
   passive: true,
   lazyWander: true,
   spawnSafeRadius: 260,
   spawnExtraSpacing: 80,
+};
+const WORKER_ANT_STATS = {
+  maxHealth: 100,
+  attack: 10,
+  experienceReward: 10,
+  bodyDamageCooldown: 200,
+  radius: 45,
+  width: 90,
+  height: 90,
+  hitShape: "circle",
+  hitRadius: 45,
+  hitRadiusX: 45,
+  hitRadiusY: 45,
+  chaseOnHit: true,
+  chaseDurationMs: 8000,
+  chaseRadius: 1600,
+  spawnSafeRadius: 320,
+  spawnExtraSpacing: 72,
 };
 const MONSTER_DEFINITIONS = {
   Bee: {
@@ -629,7 +669,13 @@ const MONSTER_DEFINITIONS = {
     labelKey: "monsterBabyAnt",
     asset: "babyAnt",
     stats: BABY_ANT_STATS,
-    drops: ["Light"],
+    drops: ["Rice", "Light"],
+  },
+  WorkerAnt: {
+    labelKey: "monsterWorkerAnt",
+    asset: "workerAnt",
+    stats: WORKER_ANT_STATS,
+    drops: ["Leaf", "Corn"],
   },
   Rock: {
     labelKey: "monsterRock",
@@ -641,7 +687,7 @@ const MONSTER_DEFINITIONS = {
 const DEFAULT_MONSTER_SPECIES = ["Bee", "Ladybug", "Rock"];
 const MONSTER_SPECIES = Object.keys(MONSTER_DEFINITIONS);
 const SHOP_DAILY_MIN_TIER_INDEX = Math.max(0, getTierIndexByName("Ultra"));
-const DAILY_TASK_COUNT = 5;
+const DAILY_TASK_COUNT = Math.max(0, TIERS.length - SHOP_DAILY_MIN_TIER_INDEX);
 const LADYBUG_CHASE_TIER_INDEX = getTierIndexByName("Epic");
 const LADYBUG_CHASE_DURATION_MS = 6500;
 const LADYBUG_CHASE_RADIUS = 1400;
@@ -674,9 +720,18 @@ const MAP_MONSTER_TIER_CONFIGS = {
   antHell: {
     minTierName: "Common",
     maxTierName: "Advanced",
-    targetCounts: [18, 15, 13, 11, 9, 8, 7, 6, 5, 4, 3, 2],
-    species: ["BabyAnt"],
-    rareSpawns: [],
+    targetCounts: [24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 5, 4],
+    species: ["BabyAnt", "WorkerAnt"],
+    rareSpawns: [
+      { tierName: "Advanced", maxCount: 3, initialCount: 1, intervalMs: 14000 },
+      { tierName: "King", maxCount: 3, initialCount: 1, intervalMs: 19000 },
+      { tierName: "Unparalleled", maxCount: 3, initialCount: 2, intervalMs: 24000 },
+      { tierName: "Peak", maxCount: 2, initialCount: 1, intervalMs: 32000 },
+      { tierName: "Ethereal", maxCount: 2, initialCount: 1, intervalMs: 38000 },
+      { tierName: "Transcendent", maxCount: 1, initialCount: 1, intervalMs: 46000 },
+      { tierName: "Peerless", maxCount: 1, initialCount: 0, intervalMs: 70000 },
+      { tierName: "r.a.b.t.", maxCount: 1, initialCount: 0, intervalMs: 90000 },
+    ],
   },
 };
 const MONSTER_RESPAWN_MS = 650;
@@ -778,6 +833,31 @@ const PETAL_DEFINITIONS = {
     baseRespawnMs: 420,
     durabilityCost: 1,
     placeableBarrier: true,
+  },
+  Rice: {
+    labelKey: "petalRice",
+    asset: "rice",
+    baseAttack: 13,
+    baseDurability: 5,
+    baseRespawnMs: 80,
+    durabilityCost: 1,
+  },
+  Leaf: {
+    labelKey: "petalLeaf",
+    asset: "leaf",
+    baseAttack: 15,
+    baseDurability: 10,
+    baseRespawnMs: 800,
+    durabilityCost: 5,
+    healPerSecond: 15,
+  },
+  Corn: {
+    labelKey: "petalCorn",
+    asset: "corn",
+    baseAttack: 8,
+    baseDurability: 150,
+    baseRespawnMs: 3000,
+    durabilityCost: 1,
   },
   Rose: {
     labelKey: "petalRose",
@@ -1403,6 +1483,9 @@ const AUTHOR_PORTAL_PASSWORDS = new Set([
   "wangyiran",
   "王怡然",
 ]);
+const TEMPORARY_AUTHOR_PORTAL_PASSWORDS = new Map([
+  ["haoqi", { expiresAfterDate: "2026-09-20" }],
+]);
 const MAP_EDGE_DISTORT_AMPLITUDE = 2.35;
 const MAP_EDGE_DISTORT_STEP = 3.5;
 const MAP_WALL_LUMA_THRESHOLD = 110;
@@ -1674,6 +1757,7 @@ function createPetalItem(name = "Basic", tierIndex = 0) {
     nextBarrierDamageAt: 0,
     attack: getPetalAttack(name, tier.index),
     healAmount: definition.baseHeal ? scaleStatByTier(definition.baseHeal, 2.2, tier.index) : 0,
+    healPerSecond: definition.healPerSecond ? scaleStatByTier(definition.healPerSecond, 2.2, tier.index) : 0,
     active: true,
     readyAt: 0,
     cooldownStartedAt: 0,
@@ -1740,6 +1824,7 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
     y,
     anchorX: x,
     anchorY: y,
+    mapId: state.mapId,
     radius: stats.radius * sizeScale,
     width: stats.width * sizeScale,
     height: stats.height * sizeScale,
@@ -1950,7 +2035,7 @@ const state = {
     size: 44,
     hitRadius: 17,
     petals: Array.from({ length: MAX_EQUIPMENT_SLOTS }, (_, index) =>
-      index < BASE_EQUIPMENT_SLOTS ? createPetalItem(index === 0 ? "Pollen" : "Basic", 0) : null,
+      index < BASE_EQUIPMENT_SLOTS ? createPetalItem(index === BASE_EQUIPMENT_SLOTS - 1 ? "Rose" : "Basic", 0) : null,
     ),
     secondaryPetals: Array.from({ length: MAX_EQUIPMENT_SLOTS }, () => null),
     homingUnits: Object.create(null),
@@ -1958,6 +2043,7 @@ const state = {
   },
   camera: { x: 0, y: 0, freeX: 0, freeY: 0 },
   inventory: [],
+  selectedEquipmentForInventory: null,
   crafting: {
     stackKey: "",
     groups: 0,
@@ -2194,6 +2280,7 @@ function resize() {
   state.pointer.y = state.pointer.active ? state.pointer.y : state.height / 2;
   updatePointerWorld();
   applyLayoutMode();
+  syncInventoryReturnDropzonePosition();
   seedMenuFloatingPetals();
 }
 
@@ -2266,6 +2353,56 @@ async function loadAssets() {
   primeMapStaticCache();
   await waitForImage(loadingArt);
   loadingBar.style.width = "100%";
+}
+
+function drawAssetImage(targetCtx, image, assetName, x, y, width, height) {
+  if (!image) return;
+
+  const sourceRect = ASSET_SOURCE_RECTS[assetName];
+  const previousSmoothing = targetCtx.imageSmoothingEnabled;
+  const previousQuality = targetCtx.imageSmoothingQuality;
+  targetCtx.imageSmoothingEnabled = true;
+  targetCtx.imageSmoothingQuality = "high";
+
+  if (sourceRect) {
+    targetCtx.drawImage(
+      image,
+      sourceRect.x,
+      sourceRect.y,
+      sourceRect.width,
+      sourceRect.height,
+      x,
+      y,
+      width,
+      height,
+    );
+  } else {
+    targetCtx.drawImage(image, x, y, width, height);
+  }
+
+  targetCtx.imageSmoothingEnabled = previousSmoothing;
+  targetCtx.imageSmoothingQuality = previousQuality;
+}
+
+function drawTintedAssetImage(targetCtx, image, assetName, x, y, width, height, color, alpha) {
+  if (!image || alpha <= 0) return;
+
+  const bufferWidth = Math.max(1, Math.ceil(Math.abs(width)));
+  const bufferHeight = Math.max(1, Math.ceil(Math.abs(height)));
+  if (tintCanvas.width !== bufferWidth) tintCanvas.width = bufferWidth;
+  if (tintCanvas.height !== bufferHeight) tintCanvas.height = bufferHeight;
+
+  tintCtx.clearRect(0, 0, bufferWidth, bufferHeight);
+  drawAssetImage(tintCtx, image, assetName, 0, 0, bufferWidth, bufferHeight);
+  tintCtx.globalCompositeOperation = "source-in";
+  tintCtx.fillStyle = color;
+  tintCtx.fillRect(0, 0, bufferWidth, bufferHeight);
+  tintCtx.globalCompositeOperation = "source-over";
+
+  targetCtx.save();
+  targetCtx.globalAlpha = alpha;
+  targetCtx.drawImage(tintCanvas, x, y, width, height);
+  targetCtx.restore();
 }
 
 function buildMapCollisionData() {
@@ -2829,7 +2966,7 @@ function drawAntHellGroundDecorations(
   includeWallTiles = false,
 ) {
   const tileSize = MAP_WIDTH / MAP_TILE_COLUMNS;
-  const decorCellSize = tileSize * 1.42;
+  const decorCellSize = tileSize * 1.08;
   const minCellX = Math.floor((visibleWorldLeft + MAP_HALF_WIDTH) / decorCellSize) - 1;
   const minCellY = Math.floor((visibleWorldTop + MAP_HALF_HEIGHT) / decorCellSize) - 1;
   const maxCellX = Math.ceil((visibleWorldRight + MAP_HALF_WIDTH) / decorCellSize) + 1;
@@ -2845,7 +2982,7 @@ function drawAntHellGroundDecorations(
   for (let cellY = minCellY; cellY <= maxCellY; cellY++) {
     for (let cellX = minCellX; cellX <= maxCellX; cellX++) {
       const stripeRoll = antHellMaskHash(cellX, cellY, 90);
-      if (stripeRoll < 0.38) continue;
+      if (stripeRoll < 0.26) continue;
 
       const centerWorldX =
         -MAP_HALF_WIDTH + cellX * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 101) * 0.4);
@@ -2857,9 +2994,10 @@ function drawAntHellGroundDecorations(
         tileX < 0 ||
         tileX >= MAP_TILE_COLUMNS ||
         tileY < 0 ||
-        tileY >= MAP_TILE_ROWS ||
-        (!includeWallTiles && isMapWallTile(tileX, tileY))
+        tileY >= MAP_TILE_ROWS
       ) {
+        if (!includeWallTiles) continue;
+      } else if (!includeWallTiles && isMapWallTile(tileX, tileY)) {
         continue;
       }
 
@@ -3040,7 +3178,16 @@ function traceVisibleWallPath(targetCtx, minTileX, minTileY, maxTileX, maxTileY,
   }
 }
 
-function drawVisibleWallTexture(targetCtx, visibleWorldLeft, visibleWorldTop, visibleWorldRight, visibleWorldBottom, viewScale) {
+function drawVisibleWallTexture(
+  targetCtx,
+  visibleWorldLeft,
+  visibleWorldTop,
+  visibleWorldRight,
+  visibleWorldBottom,
+  viewScale,
+  cameraX = state.camera.x,
+  cameraY = state.camera.y,
+) {
   if (getActiveMapDefinition().pixelCave) {
     drawVisibleAntHellWallTexture(
       targetCtx,
@@ -3049,9 +3196,8 @@ function drawVisibleWallTexture(targetCtx, visibleWorldLeft, visibleWorldTop, vi
       visibleWorldRight,
       visibleWorldBottom,
       viewScale,
-      textureCameraX,
-      textureCameraY,
-      !state.spawned,
+      cameraX,
+      cameraY,
     );
     return;
   }
@@ -3090,6 +3236,8 @@ function drawVisibleAntHellWallTexture(
   visibleWorldRight,
   visibleWorldBottom,
   viewScale,
+  cameraX = state.camera.x,
+  cameraY = state.camera.y,
 ) {
   const cellSize = 92;
   const startCellX = Math.floor(visibleWorldLeft / cellSize) - 1;
@@ -3115,7 +3263,10 @@ function drawVisibleAntHellWallTexture(
         continue;
       }
 
-      const screen = worldToScreen(worldX, worldY);
+      const screen = {
+        x: (worldX - cameraX) * viewScale + state.width / 2,
+        y: (worldY - cameraY) * viewScale + state.height / 2,
+      };
       const width = Math.max(2, Math.round((14 + wallTextureHash(gridX, gridY, 94) * 42) * viewScale));
       const height = Math.max(2, Math.round((7 + wallTextureHash(gridX, gridY, 95) * 30) * viewScale));
       targetCtx.fillStyle = roll > 0.74 ? ANT_HELL_WALL_CHIP_COLOR : "rgba(87, 58, 34, 0.48)";
@@ -3186,6 +3337,8 @@ function drawVisibleMapWallShapes(
     visibleWorldRight,
     visibleWorldBottom,
     getViewScale(),
+    state.camera.x,
+    state.camera.y,
   );
   targetCtx.restore();
 
@@ -3425,7 +3578,11 @@ function getMonsterDisplayName(speciesName) {
 }
 
 function getMonsterSpeciesSpawnChance(speciesName, tierIndex) {
-  if (speciesName === "BabyAnt") return state.mapId === "antHell" ? 1 : 0;
+  if (state.mapId === "antHell") {
+    if (speciesName === "BabyAnt") return 0.62;
+    if (speciesName === "WorkerAnt") return 0.38;
+    return 0;
+  }
 
   const tierNumber = getTier(tierIndex).index + 1;
   const rockChance = 0.16;
@@ -3616,6 +3773,7 @@ function getPetalDexEntry(petalName, tierIndex) {
     cooldown: item.baseRespawnMs,
     orbCount: item.name === "Light" ? getLightOrbCount(item.tierIndex) : 1,
     homingRange: definition.homingRange ? getLentilHomingRangeBonus(item) : 0,
+    healPerSecond: item.healPerSecond || 0,
   };
 }
 
@@ -3653,6 +3811,7 @@ function showPetalDexTooltip(entry, event) {
     createTooltipRow(text.petalDurabilityCost, formatPetalStat(entry.durabilityCost || 10)),
   ];
   if (entry.healAmount) tooltipRows.push(createTooltipRow(text.petalHeal, formatPetalStat(entry.healAmount)));
+  if (entry.healPerSecond) tooltipRows.push(createTooltipRow(text.petalHeal, `${formatPetalStat(entry.healPerSecond)}/s`));
   if (entry.homingRange) tooltipRows.push(createTooltipRow(text.petalHomingRange, formatPetalStat(entry.homingRange)));
   if (entry.name === "Light") tooltipRows.push(createTooltipRow("Light", `${entry.orbCount}`));
   rows.append(...tooltipRows);
@@ -3754,18 +3913,15 @@ function getDailyTaskReward(tierIndex, targetCount) {
 
 function generateDailyShopTasks(dateKey = getLocalDateKey()) {
   const random = createSeededRandom(`flora-shop-${dateKey}`);
-  const usedKeys = new Set();
   const tasks = [];
 
-  while (tasks.length < DAILY_TASK_COUNT && usedKeys.size < MONSTER_SPECIES.length * TIERS.length) {
+  for (
+    let tierIndex = SHOP_DAILY_MIN_TIER_INDEX;
+    tierIndex < TIERS.length && tasks.length < DAILY_TASK_COUNT;
+    tierIndex++
+  ) {
     const speciesName = MONSTER_SPECIES[Math.floor(random() * MONSTER_SPECIES.length)];
-    const tierIndex = SHOP_DAILY_MIN_TIER_INDEX + Math.floor(
-      random() * (TIERS.length - SHOP_DAILY_MIN_TIER_INDEX),
-    );
     const taskKey = `${speciesName}:${tierIndex}`;
-    if (usedKeys.has(taskKey)) continue;
-    usedKeys.add(taskKey);
-
     const targetCount = getDailyTaskTargetCount(tierIndex, random());
     tasks.push({
       id: `${dateKey}:${taskKey}`,
@@ -3781,9 +3937,20 @@ function generateDailyShopTasks(dateKey = getLocalDateKey()) {
   return tasks;
 }
 
+function hasDailyTaskForEveryShopTier(tasks) {
+  if (!Array.isArray(tasks)) return false;
+
+  const taskTiers = new Set(tasks.map((task) => task?.tierIndex));
+  for (let tierIndex = SHOP_DAILY_MIN_TIER_INDEX; tierIndex < TIERS.length; tierIndex++) {
+    if (!taskTiers.has(tierIndex)) return false;
+  }
+
+  return true;
+}
+
 function ensureDailyShopTasks() {
   const dateKey = getLocalDateKey();
-  if (state.shop.dateKey === dateKey && Array.isArray(state.shop.tasks) && state.shop.tasks.length) return;
+  if (state.shop.dateKey === dateKey && hasDailyTaskForEveryShopTier(state.shop.tasks)) return;
 
   state.shop.dateKey = dateKey;
   state.shop.tasks = generateDailyShopTasks(dateKey);
@@ -4186,6 +4353,7 @@ function showEquipmentTooltip(item, event) {
     createTooltipRow(text.petalCooldown, formatSeconds(getPetalCooldownMs(item))),
   ];
   if (item.healAmount) tooltipRows.push(createTooltipRow(text.petalHeal, formatPetalStat(item.healAmount)));
+  if (item.healPerSecond) tooltipRows.push(createTooltipRow(text.petalHeal, `${formatPetalStat(item.healPerSecond)}/s`));
   const itemDefinition = PETAL_DEFINITIONS[item.name] || {};
   if (itemDefinition.homingRange) {
     tooltipRows.push(
@@ -4378,6 +4546,46 @@ function moveSecondaryEquipmentToInventory(index) {
   movePetalToInventory(item);
 }
 
+function findEquipmentItemById(itemId) {
+  if (!itemId) return null;
+
+  for (const source of ["equipment", "secondary"]) {
+    const slots = getEquipmentArray(source);
+    const index = slots.findIndex((item) => item?.id === itemId);
+    if (index >= 0) return { source, index, item: slots[index] };
+  }
+
+  return null;
+}
+
+function rememberEquipmentItemForInventory(source, index) {
+  const item = getEquipmentArray(source)[index];
+  state.selectedEquipmentForInventory = item
+    ? { itemId: item.id, source, index }
+    : null;
+}
+
+function moveRememberedEquipmentToInventory() {
+  const selection = state.selectedEquipmentForInventory;
+  if (!selection) return false;
+
+  const match = findEquipmentItemById(selection.itemId);
+  if (!match) {
+    state.selectedEquipmentForInventory = null;
+    renderItemUi();
+    return false;
+  }
+
+  if (match.source === "equipment") {
+    moveEquipmentToInventory(match.index);
+  } else {
+    moveSecondaryEquipmentToInventory(match.index);
+  }
+  state.selectedEquipmentForInventory = null;
+  renderItemUi();
+  return true;
+}
+
 function dropDraggedItemToInventory() {
   if (!dragData) return;
 
@@ -4466,6 +4674,23 @@ function swapEquipmentSlot(index) {
   renderItemUi();
 }
 
+function clickEquipmentSlot(source, index) {
+  rememberEquipmentItemForInventory(source, index);
+  swapEquipmentSlot(index);
+}
+
+function syncInventoryReturnDropzonePosition(slotCount = getEffectiveEquipmentSlots()) {
+  if (!inventoryReturnDropzone) return;
+
+  const isTablet = document.body.classList.contains("is-tablet-ui");
+  const isSmall = window.innerWidth <= 430;
+  const slotSize = isTablet ? 76 : isSmall ? 58 : 68;
+  const gap = isSmall ? 6 : 8;
+  const hotbarWidth = slotCount * slotSize + Math.max(0, slotCount - 1) * gap;
+  const offset = hotbarWidth / 2 + (isSmall ? 34 : 42);
+  inventoryReturnDropzone.style.left = `calc(50% + ${Math.round(offset)}px)`;
+}
+
 function swapAllEquipmentSlots() {
   const slotCount = getEffectiveEquipmentSlots();
   for (let index = 0; index < slotCount; index++) {
@@ -4479,11 +4704,13 @@ function swapAllEquipmentSlots() {
 function renderEquipmentSlots(slots, source) {
   const slotCount = getEffectiveEquipmentSlots();
   const equippedItems = getEquipmentArray(source);
+  const selectedItemId = state.selectedEquipmentForInventory?.itemId;
 
   slots.forEach((slot, index) => {
     const isLocked = index >= slotCount;
     const equippedPetal = equippedItems[index];
     slot.classList.toggle("is-locked", isLocked);
+    slot.classList.toggle("is-return-selected", Boolean(equippedPetal && equippedPetal.id === selectedItemId));
     renderItemContent(slot, equippedPetal);
     slot.dataset.equipmentIndex = `${index}`;
     slot.dataset.equipmentSource = source;
@@ -4506,7 +4733,7 @@ function renderEquipmentSlots(slots, source) {
       event.preventDefault();
       dropDraggedItemToEquipment(index, source);
     };
-    slot.onclick = () => swapEquipmentSlot(index);
+    slot.onclick = () => clickEquipmentSlot(source, index);
     if (equippedPetal) {
       slot.onpointerenter = (event) => showEquipmentTooltip(equippedPetal, event);
       slot.onpointermove = (event) => showEquipmentTooltip(equippedPetal, event);
@@ -4521,6 +4748,13 @@ function renderItemUi() {
   const slotCount = getEffectiveEquipmentSlots();
   primaryHotbar.style.setProperty("--slot-count", slotCount);
   secondaryHotbar.style.setProperty("--slot-count", slotCount);
+  if (
+    state.selectedEquipmentForInventory?.itemId &&
+    !findEquipmentItemById(state.selectedEquipmentForInventory.itemId)
+  ) {
+    state.selectedEquipmentForInventory = null;
+  }
+  syncInventoryReturnDropzonePosition(slotCount);
 
   renderEquipmentSlots(equipmentSlots, "equipment");
   renderEquipmentSlots(secondaryEquipmentSlots, "secondary");
@@ -5030,6 +5264,17 @@ function shouldFullySimulateMonster(monster, bounds) {
 }
 
 function isMonsterChasingPlayer(monster, time) {
+  const stats = MONSTER_DEFINITIONS[monster.name]?.stats || {};
+  if (stats.chaseOnHit) {
+    const durationMs = stats.chaseDurationMs || LADYBUG_CHASE_DURATION_MS;
+    const chaseRadius = stats.chaseRadius || LADYBUG_CHASE_RADIUS;
+    return (
+      (monster.lastPlayerHitAt || 0) > 0 &&
+      time - monster.lastPlayerHitAt <= durationMs &&
+      Math.hypot(monster.x - state.player.x, monster.y - state.player.y) <= chaseRadius + monster.radius
+    );
+  }
+
   return (
     monster.name === "Ladybug" &&
     monster.tierIndex >= LADYBUG_CHASE_TIER_INDEX &&
@@ -5314,6 +5559,8 @@ function respawnPlayer() {
   state.input.joystickY = 0;
   state.weapon.orbitRadius = getPetalOrbitRadius(state.weapon.neutralRadius);
   state.weapon.targetRadius = getPetalOrbitRadius(state.weapon.neutralRadius);
+  state.weapon.homingUnits = Object.create(null);
+  state.weapon.homingUpdatedAt = 0;
   for (const petal of [...state.weapon.petals, ...state.weapon.secondaryPetals]) {
     if (!petal) continue;
     petal.active = true;
@@ -5447,6 +5694,10 @@ function usesTouchControls() {
   return state.settings.resolvedLayout === "tablet" || state.settings.movement === "joystick";
 }
 
+function canMoveTowardMouseWhileChatting() {
+  return state.chat.open && !usesTouchControls();
+}
+
 function getCurrentText() {
   return TEXT[state.settings.language] || TEXT.zh;
 }
@@ -5526,6 +5777,7 @@ function switchActiveMap(mapId) {
   updatePointerWorld();
   state.drops = [];
   state.weapon.homingUnits = Object.create(null);
+  clearAntHellPlayerSpawnZone();
   renderMonsterDexUi();
 }
 
@@ -5539,11 +5791,32 @@ function getMapPortalDefinitions(mapId = state.mapId) {
   if (mapId === "garden2") {
     return [{ type: "map", targetMapId: "garden", ...routeTileToWorld(23.5, 57.5) }];
   }
+  if (mapId === "antHell") {
+    return [
+      {
+        type: "author",
+        radius: AUTHOR_PORTAL_RADIUS,
+        ...routeTileToWorld(ANT_HELL_SPAWN_POINT.x + 1.4, ANT_HELL_SPAWN_POINT.y + 0.8),
+      },
+    ];
+  }
   return [];
 }
 
 function isAuthorPortalPassword(value) {
-  return AUTHOR_PORTAL_PASSWORDS.has(`${value || ""}`.trim().toLowerCase());
+  const password = `${value || ""}`.trim().toLowerCase();
+  const todayKey = getLocalDateKey();
+
+  for (const [temporaryPassword, config] of TEMPORARY_AUTHOR_PORTAL_PASSWORDS) {
+    if (todayKey > config.expiresAfterDate) {
+      TEMPORARY_AUTHOR_PORTAL_PASSWORDS.delete(temporaryPassword);
+    }
+  }
+
+  return (
+    AUTHOR_PORTAL_PASSWORDS.has(password) ||
+    TEMPORARY_AUTHOR_PORTAL_PASSWORDS.has(password)
+  );
 }
 
 function syncAuthorQuickButton() {
@@ -5633,6 +5906,9 @@ function updatePortalTransition(time) {
   state.portalTransition.active = false;
   state.uiLockMovement = false;
   switchActiveMap(targetMapId);
+  if (targetMapId === "garden2") {
+    pushMonstersAwayFromAuthorTeleport(state.player.x, state.player.y);
+  }
   return false;
 }
 
@@ -5848,7 +6124,9 @@ function populateAuthorControls() {
     [
       { value: "garden", label: text.garden || "花园" },
       { value: "garden2", label: state.settings.language === "en" ? "Garden 2" : "花园2" },
+      { value: "antHell", label: text.antHell || "蚁穴" },
     ],
+    state.mapId,
   );
   setSelectOptions(
     authorMonsterSpeciesSelect,
@@ -5931,9 +6209,18 @@ function spawnAuthorMonsters() {
     return;
   }
 
-  const mapId = authorSpawnMapSelect.value || state.mapId;
-  if (MAP_DEFINITIONS[mapId] && mapId !== state.mapId) {
-    switchActiveMap(mapId);
+  const mapId = MAP_DEFINITIONS[authorSpawnMapSelect.value] ? authorSpawnMapSelect.value : state.mapId;
+  const previousMapId = state.mapId;
+  const previousSnapshot = createMonsterMapSnapshot();
+  const shouldRestoreActiveMap = mapId !== previousMapId;
+
+  if (shouldRestoreActiveMap) {
+    saveActiveMonsterMapState(previousMapId);
+    applyMapStaticData(mapId);
+    restoreMonsterMapState(mapId, {
+      seed: true,
+      immediateLimit: mapId === "garden2" ? Infinity : 180,
+    });
   }
 
   const speciesName = authorMonsterSpeciesSelect.value || "Bee";
@@ -5947,26 +6234,37 @@ function spawnAuthorMonsters() {
   let spawnedCount = 0;
   let firstSpawnedMonster = null;
 
-  for (let index = 0; index < quantity; index++) {
-    const ringRadius = Math.sqrt(index) * Math.max(54, spawnRadius * 1.4);
-    const angle = index * goldenAngle;
-    const point = findNearestFloorPosition(
-      clampToMapX(center.x + Math.cos(angle) * ringRadius, spawnRadius),
-      clampToMapY(center.y + Math.sin(angle) * ringRadius, spawnRadius),
-      spawnRadius,
-    );
-    const monster = createMonster(
-      speciesName,
-      point.x,
-      point.y,
-      Math.cos(angle) >= 0 ? 1 : -1,
-      tierIndex,
-    );
-    monster.anchorX = point.x;
-    monster.anchorY = point.y;
-    state.monsters.push(monster);
-    if (!firstSpawnedMonster) firstSpawnedMonster = monster;
-    spawnedCount += 1;
+  try {
+    for (let index = 0; index < quantity; index++) {
+      const ringRadius = Math.sqrt(index) * Math.max(54, spawnRadius * 1.4);
+      const angle = index * goldenAngle;
+      const point = findNearestFloorPosition(
+        clampToMapX(center.x + Math.cos(angle) * ringRadius, spawnRadius),
+        clampToMapY(center.y + Math.sin(angle) * ringRadius, spawnRadius),
+        spawnRadius,
+      );
+      const monster = createMonster(
+        speciesName,
+        point.x,
+        point.y,
+        Math.cos(angle) >= 0 ? 1 : -1,
+        tierIndex,
+      );
+      monster.anchorX = point.x;
+      monster.anchorY = point.y;
+      state.monsters.push(monster);
+      if (!firstSpawnedMonster) firstSpawnedMonster = monster;
+      spawnedCount += 1;
+    }
+
+    if (shouldRestoreActiveMap) {
+      saveActiveMonsterMapState(mapId);
+    }
+  } finally {
+    if (shouldRestoreActiveMap) {
+      applyMapStaticData(previousMapId);
+      applyMonsterMapSnapshot(previousSnapshot);
+    }
   }
 
   if (firstSpawnedMonster) {
@@ -6027,13 +6325,13 @@ function selectAuthorTeleportPoint(event) {
   updateAuthorPanelUi();
 }
 
-function pushMonsterAwayFromPoint(monster, originX, originY) {
+function pushMonsterAwayFromPoint(monster, originX, originY, safeRadius = AUTHOR_TELEPORT_PUSH_RADIUS) {
   if (monster.hidden || monster.dying || !monster.alive) return;
 
   const dx = monster.x - originX;
   const dy = monster.y - originY;
   const distance = Math.hypot(dx, dy);
-  const safeDistance = AUTHOR_TELEPORT_PUSH_RADIUS + monster.radius;
+  const safeDistance = safeRadius + monster.radius;
   if (distance >= safeDistance) return;
 
   const fallbackAngle = wallTextureHash(
@@ -6067,10 +6365,31 @@ function pushMonsterAwayFromPoint(monster, originX, originY) {
   monster.moveAngle = angle;
 }
 
-function pushMonstersAwayFromAuthorTeleport(x, y) {
+function pushMonstersAwayFromPoint(x, y, safeRadius = AUTHOR_TELEPORT_PUSH_RADIUS) {
   for (const monster of state.monsters) {
-    pushMonsterAwayFromPoint(monster, x, y);
+    pushMonsterAwayFromPoint(monster, x, y, safeRadius);
   }
+}
+
+function pushMonstersAwayFromAuthorTeleport(x, y) {
+  pushMonstersAwayFromPoint(x, y, AUTHOR_TELEPORT_PUSH_RADIUS);
+}
+
+function clearAntHellPlayerSpawnZone() {
+  if (state.mapId !== "antHell") return;
+
+  const safeRadius = MONSTER_SPAWN_SAFE_RADIUS + state.player.hitRadius;
+  for (const monster of state.monsters) {
+    if (monster.hidden || monster.dying || !monster.alive) continue;
+    pushMonsterAwayFromPoint(monster, state.player.x, state.player.y, safeRadius);
+    const distance = Math.hypot(monster.x - state.player.x, monster.y - state.player.y);
+    if (distance < state.player.hitRadius + monster.radius + 12) {
+      monster.hidden = true;
+      monster.alive = false;
+    }
+  }
+  state.monsters = state.monsters.filter((monster) => !monster.hidden);
+  saveActiveMonsterMapState(state.mapId);
 }
 
 function teleportToAuthorPoint() {
@@ -6113,9 +6432,15 @@ function isBlockedBrowserShortcut(event) {
     event.key === "F12" ||
     (event.ctrlKey && event.shiftKey && (key === "i" || key === "j" || key === "c")) ||
     (event.metaKey && event.altKey && (key === "i" || key === "j" || key === "c")) ||
+    ((event.ctrlKey || event.metaKey) && key === "c") ||
     (event.ctrlKey && key === "u") ||
     (event.metaKey && event.altKey && key === "u")
   );
+}
+
+function blockClipboardCopy(event) {
+  event.preventDefault();
+  event.stopPropagation();
 }
 
 function getAccountText() {
@@ -7383,7 +7708,12 @@ function isMonsterSpawnClear(x, y, tierIndex = 0, speciesName = "Bee", options =
   const stats = MONSTER_DEFINITIONS[speciesName]?.stats || BEE_STATS;
   const sizeScale = scaleSizeByTier(1, tierIndex);
   const spawnRadius = stats.radius * sizeScale;
-  const spawnSpacing = getMonsterSpawnExtraSpacing(tierIndex, options) + (stats.spawnExtraSpacing || 0);
+  const baseSpawnSpacing = getMonsterSpawnExtraSpacing(tierIndex, options) + (stats.spawnExtraSpacing || 0);
+  const spawnSpacing = options.ignoreMonsterSpacing
+    ? 0
+    : options.rare
+      ? Math.max(18, baseSpawnSpacing * 0.38)
+      : baseSpawnSpacing;
   if (isCircleBlockedByMap(x, y, spawnRadius)) return false;
   if (!isPointOutsideSpawnSafeZone(x, y, spawnRadius, stats.spawnSafeRadius ?? MONSTER_SPAWN_SAFE_RADIUS)) return false;
 
@@ -7398,6 +7728,8 @@ function isMonsterSpawnClear(x, y, tierIndex = 0, speciesName = "Bee", options =
           radiusY: stats.hitRadiusY * sizeScale,
           angle: 0,
         };
+
+  if (options.ignoreMonsterSpacing) return true;
 
   return state.monsters.every((monster) => {
     if (monster.hidden || monster.dying || !monster.alive) return true;
@@ -7543,7 +7875,8 @@ function isPointInsideMap(x, y, padding = BEE_STATS.radius) {
 
 function isPointOutsideSpawnSafeZone(x, y, padding = 0, safeRadius = MONSTER_SPAWN_SAFE_RADIUS) {
   const origin = state.spawned ? state.player : getPlayerSpawnWorldPosition();
-  return Math.hypot(x - origin.x, y - origin.y) >= safeRadius + padding;
+  const playerPadding = state.player?.hitRadius || 0;
+  return Math.hypot(x - origin.x, y - origin.y) >= safeRadius + padding + playerPadding;
 }
 
 function nextMonsterSpawnSequence(tierIndex) {
@@ -7630,9 +7963,16 @@ function getRareMonsterProgressTarget(tierIndex) {
   const activeMaxTierIndex = getActiveMonsterMaxTierIndex();
   const overflow = Math.max(0, tierIndex - activeMaxTierIndex);
   if (state.mapId === "antHell") {
+    const closestRange = getMonsterTierProgressRange(Math.min(tierIndex, activeMaxTierIndex));
+    const rangeSize = Math.max(0.001, closestRange.max - closestRange.min);
+    const deepBias = Math.min(0.42, overflow * 0.052);
     return {
-      center: clamp(0.9 + Math.min(overflow, 5) * 0.016, 0.9, 0.985),
-      spread: clamp(0.12 - Math.min(overflow, 5) * 0.012, 0.055, 0.12),
+      center: clamp(
+        closestRange.min + rangeSize * (0.5 + deepBias),
+        closestRange.min + rangeSize * 0.18,
+        closestRange.max - rangeSize * 0.05,
+      ),
+      spread: clamp(rangeSize * (0.78 - Math.min(overflow, 7) * 0.065), rangeSize * 0.28, rangeSize * 0.78),
     };
   }
   return {
@@ -7641,9 +7981,72 @@ function getRareMonsterProgressTarget(tierIndex) {
   };
 }
 
+function createAntHellRareMonsterSpawnPoint(tierIndex, sequence, spawnPadding) {
+  if (state.mapId !== "antHell") return null;
+
+  const activeMap = getActiveMapDefinition();
+  if (!activeMap.tileMask || !activeMap.depthField) return null;
+
+  const { center, spread } = getRareMonsterProgressTarget(tierIndex);
+  const maxDistance = spread * 2.35;
+  let bestPoint = null;
+  let bestScore = Infinity;
+  let bestBlockedPoint = null;
+  let bestBlockedScore = Infinity;
+
+  for (let attempt = 0; attempt < 520; attempt++) {
+    const tileIndex =
+      (sequence * 229 + attempt * 197 + tierIndex * 311) % (MAP_TILE_COLUMNS * MAP_TILE_ROWS);
+    const baseTileX = tileIndex % MAP_TILE_COLUMNS;
+    const baseTileY = Math.floor(tileIndex / MAP_TILE_COLUMNS);
+    if (activeMap.tileMask[baseTileY]?.[baseTileX] !== "0") continue;
+
+    const jitterX = 0.18 + wallTextureHash(baseTileX, baseTileY, sequence + attempt * 0.31) * 0.64;
+    const jitterY = 0.18 + wallTextureHash(baseTileX, baseTileY, tierIndex + attempt * 0.37) * 0.64;
+    const { x, y } = routeTileToWorld(baseTileX + jitterX, baseTileY + jitterY);
+    const progress = getMonsterProgressForWorld(x, y);
+    const distance = Math.abs(progress - center);
+    if (distance > maxDistance) continue;
+
+    const score =
+      distance +
+      wallTextureHash(baseTileX + sequence * 0.17, baseTileY - tierIndex * 0.19, attempt) * 0.018;
+    if (
+      !isPointInsideMap(x, y, spawnPadding) ||
+      isCircleBlockedByMap(x, y, spawnPadding)
+    ) {
+      if (score < bestBlockedScore) {
+        bestBlockedScore = score;
+        bestBlockedPoint = { x, y };
+      }
+      continue;
+    }
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestPoint = { x, y };
+      if (score < spread * 0.18) break;
+    }
+  }
+
+  if (bestPoint) return bestPoint;
+  if (!bestBlockedPoint) return null;
+
+  const floorPoint = findNearestFloorPosition(bestBlockedPoint.x, bestBlockedPoint.y, spawnPadding);
+  return (
+    isPointInsideMap(floorPoint.x, floorPoint.y, spawnPadding) &&
+    !isCircleBlockedByMap(floorPoint.x, floorPoint.y, spawnPadding)
+  )
+    ? floorPoint
+    : null;
+}
+
 function createRareMonsterSpawnPoint(tierIndex, sequence, spawnPadding) {
   const activeMap = getActiveMapDefinition();
   if (!activeMap.tileMask) return null;
+
+  const antHellSpawn = createAntHellRareMonsterSpawnPoint(tierIndex, sequence, spawnPadding);
+  if (antHellSpawn) return antHellSpawn;
 
   const { center, spread } = getRareMonsterProgressTarget(tierIndex);
   for (let attempt = 0; attempt < 780; attempt++) {
@@ -7724,7 +8127,7 @@ function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesN
   let fallbackY = 0;
   let fallbackDirection = 1;
 
-  const maxSpawnAttempts = options.rare ? 120 : state.mapId === "garden2" ? 96 : 48;
+  const maxSpawnAttempts = options.rare ? 320 : state.mapId === "garden2" ? 96 : 48;
   for (let attempt = 0; attempt < maxSpawnAttempts; attempt++) {
     const spawnPadding = scaleSizeByTier(MONSTER_DEFINITIONS[monsterSpecies]?.stats?.radius || BEE_STATS.radius, tierIndex);
     const rareSpawn = options.rare
@@ -7746,6 +8149,15 @@ function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesN
   if (isMonsterSpawnClear(fallbackX, fallbackY, tierIndex, monsterSpecies, options)) {
     const monster = createMonster(monsterSpecies, fallbackX, fallbackY, fallbackDirection, tierIndex);
     if (options.rare) monster.rareSpawn = true;
+    return monster;
+  }
+
+  if (options.rare && isMonsterSpawnClear(fallbackX, fallbackY, tierIndex, monsterSpecies, {
+    ...options,
+    ignoreMonsterSpacing: true,
+  })) {
+    const monster = createMonster(monsterSpecies, fallbackX, fallbackY, fallbackDirection, tierIndex);
+    monster.rareSpawn = true;
     return monster;
   }
 
@@ -7784,6 +8196,8 @@ function seedRareMonsterPopulation({ immediateLimit = Infinity } = {}) {
       state.nextRareMonsterSpawnAt[tierIndex] = (state.lastTime || performance.now()) + intervalMs;
     }
   }
+
+  return immediateCount;
 }
 
 function seedMonsterPopulation({ immediateLimit = Infinity } = {}) {
@@ -7792,6 +8206,11 @@ function seedMonsterPopulation({ immediateLimit = Infinity } = {}) {
   state.monsterBackfillQueue = [];
   const targetCounts = getMonsterTierTargetCounts();
   let immediateCount = 0;
+  const seedRareFirst = state.mapId === "antHell" && getRareMonsterSpawnConfigs().length > 0;
+
+  if (seedRareFirst) {
+    immediateCount += seedRareMonsterPopulation({ immediateLimit });
+  }
 
   for (let tierIndex = 0; tierIndex < targetCounts.length; tierIndex++) {
     const targetCount = targetCounts[tierIndex];
@@ -7811,7 +8230,9 @@ function seedMonsterPopulation({ immediateLimit = Infinity } = {}) {
     }
   }
 
-  seedRareMonsterPopulation({ immediateLimit: Math.max(0, immediateLimit - immediateCount) });
+  if (!seedRareFirst) {
+    seedRareMonsterPopulation({ immediateLimit: Math.max(0, immediateLimit - immediateCount) });
+  }
 }
 
 function updateMonsterBackfill() {
@@ -7873,7 +8294,8 @@ function updateMonsterSpawns(time) {
 
 function createMonsterMapSnapshot() {
   return {
-    monsters: state.monsters,
+    mapId: state.mapId,
+    monsters: state.monsters.map((monster) => ({ ...monster, mapId: monster.mapId || state.mapId })),
     monsterSpawnSequence: [...state.monsterSpawnSequence],
     nextRareMonsterSpawnAt: [...state.nextRareMonsterSpawnAt],
     monsterBackfillQueue: [...state.monsterBackfillQueue],
@@ -7884,7 +8306,12 @@ function createMonsterMapSnapshot() {
 }
 
 function applyMonsterMapSnapshot(snapshot) {
-  state.monsters = snapshot?.monsters || [];
+  const activeSpecies = new Set(getActiveMonsterSpecies());
+  state.monsters = (snapshot?.monsters || []).filter((monster) => {
+    if (monster.mapId && monster.mapId !== state.mapId) return false;
+    if (!monster.mapId && !activeSpecies.has(monster.name)) return false;
+    return true;
+  });
   state.monsterSpawnSequence = [...(snapshot?.monsterSpawnSequence || Array(TIERS.length).fill(0))];
   state.nextRareMonsterSpawnAt = [...(snapshot?.nextRareMonsterSpawnAt || Array(TIERS.length).fill(0))];
   state.monsterBackfillQueue = [...(snapshot?.monsterBackfillQueue || [])];
@@ -7898,6 +8325,7 @@ function getMonsterPopulationConfigKey() {
     minTierName: config.minTierName,
     maxTierName: config.maxTierName,
     targetCounts: config.targetCounts,
+    rareSpawns: config.rareSpawns || [],
     species: getActiveMonsterSpecies(),
   });
 }
@@ -7909,6 +8337,7 @@ function saveActiveMonsterMapState(mapId = state.mapId) {
 
 function hasViableMonsterMapSnapshot(snapshot) {
   if (!snapshot?.seeded) return false;
+  if (snapshot.mapId && snapshot.mapId !== state.mapId) return false;
   if (snapshot.monsterConfigKey !== getMonsterPopulationConfigKey()) return false;
 
   const targetTotal = getMonsterTierTargetCounts().reduce((total, count) => total + count, 0);
@@ -8338,7 +8767,7 @@ function updateDrops(dt = 1 / 60) {
   mergeNearbyDrops();
 }
 
-function updatePetals(time) {
+function updatePetals(time, dt = 1 / 60) {
   const activePetals = new Set(state.weapon.petals.filter(Boolean));
 
   for (const petal of [...state.weapon.petals, ...state.weapon.secondaryPetals]) {
@@ -8364,6 +8793,20 @@ function updatePetals(time) {
       petal.healEffectEndsAt = 0;
       petal.cooldownStartedAt = 0;
       resetPetalPlacement(petal);
+    }
+
+    if (
+      petal.active &&
+      activePetals.has(petal) &&
+      petal.healPerSecond &&
+      state.player.alive &&
+      !state.player.dying &&
+      state.player.health < state.player.maxHealth
+    ) {
+      state.player.health = Math.min(
+        state.player.maxHealth,
+        state.player.health + petal.healPerSecond * dt,
+      );
     }
 
     if (
@@ -8615,13 +9058,14 @@ function update(dt, time) {
   const distance = Math.hypot(toTargetX, toTargetY);
   const playerPointerDeadZone = state.player.radius;
   const movementVector = getDirectionalMovementVector();
+  const chatMouseMovement = canMoveTowardMouseWhileChatting();
 
   if (
     state.spawned &&
-    !state.uiLockMovement &&
+    (!state.uiLockMovement || chatMouseMovement) &&
     state.player.alive &&
     !usesTouchControls() &&
-    state.settings.movement === "mouse" &&
+    (state.settings.movement === "mouse" || chatMouseMovement) &&
     distance > playerPointerDeadZone
   ) {
     const step = Math.min(distance, getPlayerMoveSpeed() * dt);
@@ -8668,7 +9112,7 @@ function update(dt, time) {
       state.player.health + getPlayerRegenPerSecond() * dt,
     );
   }
-  updatePetals(time);
+  updatePetals(time, dt);
   updateLeaderboard(time);
   updateMonsters(dt, time);
   updateMonsterRegeneration(dt, time);
@@ -8990,10 +9434,14 @@ function drawBackground() {
   const textureCameraY = state.camera.y;
   const mapLeft = (-MAP_HALF_WIDTH - state.camera.x) * viewScale + state.width / 2;
   const mapTop = (-MAP_HALF_HEIGHT - state.camera.y) * viewScale + state.height / 2;
-  const visibleWorldLeft = Math.max(-MAP_HALF_WIDTH, textureCameraX - state.width / (2 * viewScale));
-  const visibleWorldTop = Math.max(-MAP_HALF_HEIGHT, textureCameraY - state.height / (2 * viewScale));
-  const visibleWorldRight = Math.min(MAP_HALF_WIDTH, textureCameraX + state.width / (2 * viewScale));
-  const visibleWorldBottom = Math.min(MAP_HALF_HEIGHT, textureCameraY + state.height / (2 * viewScale));
+  const rawVisibleWorldLeft = textureCameraX - state.width / (2 * viewScale);
+  const rawVisibleWorldTop = textureCameraY - state.height / (2 * viewScale);
+  const rawVisibleWorldRight = textureCameraX + state.width / (2 * viewScale);
+  const rawVisibleWorldBottom = textureCameraY + state.height / (2 * viewScale);
+  const visibleWorldLeft = state.spawned ? Math.max(-MAP_HALF_WIDTH, rawVisibleWorldLeft) : rawVisibleWorldLeft;
+  const visibleWorldTop = state.spawned ? Math.max(-MAP_HALF_HEIGHT, rawVisibleWorldTop) : rawVisibleWorldTop;
+  const visibleWorldRight = state.spawned ? Math.min(MAP_HALF_WIDTH, rawVisibleWorldRight) : rawVisibleWorldRight;
+  const visibleWorldBottom = state.spawned ? Math.min(MAP_HALF_HEIGHT, rawVisibleWorldBottom) : rawVisibleWorldBottom;
 
   ctx.fillStyle = state.mapId === "antHell" ? ANT_HELL_OUTER_COLOR : "#186044";
   ctx.fillRect(0, 0, state.width, state.height);
@@ -9261,29 +9709,24 @@ function drawMonsters() {
     if (monster.name === "Rock") {
       drawRockMonsterShape(ctx, drawWidth, drawHeight, monster.wobbleSeed, 0, monster.tierIndex);
     } else {
-      ctx.drawImage(
-        image,
-        -drawWidth / 2,
-        -drawHeight / 2,
-        drawWidth,
-        drawHeight,
-      );
+      drawAssetImage(ctx, image, monster.asset, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
     }
     if (redAlpha > 0) {
       ctx.save();
-      ctx.globalAlpha = redAlpha;
       if (monster.name === "Rock") {
         drawRockMonsterShape(ctx, drawWidth, drawHeight, monster.wobbleSeed, redAlpha, monster.tierIndex);
-      } else if (monster.hitShape === "circle") {
-        ctx.fillStyle = "#ff2f2f";
-        ctx.beginPath();
-        ctx.arc(0, 0, (monster.hitRadius || Math.min(monster.width, monster.height) * 0.44) * viewScale, 0, Math.PI * 2);
-        ctx.fill();
       } else {
-        ctx.fillStyle = "#ff2f2f";
-        ctx.beginPath();
-        ctx.ellipse(0, 0, drawWidth * 0.48, drawHeight * 0.34, 0, 0, Math.PI * 2);
-        ctx.fill();
+        drawTintedAssetImage(
+          ctx,
+          image,
+          monster.asset,
+          -drawWidth / 2,
+          -drawHeight / 2,
+          drawWidth,
+          drawHeight,
+          "#ff2f2f",
+          redAlpha,
+        );
       }
       ctx.restore();
     }
@@ -9911,6 +10354,7 @@ async function boot() {
   seedMonsterPopulation();
   saveActiveMonsterMapState();
   ensureMonsterMapPopulation("garden2");
+  ensureMonsterMapPopulation("antHell");
   renderItemUi();
   renderMonsterDexUi();
   renderPetalDexUi();
@@ -10014,6 +10458,8 @@ window.addEventListener("auxclick", (event) => {
   event.preventDefault();
   event.stopPropagation();
 }, { capture: true });
+window.addEventListener("copy", blockClipboardCopy, { capture: true });
+window.addEventListener("cut", blockClipboardCopy, { capture: true });
 window.addEventListener("keydown", (event) => {
   if (isBlockedBrowserShortcut(event)) {
     event.preventDefault();
@@ -10513,6 +10959,27 @@ inventoryPanel.addEventListener("dragover", (event) => {
 inventoryPanel.addEventListener("drop", (event) => {
   event.preventDefault();
   dropDraggedItemToInventory();
+});
+inventoryReturnDropzone.addEventListener("dragover", (event) => {
+  event.preventDefault();
+  state.uiLockMovement = true;
+});
+inventoryReturnDropzone.addEventListener("drop", (event) => {
+  event.preventDefault();
+  dropDraggedItemToInventory();
+});
+inventoryReturnDropzone.addEventListener("click", (event) => {
+  event.stopPropagation();
+  moveRememberedEquipmentToInventory();
+});
+inventoryReturnDropzone.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+inventoryReturnDropzone.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
+inventoryReturnDropzone.addEventListener("pointerdown", (event) => {
+  event.stopPropagation();
 });
 joystick.addEventListener("pointerdown", (event) => {
   event.stopPropagation();
