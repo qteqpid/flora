@@ -17,6 +17,7 @@ const accountButton = document.querySelector("#accountButton");
 const monsterDexButton = document.querySelector("#monsterDexButton");
 const petalDexButton = document.querySelector("#petalDexButton");
 const shopButton = document.querySelector("#shopButton");
+const thanksButton = document.querySelector("#thanksButton");
 const accountPanel = document.querySelector("#accountPanel");
 const loginForm = document.querySelector("#loginForm");
 const loginNameInput = document.querySelector("#loginName");
@@ -40,6 +41,8 @@ const shopPointsValue = document.querySelector("#shopPointsValue");
 const dailyTaskList = document.querySelector("#dailyTaskList");
 const shopItemList = document.querySelector("#shopItemList");
 const shopMessage = document.querySelector("#shopMessage");
+const thanksPanel = document.querySelector("#thanksPanel");
+const thanksCloseButton = document.querySelector("#thanksCloseButton");
 const tutorialPanel = document.querySelector("#tutorialPanel");
 const tutorialCloseButton = document.querySelector("#tutorialCloseButton");
 const gameNotice = document.querySelector("#gameNotice");
@@ -82,6 +85,7 @@ const craftList = document.querySelector("#craftList");
 const craftSlotsContainer = document.querySelector("#craftSlots");
 const craftSlots = Array.from(document.querySelectorAll("#craftSlots .craft-slot"));
 const craftSubmitButton = document.querySelector("#craftSubmitButton");
+const craftAllInButton = document.querySelector("#craftAllInButton");
 const craftCloseButton = document.querySelector("#craftCloseButton");
 const craftChanceLabel = document.querySelector("#craftChanceLabel");
 const craftMessage = document.querySelector("#craftMessage");
@@ -123,6 +127,7 @@ const authorItemQuantityInput = document.querySelector("#authorItemQuantityInput
 const authorAddItemButton = document.querySelector("#authorAddItemButton");
 const authorLevelInput = document.querySelector("#authorLevelInput");
 const authorSetLevelButton = document.querySelector("#authorSetLevelButton");
+const authorHealthLockButton = document.querySelector("#authorHealthLockButton");
 const authorSpawnMapSelect = document.querySelector("#authorSpawnMapSelect");
 const authorMonsterSpeciesSelect = document.querySelector("#authorMonsterSpeciesSelect");
 const authorMonsterTierSelect = document.querySelector("#authorMonsterTierSelect");
@@ -165,6 +170,39 @@ function createRockDataUrl() {
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
 }
 
+function createBoulderDataUrl() {
+  const cx = 250;
+  const cy = 250;
+  const radius = 150;
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 500;
+  canvas.height = 500;
+  const rockCtx = canvas.getContext("2d");
+
+  rockCtx.beginPath();
+  rockCtx.arc(cx, cy, radius, 0, Math.PI * 2);
+  rockCtx.fillStyle = "#787878";
+  rockCtx.fill();
+  rockCtx.lineWidth = 26;
+  rockCtx.strokeStyle = "#545454";
+  rockCtx.stroke();
+
+  rockCtx.save();
+  rockCtx.globalAlpha = 0.22;
+  rockCtx.fillStyle = "#9a9a9a";
+  rockCtx.beginPath();
+  rockCtx.arc(205, 185, 34, 0, Math.PI * 2);
+  rockCtx.fill();
+  rockCtx.fillStyle = "#5f5f5f";
+  rockCtx.beginPath();
+  rockCtx.arc(315, 305, 46, 0, Math.PI * 2);
+  rockCtx.fill();
+  rockCtx.restore();
+
+  return canvas.toDataURL("image/png");
+}
+
 function createLentilDataUrl() {
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500"><circle cx="250" cy="250" r="142" fill="#171717" stroke="#050505" stroke-width="34"/><circle cx="205" cy="190" r="34" fill="#4a4a4a" opacity=".72"/></svg>`;
   return `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
@@ -187,6 +225,7 @@ const ASSETS = {
   light: "light1.webp",
   thunderHammer: "雷神之锤.webp",
   bubble: createBubbleDataUrl(),
+  boulder: createBoulderDataUrl(),
   bee: "bee.webp",
   ladybug: "ladybug.webp",
   babyAnt: "baby ant.webp",
@@ -276,9 +315,12 @@ const TEXT = {
     tutorialStrategyTitle: "策略",
     tutorialStrategyBody: "越深入地图怪物等级越高。先刷低等级花瓣，合成、锻造、点天赋，再去挑战更深区域。",
     tutorialGarden2Title: "花园2",
-    tutorialGarden2Body: "花园2需要玩家等级超过30级才能进入，里面只会出现更高级的怪物。",
-    garden2LevelRequired: "需要超过30级才能进入花园2。",
+    tutorialGarden2Body: "花园2可以直接进入，里面只会出现更高级的怪物。",
+    garden2LevelRequired: "花园2现在可以直接进入。",
     shop: "商店",
+    thanks: "感谢",
+    thanksInvite: "来玩 florr.io 吧",
+    thanksOpen: "打开 florr.io",
     shopPoints: "积分",
     dailyTasks: "每日任务",
     shopItems: "可购买物品",
@@ -349,6 +391,7 @@ const TEXT = {
     craftSlots: "合成槽",
     craftChance: "本次成功率",
     craftTip: "消耗5个相同的花瓣来进行一次合成",
+    craftAllIn: "All in",
     craftEmpty: "没有够 5 个的同级同种花瓣",
     craftLoaded: "已装填",
     craftResult: "成功",
@@ -399,6 +442,7 @@ const TEXT = {
     petalRose: "玫瑰",
     petalLight: "Light",
     petalStone: "石头",
+    petalBoulder: "巨石",
     petalLentil: "小扁豆",
     petalThunderHammer: "雷神之锤",
     petalBubble: "泡泡",
@@ -447,9 +491,12 @@ const TEXT = {
     tutorialStrategyTitle: "Strategy",
     tutorialStrategyBody: "Monster levels rise deeper into the map. Farm lower tiers, craft, forge, and spend talent points before pushing forward.",
     tutorialGarden2Title: "Garden 2",
-    tutorialGarden2Body: "Garden 2 requires player level above 30 and contains higher-tier monsters.",
-    garden2LevelRequired: "Reach level 31 to enter Garden 2.",
+    tutorialGarden2Body: "Garden 2 can be entered directly and contains higher-tier monsters.",
+    garden2LevelRequired: "Garden 2 can now be entered directly.",
     shop: "Shop",
+    thanks: "Thanks",
+    thanksInvite: "Come play florr.io",
+    thanksOpen: "Open florr.io",
     shopPoints: "Points",
     dailyTasks: "Daily Tasks",
     shopItems: "Items",
@@ -520,6 +567,7 @@ const TEXT = {
     craftSlots: "Craft Slots",
     craftChance: "This Chance",
     craftTip: "Spend 5 matching petals for one craft",
+    craftAllIn: "All in",
     craftEmpty: "No same-tier petal stack has 5 yet",
     craftLoaded: "Loaded",
     craftResult: "Success",
@@ -570,6 +618,7 @@ const TEXT = {
     petalRose: "Rose",
     petalLight: "Light",
     petalStone: "Stone",
+    petalBoulder: "Boulder",
     petalLentil: "Lentil",
     petalThunderHammer: "Thunder Hammer",
     petalBubble: "Bubble",
@@ -591,7 +640,7 @@ const BEE_STATS = {
   maxHealth: 80,
   attack: 20,
   experienceReward: 10,
-  bodyDamageCooldown: 200,
+  bodyDamageCooldown: 500,
   radius: 32,
   width: 48,
   height: 98,
@@ -602,7 +651,7 @@ const LADYBUG_STATS = {
   maxHealth: 110,
   attack: 30,
   experienceReward: 10,
-  bodyDamageCooldown: 200,
+  bodyDamageCooldown: 500,
   radius: 36,
   width: 102,
   height: 102,
@@ -615,7 +664,7 @@ const ROCK_STATS = {
   maxHealth: 115,
   attack: 10,
   experienceReward: 10,
-  bodyDamageCooldown: 200,
+  bodyDamageCooldown: 500,
   radius: 43,
   width: 104,
   height: 104,
@@ -629,7 +678,7 @@ const BABY_ANT_STATS = {
   maxHealth: 85,
   attack: 10,
   experienceReward: 10,
-  bodyDamageCooldown: 200,
+  bodyDamageCooldown: 500,
   radius: 44,
   width: 88,
   height: 88,
@@ -646,7 +695,7 @@ const WORKER_ANT_STATS = {
   maxHealth: 100,
   attack: 10,
   experienceReward: 10,
-  bodyDamageCooldown: 200,
+  bodyDamageCooldown: 500,
   radius: 45,
   width: 90,
   height: 90,
@@ -689,7 +738,7 @@ const MONSTER_DEFINITIONS = {
     labelKey: "monsterRock",
     asset: "rock",
     stats: ROCK_STATS,
-    drops: ["Stone", "Lentil"],
+    drops: ["Stone", "Boulder", "Lentil"],
   },
 };
 const DEFAULT_MONSTER_SPECIES = ["Bee", "Ladybug", "Rock"];
@@ -703,28 +752,32 @@ const LADYBUG_HEAD_FORWARD_OFFSET = 0.9;
 const WORKER_ANT_HEAD_FORWARD_OFFSET = Math.PI / 4;
 
 const HIT_FLASH_SECONDS = 0.28;
+const PLAYER_CONTACT_FLASH_INTERVAL_MS = 100;
+const MONSTER_BODY_DAMAGE_COOLDOWN_MS = 500;
 const DEATH_ANIMATION_MS = 95;
 const DEATH_END_SCALE = 0.8;
+const GARDEN_RARE_MONSTER_SPAWNS = [
+  { tierName: "Advanced", maxCount: 8, initialCount: 2, intervalMs: 11000 },
+  { tierName: "King", maxCount: 6, initialCount: 2, intervalMs: 15000 },
+  { tierName: "Unparalleled", maxCount: 4, initialCount: 1, intervalMs: 20000 },
+  { tierName: "Peak", maxCount: 3, initialCount: 1, intervalMs: 26000 },
+  { tierName: "Ethereal", maxCount: 2, initialCount: 1, intervalMs: 34000 },
+  { tierName: "Transcendent", maxCount: 2, initialCount: 1, intervalMs: 36000 },
+  { tierName: "Peerless", maxCount: 1, initialCount: 1, intervalMs: 52000 },
+  { tierName: "r.a.b.t.", maxCount: 1, initialCount: 0, intervalMs: 90000 },
+];
 const MAP_MONSTER_TIER_CONFIGS = {
   garden: {
     minTierName: "Common",
     maxTierName: "Advanced",
     targetCounts: [70, 68, 64, 58, 52, 46, 38, 31, 24, 18, 13, 9],
-    rareSpawns: [
-      { tierName: "Advanced", maxCount: 8, initialCount: 2, intervalMs: 11000 },
-      { tierName: "King", maxCount: 6, initialCount: 2, intervalMs: 15000 },
-      { tierName: "Unparalleled", maxCount: 4, initialCount: 1, intervalMs: 20000 },
-      { tierName: "Peak", maxCount: 3, initialCount: 1, intervalMs: 26000 },
-      { tierName: "Ethereal", maxCount: 2, initialCount: 1, intervalMs: 34000 },
-      { tierName: "Transcendent", maxCount: 2, initialCount: 1, intervalMs: 36000 },
-      { tierName: "Peerless", maxCount: 1, initialCount: 1, intervalMs: 52000 },
-      { tierName: "r.a.b.t.", maxCount: 1, initialCount: 0, intervalMs: 90000 },
-    ],
+    rareSpawns: GARDEN_RARE_MONSTER_SPAWNS,
   },
   garden2: {
-    minTierName: "Eternal",
-    maxTierName: "Peerless",
-    targetCounts: [32, 28, 24, 19, 15, 11, 7, 4, 2],
+    minTierName: "Common",
+    maxTierName: "Advanced",
+    targetCounts: [70, 68, 64, 58, 52, 46, 38, 31, 24, 18, 13, 9],
+    rareSpawns: GARDEN_RARE_MONSTER_SPAWNS,
   },
   antHell: {
     minTierName: "Common",
@@ -748,6 +801,8 @@ const MONSTER_REGEN_DELAY_MS = 10000;
 const MONSTER_REGEN_PER_SECOND = 0.005;
 const MONSTER_ATTACK_TIER_MULTIPLIER = 1.8;
 const MONSTER_EXPERIENCE_TIER_MULTIPLIER = 3.3;
+const ANT_HELL_LOW_TIER_MONSTER_COUNT_MULTIPLIER = 1.5;
+const ANT_HELL_LOW_TIER_MONSTER_COUNT_MAX_TIER_NUMBER = 12;
 const RESPAWN_INVULNERABLE_MS = 1200;
 const MONSTER_SPAWN_SAFE_RADIUS = 700;
 const MAP_SCALE = 2 / 3;
@@ -800,6 +855,8 @@ const ACCOUNT_LAST_LOCAL_KEY = "flora-local-last-account-v1";
 const PETAL_BASE_RESPAWN_MS = 450;
 const MONSTER_ROAM_RADIUS = 165;
 const BASE_PLAYER_MAX_HEALTH = 100;
+const PLAYER_HEALTH_BOOST_LEVEL = 75;
+const PLAYER_HEALTH_BOOST_MULTIPLIER = 1.5;
 const DROP_SIZE = 62;
 const DROP_STACK_MERGE_RADIUS = 58;
 const PETAL_MONSTER_PUSH_STRENGTH = 0.72;
@@ -903,6 +960,18 @@ const PETAL_DEFINITIONS = {
     baseRespawnMs: 850,
     durabilityCost: 1,
   },
+  Boulder: {
+    labelKey: "petalBoulder",
+    asset: "boulder",
+    baseAttack: 5,
+    baseDurability: 200,
+    baseRespawnMs: 10000,
+    durabilityCost: 1,
+    durabilityTierMultiplier: 4,
+    playerOverlay: true,
+    baseSizeScale: 2.75,
+    sizeTierMultiplier: 1.12,
+  },
   Lentil: {
     labelKey: "petalLentil",
     asset: "lentil",
@@ -956,10 +1025,17 @@ const GARDEN_TEXTURE_LAYERS = [
   { type: "lightTri", cell: GARDEN_LIGHT_TRI_CELL, jitter: GARDEN_JITTER_SCALE, seed: 5, order: 1 },
   { type: "dot", cell: GARDEN_DOT_CELL, jitter: GARDEN_JITTER_SCALE, seed: 9, order: 2 },
 ];
-const GARDEN2_CIRCLE_GLOBAL_MIN_DIST = 48;
-const GARDEN2_CIRCLE_TEXTURE_LAYERS = [
-  { type: "darkCircle", color: "#52ad5f", cell: 178, jitter: 0.72, seed: 41, order: 0, minRadius: 8, maxRadius: 22 },
-  { type: "lightCircle", color: "#78d284", cell: 148, jitter: 0.72, seed: 47, order: 1, minRadius: 7, maxRadius: 20 },
+const GARDEN2_SWAMP_GROUND = "#5f7445";
+const GARDEN2_SWAMP_DARK_MOSS = "#4f6138";
+const GARDEN2_SWAMP_LIGHT_MOSS = "#71884d";
+const GARDEN2_SWAMP_MUD = "#695840";
+const GARDEN2_SWAMP_GRASS = "#3f5331";
+const GARDEN2_SWAMP_GLOBAL_MIN_DIST = 44;
+const GARDEN2_SWAMP_TEXTURE_LAYERS = [
+  { type: "darkMoss", cell: 182, jitter: 0.7, seed: 41, order: 0 },
+  { type: "mudHex", cell: 224, jitter: 0.68, seed: 47, order: 1 },
+  { type: "lightMoss", cell: 154, jitter: 0.7, seed: 53, order: 2 },
+  { type: "mossPentagon", cell: 132, jitter: 0.74, seed: 59, order: 3 },
 ];
 const ANT_HELL_FLOOR_COLOR = "#9a6428";
 const ANT_HELL_OUTER_COLOR = "#3d2917";
@@ -1408,6 +1484,7 @@ function openAntHellBlockedPassages(grid) {
     [17, 20], [18, 20], [19, 20],
     [17, 21], [18, 21],
     [18, 22],
+    [45, 44],
   ].forEach(([x, y]) => setAntHellTile(grid, x, y, "0"));
 }
 
@@ -1495,10 +1572,15 @@ const MAP_DEFINITIONS = {
   },
   garden2: {
     routePoints: MAP_GARDEN2_ROUTE_POINTS,
+    spawnPoint: { x: 11.0, y: 9.0 },
     smallWalls: MAP_GARDEN2_SMALL_WALLS,
     denseWalls: MAP_GARDEN2_DENSE_WALL_FIELDS,
     routeHalfWidth: 6.4,
     tileMask: MAP_GARDEN2_TILE_MASK,
+    diagonalProgress: true,
+    diagonalProgressMin: 12,
+    diagonalProgressMax: 113,
+    groundColor: GARDEN2_SWAMP_GROUND,
   },
   antHell: {
     routePoints: MAP_ANT_HELL_ROUTE_POINTS,
@@ -1725,6 +1807,23 @@ function getPetalAttack(name, tierIndex) {
   return scaleStatByTier(definition.baseAttack, 3, tier.index);
 }
 
+function isPlayerOverlayPetal(petal) {
+  return Boolean(petal && PETAL_DEFINITIONS[petal.name]?.playerOverlay);
+}
+
+function getPetalSizeScale(petal) {
+  const definition = PETAL_DEFINITIONS[petal?.name] || {};
+  const baseScale = definition.baseSizeScale || 1;
+  const tierScale = definition.sizeTierMultiplier
+    ? definition.sizeTierMultiplier ** getTier(petal?.tierIndex || 0).index
+    : 1;
+  return baseScale * tierScale;
+}
+
+function getPetalHitRadius(petal) {
+  return state.weapon.hitRadius * getPetalSizeScale(petal);
+}
+
 function getLightOrbCount(tierIndex = 0) {
   const tierNumber = getTier(tierIndex).index + 1;
   if (tierNumber <= 3) return 1;
@@ -1903,7 +2002,7 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
     health: maxHealth,
     attack: scaleStatByTier(stats.attack, MONSTER_ATTACK_TIER_MULTIPLIER, tier.index),
     experienceReward: getMonsterExperienceReward(tier.index),
-    bodyDamageCooldown: stats.bodyDamageCooldown,
+    bodyDamageCooldown: MONSTER_BODY_DAMAGE_COOLDOWN_MS,
     nextBodyDamageAt: 0,
     direction,
     moveAngle,
@@ -2052,6 +2151,8 @@ const state = {
     defend: false,
     joystickX: 0,
     joystickY: 0,
+    touchAimX: 1,
+    touchAimY: 0,
     joystickOriginX: 0,
     joystickOriginY: 0,
     joystickPointerId: null,
@@ -2083,6 +2184,7 @@ const state = {
     deathStartedAt: 0,
     deathDuration: DEATH_ANIMATION_MS,
     invulnerableUntil: 0,
+    nextContactFlashAt: 0,
     lifeId: 0,
     lastDeathX: null,
     lastDeathY: null,
@@ -2136,6 +2238,7 @@ const state = {
     selectedX: 0,
     selectedY: 0,
     hasSelection: false,
+    healthLocked: false,
   },
   chat: {
     open: false,
@@ -2663,7 +2766,11 @@ function getMonsterTierTargetCounts() {
 
   return Array.from({ length: TIERS.length }, (_, tierIndex) => {
     if (tierIndex < minTierIndex || tierIndex > maxTierIndex) return 0;
-    return config.targetCounts[tierIndex - minTierIndex] || 0;
+    const baseCount = config.targetCounts[tierIndex - minTierIndex] || 0;
+    if (state.mapId === "antHell" && tierIndex + 1 <= ANT_HELL_LOW_TIER_MONSTER_COUNT_MAX_TIER_NUMBER) {
+      return Math.ceil(baseCount * ANT_HELL_LOW_TIER_MONSTER_COUNT_MULTIPLIER);
+    }
+    return baseCount;
   });
 }
 
@@ -3638,7 +3745,11 @@ function getPetalDisplayName(item) {
 
 function formatPetalStat(value) {
   if (!Number.isFinite(value)) return "0";
-  return Number.isInteger(value) ? `${value}` : `${Math.round(value * 10) / 10}`;
+  const sign = value < 0 ? "-" : "";
+  const absoluteValue = Math.abs(value);
+  if (absoluteValue >= 1000000) return `${sign}${Math.round(absoluteValue / 1000000)}M`;
+  if (absoluteValue >= 1000) return `${sign}${Math.round(absoluteValue / 1000)}K`;
+  return `${sign}${Math.round(absoluteValue)}`;
 }
 
 function formatSeconds(milliseconds) {
@@ -4650,6 +4761,27 @@ function resetPetalForInventory(item) {
   }
 }
 
+function restartPetalCooldownForPrimaryEquip(item, time = performance.now()) {
+  if (!item) return;
+
+  resetPetalPlacement(item);
+  item.active = false;
+  item.durability = 0;
+  item.cooldownStartedAt = time;
+  item.readyAt = time + getPetalCooldownMs(item);
+
+  if (item.name === "Light") {
+    ensureLightOrbStates(item);
+    item.orbs.forEach((orb) => {
+      orb.active = false;
+      orb.durability = 0;
+      orb.cooldownStartedAt = time;
+      orb.readyAt = item.readyAt;
+    });
+    syncPetalActiveState(item);
+  }
+}
+
 function moveEquipmentToInventory(index) {
   const item = state.weapon.petals[index];
   if (!item) return;
@@ -4733,10 +4865,16 @@ function dropDraggedItemToEquipment(targetIndex, targetSource = "equipment") {
     const sourceItem = sourceArray[sourceIndex];
     sourceArray[sourceIndex] = targetArray[targetIndex];
     targetArray[targetIndex] = sourceItem;
+    if (targetSource === "equipment" && dragData.source !== "equipment") {
+      restartPetalCooldownForPrimaryEquip(sourceItem);
+    }
   } else {
     const sourceItem = state.inventory.splice(dragData.index, 1)[0];
     const replacedItem = targetArray[targetIndex];
     targetArray[targetIndex] = sourceItem;
+    if (targetSource === "equipment") {
+      restartPetalCooldownForPrimaryEquip(sourceItem);
+    }
     if (replacedItem) movePetalToInventory(replacedItem);
     sortInventory();
   }
@@ -4782,6 +4920,9 @@ function equipInventoryItem(index) {
 
   state.inventory.splice(index, 1);
   getEquipmentArray(targetSource)[targetIndex] = item;
+  if (targetSource === "equipment") {
+    restartPetalCooldownForPrimaryEquip(item);
+  }
   renderItemUi();
 }
 
@@ -4791,6 +4932,7 @@ function swapEquipmentSlot(index) {
   const mainItem = state.weapon.petals[index];
   state.weapon.petals[index] = state.weapon.secondaryPetals[index];
   state.weapon.secondaryPetals[index] = mainItem;
+  restartPetalCooldownForPrimaryEquip(state.weapon.petals[index]);
   renderItemUi();
 }
 
@@ -4804,10 +4946,14 @@ function syncInventoryReturnDropzonePosition(slotCount = getEffectiveEquipmentSl
 
   const isTablet = document.body.classList.contains("is-tablet-ui");
   const isSmall = window.innerWidth <= 430;
-  const slotSize = isTablet ? 76 : isSmall ? 58 : 68;
-  const gap = isSmall ? 6 : 8;
+  const slotSize = isSmall ? 34 : isTablet ? 76 : 68;
+  const gap = isSmall ? 4 : 8;
   const hotbarWidth = slotCount * slotSize + Math.max(0, slotCount - 1) * gap;
-  const offset = hotbarWidth / 2 + (isSmall ? 34 : 42);
+  const offset = hotbarWidth / 2 + (isSmall ? 26 : 42);
+  if (isSmall) {
+    inventoryReturnDropzone.style.left = `${Math.min(window.innerWidth - 24, window.innerWidth / 2 + offset)}px`;
+    return;
+  }
   inventoryReturnDropzone.style.left = `calc(50% + ${Math.round(offset)}px)`;
 }
 
@@ -4817,6 +4963,7 @@ function swapAllEquipmentSlots() {
     const mainItem = state.weapon.petals[index];
     state.weapon.petals[index] = state.weapon.secondaryPetals[index];
     state.weapon.secondaryPetals[index] = mainItem;
+    restartPetalCooldownForPrimaryEquip(state.weapon.petals[index]);
   }
   renderItemUi();
 }
@@ -4984,6 +5131,7 @@ function renderCraftingUi() {
       : "";
   craftSubmitButton.disabled = !activeItem || state.crafting.quantity < CRAFT_ITEMS_PER_ATTEMPT;
   craftSubmitButton.disabled = craftSubmitButton.disabled || state.crafting.animating;
+  craftAllInButton.disabled = !activeItem || !activeEntry || state.crafting.animating;
   craftMessage.textContent = state.crafting.message;
 }
 
@@ -5010,6 +5158,11 @@ function loadCraftingGroup(stackKey, selectAll = false) {
     ? entry.quantity
     : Math.min(entry.quantity, state.crafting.quantity + CRAFT_ITEMS_PER_ATTEMPT);
   renderCraftingUi();
+}
+
+function loadSelectedCraftingAllIn() {
+  if (!state.crafting.stackKey || state.crafting.animating) return;
+  loadCraftingGroup(state.crafting.stackKey, true);
 }
 
 function removeInventoryItemsByStackKey(stackKey, count) {
@@ -5539,6 +5692,11 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
     const monsterShape = getMonsterHitbox(monster);
     if (!hitShapesOverlap(playerShape, monsterShape)) continue;
 
+    if (time >= (state.player.nextContactFlashAt || 0)) {
+      state.player.hitFlash = HIT_FLASH_SECONDS;
+      state.player.nextContactFlashAt = time + PLAYER_CONTACT_FLASH_INTERVAL_MS;
+    }
+
     const playerWasHit = time >= monster.nextBodyDamageAt
       ? damageCreature(state.player, monster.attack, time)
       : false;
@@ -5671,6 +5829,7 @@ function respawnPlayer() {
   state.player.hidden = false;
   state.player.deathStartedAt = 0;
   state.player.invulnerableUntil = now + RESPAWN_INVULNERABLE_MS;
+  state.player.nextContactFlashAt = 0;
   state.camera.x = spawnPoint.x;
   state.camera.y = spawnPoint.y;
   state.pointer.x = state.width / 2;
@@ -5683,6 +5842,8 @@ function respawnPlayer() {
   state.input.defend = false;
   state.input.joystickX = 0;
   state.input.joystickY = 0;
+  state.input.touchAimX = 1;
+  state.input.touchAimY = 0;
   state.weapon.orbitRadius = getPetalOrbitRadius(state.weapon.neutralRadius);
   state.weapon.targetRadius = getPetalOrbitRadius(state.weapon.neutralRadius);
   state.weapon.homingUnits = Object.create(null);
@@ -5730,7 +5891,7 @@ function startGame() {
   } else if (MAP_DEFINITIONS[state.mapId]) {
     restoreMonsterMapState(state.mapId, {
       seed: true,
-      immediateLimit: state.mapId === "garden2" ? Infinity : 180,
+      immediateLimit: 180,
     });
   }
   respawnPlayer();
@@ -5852,10 +6013,13 @@ function applyLanguage() {
   tutorialPanel.setAttribute("aria-label", text.tutorial);
   shopButton.setAttribute("aria-label", text.shop);
   shopPanel.setAttribute("aria-label", text.shop);
+  thanksButton.setAttribute("aria-label", text.thanks);
+  thanksPanel.setAttribute("aria-label", text.thanks);
   talentButton.setAttribute("aria-label", text.talents);
   talentPanel.setAttribute("aria-label", text.talents);
   craftButton.setAttribute("aria-label", text.craft);
   craftPanel.setAttribute("aria-label", text.craft);
+  craftAllInButton.setAttribute("aria-label", text.craftAllIn);
   forgeButton.setAttribute("aria-label", text.forge);
   forgePanel.setAttribute("aria-label", text.forge);
   authorPanel.setAttribute("aria-label", text.authorPanel);
@@ -5889,7 +6053,7 @@ function switchActiveMap(mapId) {
   rebuildActiveMap();
   restoreMonsterMapState(nextMapId, {
     seed: true,
-    immediateLimit: nextMapId === "garden2" ? Infinity : 180,
+    immediateLimit: 180,
   });
   const spawn = findNearestFloorPosition(
     getPlayerSpawnWorldPosition().x,
@@ -5917,7 +6081,7 @@ function getMapPortalDefinitions(mapId = state.mapId) {
     ];
   }
   if (mapId === "garden2") {
-    return [{ type: "map", targetMapId: "garden", ...routeTileToWorld(23.5, 57.5) }];
+    return [{ type: "map", targetMapId: "garden", ...routeTileToWorld(11.0, 9.0) }];
   }
   if (mapId === "antHell") {
     return [
@@ -6007,13 +6171,6 @@ function verifyAuthorPortalPassword() {
 
 function startMapPortalTransition(portal, time) {
   if (state.portalTransition.active || !portal) return;
-  if (portal.targetMapId === "garden2" && state.player.level <= 30) {
-    if (time >= state.nextPortalNoticeAt) {
-      showGameNotice("garden2LevelRequired");
-      state.nextPortalNoticeAt = time + 900;
-    }
-    return;
-  }
 
   state.portalTransition.active = true;
   state.portalTransition.startedAt = time;
@@ -6138,6 +6295,43 @@ function getBubbleLaunchDistance(petal) {
   return BUBBLE_LAUNCH_BASE_DISTANCE + getTier(petal?.tierIndex || 0).index * BUBBLE_LAUNCH_DISTANCE_PER_TIER;
 }
 
+function getEquippedBubblePetals() {
+  const slotCount = getEffectiveEquipmentSlots();
+  return state.weapon.petals
+    .slice(0, slotCount)
+    .filter((petal) => petal && PETAL_DEFINITIONS[petal.name]?.bubbleLaunch);
+}
+
+function getReadyBubblePetal() {
+  return getEquippedBubblePetals()
+    .filter((petal) => petal.active)
+    .sort((a, b) => b.tierIndex - a.tierIndex)[0] || null;
+}
+
+function getBubbleLaunchIntervalMs() {
+  const readyBubbleCount = getEquippedBubblePetals().filter((petal) => petal.active).length;
+  return Math.max(35, BUBBLE_LAUNCH_CHAIN_INTERVAL_MS / Math.max(1, readyBubbleCount));
+}
+
+function getBubbleLaunchAngle() {
+  if (usesTouchControls()) {
+    const joystickLength = Math.hypot(state.input.joystickX, state.input.joystickY);
+    if (joystickLength > 0.12) {
+      return Math.atan2(state.input.joystickY, state.input.joystickX);
+    }
+    const touchAimLength = Math.hypot(state.input.touchAimX, state.input.touchAimY);
+    if (touchAimLength > 0.01) {
+      return Math.atan2(state.input.touchAimY, state.input.touchAimX);
+    }
+  }
+
+  const dx = state.pointer.worldX - state.player.x;
+  const dy = state.pointer.worldY - state.player.y;
+  const distanceToPointer = Math.hypot(dx, dy);
+  if (distanceToPointer <= 1) return null;
+  return Math.atan2(dy, dx);
+}
+
 function movePlayerByBubbleLaunch(angle, distance) {
   const stepDistance = 64;
   let remaining = Math.max(0, distance);
@@ -6162,16 +6356,11 @@ function launchPlayerWithBubble(time = performance.now()) {
   if (!state.spawned || !state.player.alive || state.player.dying || state.player.hidden) return false;
   if (time < (state.nextBubbleLaunchAt || 0)) return false;
 
-  const bubble = state.weapon.petals.find(
-    (petal) => petal && PETAL_DEFINITIONS[petal.name]?.bubbleLaunch && petal.active,
-  );
+  const bubble = getReadyBubblePetal();
   if (!bubble) return false;
 
-  const dx = state.pointer.worldX - state.player.x;
-  const dy = state.pointer.worldY - state.player.y;
-  const distanceToPointer = Math.hypot(dx, dy);
-  if (distanceToPointer <= 1) return false;
-  const launchAngle = Math.atan2(dy, dx);
+  const launchAngle = getBubbleLaunchAngle();
+  if (launchAngle == null) return false;
 
   movePlayerByBubbleLaunch(launchAngle, getBubbleLaunchDistance(bubble));
   state.camera.x = state.player.x;
@@ -6181,7 +6370,7 @@ function launchPlayerWithBubble(time = performance.now()) {
   state.weapon.inertiaY -= Math.sin(launchAngle) * BUBBLE_PETAL_INERTIA_DISTANCE;
   bubble.durability = 0;
   startPetalCooldown(bubble, time);
-  state.nextBubbleLaunchAt = time + BUBBLE_LAUNCH_CHAIN_INTERVAL_MS;
+  state.nextBubbleLaunchAt = time + getBubbleLaunchIntervalMs();
   syncEquipmentSlotWearUi();
   return true;
 }
@@ -6205,6 +6394,8 @@ function closeFloatingPanels() {
   monsterDexButton.classList.remove("is-active");
   shopPanel.classList.add("is-hidden");
   shopButton.classList.remove("is-active");
+  thanksPanel.classList.add("is-hidden");
+  thanksButton.classList.remove("is-active");
   closeAuthorPortalPanel();
   authorPanel.classList.add("is-hidden");
   closeChatPanel();
@@ -6231,6 +6422,8 @@ function isFloatingPanelTarget(target) {
     monsterDexButton.contains(target) ||
     shopPanel.contains(target) ||
     shopButton.contains(target) ||
+    thanksPanel.contains(target) ||
+    thanksButton.contains(target) ||
     chatWidget.contains(target) ||
     authorQuickButton.contains(target) ||
     authorPortalCard.contains(target) ||
@@ -6261,6 +6454,9 @@ function updateAuthorPanelUi() {
   authorMessage.textContent = state.author.verified ? text.authorReady : "";
   authorTeleportButton.disabled = !state.author.hasSelection;
   authorSpawnMonsterButton.disabled = !state.author.verified;
+  authorHealthLockButton.disabled = !state.author.verified;
+  authorHealthLockButton.textContent = state.author.healthLocked ? "锁血：开" : "锁血：关";
+  authorHealthLockButton.classList.toggle("is-active", state.author.healthLocked);
   authorMapMarker.classList.toggle("is-hidden", !state.author.hasSelection);
   if (state.author.hasSelection) {
     const mapWidth = getMapWorldWidth();
@@ -6367,6 +6563,16 @@ function setAuthorPlayerLevel() {
   authorMessage.textContent = `等级已改为 ${targetLevel}`;
 }
 
+function toggleAuthorHealthLock() {
+  if (!state.author.verified) return;
+  state.author.healthLocked = !state.author.healthLocked;
+  if (state.author.healthLocked) {
+    state.player.health = state.player.maxHealth;
+  }
+  updateAuthorPanelUi();
+  authorMessage.textContent = state.author.healthLocked ? "锁血已开启" : "锁血已关闭";
+}
+
 function addAuthorInventoryItems() {
   if (!state.author.verified) return;
 
@@ -6401,13 +6607,12 @@ function spawnAuthorMonsters() {
     applyMapStaticData(mapId);
     restoreMonsterMapState(mapId, {
       seed: true,
-      immediateLimit: mapId === "garden2" ? Infinity : 180,
+      immediateLimit: 180,
     });
   }
 
   const speciesName = authorMonsterSpeciesSelect.value || "Bee";
-  const minTierIndex = mapId === "garden2" ? getTierIndexByName("Eternal") : 0;
-  const tierIndex = clamp(Math.floor(Number(authorMonsterTierSelect.value) || 0), minTierIndex, TIERS.length - 1);
+  const tierIndex = clamp(Math.floor(Number(authorMonsterTierSelect.value) || 0), 0, TIERS.length - 1);
   const quantity = clamp(Math.floor(Number(authorMonsterQuantityInput.value) || 1), 1, 3000);
   const stats = MONSTER_DEFINITIONS[speciesName]?.stats || BEE_STATS;
   const spawnRadius = getMonsterSizeScale(stats.radius, tierIndex, mapId);
@@ -6975,6 +7180,13 @@ function openShopPanel() {
   state.uiLockMovement = true;
 }
 
+function openThanksPanel() {
+  closeFloatingPanels();
+  thanksPanel.classList.remove("is-hidden");
+  thanksButton.classList.add("is-active");
+  state.uiLockMovement = true;
+}
+
 function collapseInventoryPanel() {
   inventoryPanel.classList.add("is-collapsed");
   inventoryToggleButton.textContent = "+";
@@ -7200,6 +7412,9 @@ function getBaseMaxHealthForLevel(level) {
 
   for (let currentLevel = 1; currentLevel < targetLevel; currentLevel++) {
     baseMaxHealth = Math.round(baseMaxHealth * getPlayerHealthGrowthMultiplier(currentLevel));
+    if (currentLevel + 1 === PLAYER_HEALTH_BOOST_LEVEL) {
+      baseMaxHealth = Math.round(baseMaxHealth * PLAYER_HEALTH_BOOST_MULTIPLIER);
+    }
   }
 
   return baseMaxHealth;
@@ -7538,6 +7753,10 @@ function setJoystickPosition(clientX, clientY) {
 
   state.input.joystickX = maxDistance > 0 ? knobX / maxDistance : 0;
   state.input.joystickY = maxDistance > 0 ? knobY / maxDistance : 0;
+  if (distance > 6) {
+    state.input.touchAimX = dx / distance;
+    state.input.touchAimY = dy / distance;
+  }
   joystickKnob.style.transform = `translate(calc(-50% + ${knobX}px), calc(-50% + ${knobY}px))`;
 }
 
@@ -7574,7 +7793,12 @@ function setInputAction(action, pressed) {
 
 function damageCreature(creature, amount, time) {
   if (creature.hidden || creature.dying || !creature.alive) return false;
-  if (creature === state.player && time < state.player.invulnerableUntil) return false;
+  if (
+    creature === state.player &&
+    (time < state.player.invulnerableUntil || (state.author.verified && state.author.healthLocked))
+  ) {
+    return false;
+  }
 
   const finalAmount = creature === state.player ? amount * getDamageReductionMultiplier() : amount;
   creature.health = Math.max(0, creature.health - finalAmount);
@@ -7644,6 +7868,9 @@ function levelUpPlayer() {
 
   state.player.level += 1;
   state.player.baseMaxHealth = Math.round(state.player.baseMaxHealth * multiplier);
+  if (state.player.level === PLAYER_HEALTH_BOOST_LEVEL) {
+    state.player.baseMaxHealth = Math.round(state.player.baseMaxHealth * PLAYER_HEALTH_BOOST_MULTIPLIER);
+  }
   grantTalentPoint();
   refreshPlayerMaxHealth();
   state.player.health = Math.min(
@@ -7747,6 +7974,11 @@ function updateLazyWanderMonster(monster, dt, time) {
   monster.faceAngle = lerpAngle(monster.faceAngle, monster.moveAngle + Math.PI / 2, Math.min(1, dt * 7));
 }
 
+function shouldUseLazyWanderMovement(monster, time) {
+  if (monster.lazyWander) return true;
+  return monster.name === "WorkerAnt" && !isMonsterChasingPlayer(monster, time);
+}
+
 function updateMonsters(dt, time) {
   if (!state.spawned) return;
 
@@ -7760,7 +7992,7 @@ function updateMonsters(dt, time) {
       monster.speed = 0;
       continue;
     }
-    if (monster.lazyWander) {
+    if (shouldUseLazyWanderMovement(monster, time)) {
       updateLazyWanderMonster(monster, dt, time);
       continue;
     }
@@ -8339,8 +8571,6 @@ function createTierSpawnPoint(tierIndex) {
   if (antHellHubSpawn) return antHellHubSpawn;
   const distributedSpawn = createTileMaskDistributedSpawnPoint(tierIndex, sequence, spawnPadding);
   if (distributedSpawn) return distributedSpawn;
-  const upperSpawn = createGarden2UpperSpawnPoint(tierIndex, sequence, spawnPadding);
-  if (upperSpawn) return upperSpawn;
 
   for (let attempt = 0; attempt < 256; attempt++) {
     const progressSeed = (sequence * 0.61803398875 + attempt * 0.139 + tierIndex * 0.071) % 1;
@@ -8375,7 +8605,7 @@ function createRandomMonster(tierIndex = chooseMonsterSpawnTierIndex(), speciesN
   let fallbackY = 0;
   let fallbackDirection = 1;
 
-  const maxSpawnAttempts = options.rare ? 320 : state.mapId === "garden2" ? 96 : 48;
+  const maxSpawnAttempts = options.rare ? 320 : 48;
   for (let attempt = 0; attempt < maxSpawnAttempts; attempt++) {
     const spawnPadding = getMonsterSizeScale(MONSTER_DEFINITIONS[monsterSpecies]?.stats?.radius || BEE_STATS.radius, tierIndex);
     const rareSpawn = options.rare
@@ -8486,7 +8716,7 @@ function seedMonsterPopulation({ immediateLimit = Infinity } = {}) {
 function updateMonsterBackfill() {
   if (!state.monsterBackfillQueue.length) return;
 
-  const perTick = state.mapId === "garden" ? 5 : 7;
+  const perTick = state.mapId === "antHell" ? 7 : 5;
   for (let index = 0; index < perTick && state.monsterBackfillQueue.length; index++) {
     const tierIndex = state.monsterBackfillQueue.shift();
     const monster = createRandomMonster(tierIndex);
@@ -8506,7 +8736,8 @@ function updateRareMonsterSpawns(time) {
     const currentCount = counts[tierIndex] || 0;
     const intervalMs = config.intervalMs || 30000;
     if (!state.nextRareMonsterSpawnAt[tierIndex]) {
-      const stagger = 0.35 + wallTextureHash(tierIndex, state.mapId === "garden" ? 1.3 : 2.7, 44) * 0.65;
+      const staggerSeed = state.mapId === "antHell" ? 2.7 : 1.3;
+      const stagger = 0.35 + wallTextureHash(tierIndex, staggerSeed, 44) * 0.65;
       state.nextRareMonsterSpawnAt[tierIndex] = time + intervalMs * stagger;
       continue;
     }
@@ -8572,7 +8803,7 @@ function getMonsterPopulationConfigKey() {
     mapId: state.mapId,
     minTierName: config.minTierName,
     maxTierName: config.maxTierName,
-    targetCounts: config.targetCounts,
+    targetCounts: getMonsterTierTargetCounts(),
     rareSpawns: config.rareSpawns || [],
     species: getActiveMonsterSpecies(),
   });
@@ -8712,7 +8943,10 @@ function moveHomingStateToward(homingState, targetX, targetY, speed, dt, useIner
 }
 
 function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state.lastTime) {
-  const orbitingPetals = state.weapon.petals.filter((petal) => petal && !(petal.placeableBarrier && petal.placed));
+  const playerOverlayPetals = state.weapon.petals.filter((petal) => isPlayerOverlayPetal(petal));
+  const orbitingPetals = state.weapon.petals.filter(
+    (petal) => petal && !isPlayerOverlayPetal(petal) && !(petal.placeableBarrier && petal.placed),
+  );
   const placedPetals = state.weapon.petals.filter((petal) => petal?.placeableBarrier && petal.placed && petal.active);
   const lentilHomingRange = getLentilHomingRange();
   const shouldUpdateHoming = time !== state.weapon.homingUpdatedAt;
@@ -8732,7 +8966,8 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
   const orbitingPositions = orbitingUnits.map((unit, index) => {
     const angle = state.weapon.angle + (index / equippedCount) * Math.PI * 2;
     const lightScale = unit.petal.name === "Light" ? 0.72 : 1;
-    const hitRadius = state.weapon.hitRadius * lightScale;
+    const sizeScale = getPetalSizeScale(unit.petal) * lightScale;
+    const hitRadius = state.weapon.hitRadius * sizeScale;
     const orbitX = state.player.x + Math.cos(angle) * orbitRadius + state.weapon.inertiaX;
     const orbitY = state.player.y + Math.sin(angle) * orbitRadius + state.weapon.inertiaY;
     let x = orbitX;
@@ -8744,6 +8979,7 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
     const homingKey = getWeaponHomingKey(unit.petal, unit.unitIndex);
     const unitActive = isPetalUnitActive(unit.petal, unit.unitIndex);
     const rechargeAtPlayerCenter = unit.petal.name === "Lentil" && !unitActive;
+    const petalLentilHomingRange = getPetalLentilHomingRange(unit.petal, lentilHomingRange);
 
     if (rechargeAtPlayerCenter) {
       x = state.player.x;
@@ -8751,12 +8987,12 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
       delete state.weapon.homingUnits[homingKey];
     }
 
-    if (lentilHomingRange > 0 && unitActive) {
+    if (petalLentilHomingRange > 0 && unitActive) {
       let homingState = state.weapon.homingUnits[homingKey];
       const target = getNearestMonsterToPoint(
         state.player.x,
         state.player.y,
-        lentilHomingRange,
+        petalLentilHomingRange,
       );
       if (target) {
         const originX = homingState ? homingState.x : state.player.x;
@@ -8854,7 +9090,7 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
       homingStartX,
       homingStartY,
       hitRadius,
-      sizeScale: lightScale,
+      sizeScale,
     };
   });
 
@@ -8868,6 +9104,18 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
   }
 
   return orbitingPositions.concat(
+    playerOverlayPetals.map((petal, index) => ({
+      petal,
+      unitIndex: 0,
+      unitState: getPetalUnitState(petal, 0),
+      unitCount: 1,
+      angle: state.weapon.angle * 0.25 + index * 0.22,
+      x: state.player.x,
+      y: state.player.y,
+      playerOverlay: true,
+      hitRadius: getPetalHitRadius(petal),
+      sizeScale: getPetalSizeScale(petal),
+    })),
     placedPetals.map((petal) => ({
       petal,
       angle: petal.placedAngle || 0,
@@ -9105,6 +9353,12 @@ function getLentilHomingRange() {
   return Math.min(LENTIL_MAX_TOTAL_HOMING_RANGE, total);
 }
 
+function getPetalLentilHomingRange(petal, totalRange = getLentilHomingRange()) {
+  if (!petal || totalRange <= 0) return 0;
+  if (petal.name === "Stone" || petal.name === "Corn") return totalRange * 0.5;
+  return totalRange;
+}
+
 function getNearestMonsterToPoint(x, y, maxDistance, excludedMonsterId = null) {
   let bestMonster = null;
   let bestDistance = maxDistance;
@@ -9229,6 +9483,7 @@ function resolvePlacedPollenBarriers(time) {
 
 function pushMonsterAwayFromWeapon(weapon, monster, monsterShape) {
   if (monster.stationary) return;
+  if (weapon.petal?.name === "Light" || weapon.petal?.name === "Rice") return;
 
   const angle = Math.atan2(weapon.y - monster.y, weapon.x - monster.x);
   const distance = Math.hypot(weapon.x - monster.x, weapon.y - monster.y) || 1;
@@ -9361,10 +9616,14 @@ function update(dt, time) {
   state.weapon.inertiaY += (0 - state.weapon.inertiaY) * inertiaReturn;
   state.weapon.angle += dt * getPetalSpinSpeed();
   if (state.spawned && state.player.alive && !state.player.dying) {
-    state.player.health = Math.min(
-      state.player.maxHealth,
-      state.player.health + getPlayerRegenPerSecond() * dt,
-    );
+    if (state.author.verified && state.author.healthLocked) {
+      state.player.health = state.player.maxHealth;
+    } else {
+      state.player.health = Math.min(
+        state.player.maxHealth,
+        state.player.health + getPlayerRegenPerSecond() * dt,
+      );
+    }
   }
   updatePetals(time, dt);
   updateLeaderboard(time);
@@ -9492,6 +9751,53 @@ function drawRoundTri(targetCtx, cx, cy, size, rotate, round) {
   targetCtx.restore();
 }
 
+function drawRoundPentagon(targetCtx, cx, cy, radius, rotate, roundFactor) {
+  targetCtx.save();
+  targetCtx.translate(cx, cy);
+  targetCtx.rotate(rotate);
+  targetCtx.beginPath();
+
+  const sideCount = 5;
+  const vertices = [];
+  for (let index = 0; index < sideCount; index++) {
+    const angle = -Math.PI / 2 + (Math.PI * 2 * index) / sideCount;
+    vertices.push({
+      x: Math.cos(angle) * radius,
+      y: Math.sin(angle) * radius,
+    });
+  }
+
+  const cornerRadius = radius * roundFactor;
+  function roundCorner(p0, p, p1) {
+    const dx0 = p0.x - p.x;
+    const dy0 = p0.y - p.y;
+    const dx1 = p1.x - p.x;
+    const dy1 = p1.y - p.y;
+    const len0 = Math.hypot(dx0, dy0) || 1;
+    const len1 = Math.hypot(dx1, dy1) || 1;
+    const pa = { x: p.x + dx0 * (cornerRadius / len0), y: p.y + dy0 * (cornerRadius / len0) };
+    const pb = { x: p.x + dx1 * (cornerRadius / len1), y: p.y + dy1 * (cornerRadius / len1) };
+
+    targetCtx.lineTo(pa.x, pa.y);
+    targetCtx.quadraticCurveTo(p.x, p.y, pb.x, pb.y);
+  }
+
+  const first = vertices[0];
+  const second = vertices[1];
+  targetCtx.moveTo(
+    first.x + ((second.x - first.x) * cornerRadius) / radius,
+    first.y + ((second.y - first.y) * cornerRadius) / radius,
+  );
+
+  for (let index = 0; index < sideCount; index++) {
+    roundCorner(vertices[index], vertices[(index + 1) % sideCount], vertices[(index + 2) % sideCount]);
+  }
+
+  targetCtx.closePath();
+  targetCtx.fill();
+  targetCtx.restore();
+}
+
 function getGardenTextureCandidate(layer, gridX, gridY) {
   const baseX = gridX * layer.cell + layer.cell * 0.5;
   const baseY = gridY * layer.cell + layer.cell * 0.5;
@@ -9568,7 +9874,7 @@ function generateGardenJitterPoints(
   return points;
 }
 
-function drawGarden2CircleGroundDecorations(
+function drawGarden2SwampGroundDecorations(
   targetCtx,
   mapLeft,
   mapTop,
@@ -9592,25 +9898,40 @@ function drawGarden2CircleGroundDecorations(
   targetCtx.rect(mapLeft, mapTop, mapScreenWidth, mapScreenHeight);
   targetCtx.clip();
 
-  for (const layer of GARDEN2_CIRCLE_TEXTURE_LAYERS) {
-    targetCtx.fillStyle = layer.color;
-    for (const point of generateGardenJitterPoints(
+  for (const layer of GARDEN2_SWAMP_TEXTURE_LAYERS) {
+    const points = generateGardenJitterPoints(
       visibleWorldLeft,
       visibleWorldTop,
       visibleWorldRight,
       visibleWorldBottom,
       layer,
-      GARDEN2_CIRCLE_TEXTURE_LAYERS,
-      GARDEN2_CIRCLE_GLOBAL_MIN_DIST,
-    )) {
-      const screen = toScreen(point);
-      const radius =
-        (layer.minRadius + gardenHash(point.gridX, point.gridY, layer.seed + 19) * (layer.maxRadius - layer.minRadius)) *
-        viewScale;
+      GARDEN2_SWAMP_TEXTURE_LAYERS,
+      GARDEN2_SWAMP_GLOBAL_MIN_DIST,
+    );
 
-      targetCtx.beginPath();
-      targetCtx.arc(screen.x, screen.y, radius, 0, Math.PI * 2);
-      targetCtx.fill();
+    for (const point of points) {
+      const screen = toScreen(point);
+      const rotate = gardenHash(point.gridX, point.gridY, layer.seed + 19) * Math.PI * 2;
+
+      if (layer.type === "mudHex") {
+        const radius = (12 + gardenHash(point.gridX, point.gridY, layer.seed + 23) * 18) * viewScale;
+        targetCtx.fillStyle = GARDEN2_SWAMP_MUD;
+        drawRoundHex(targetCtx, screen.x, screen.y, radius, rotate, 0.22);
+        continue;
+      }
+
+      if (layer.type === "mossPentagon") {
+        const radius = (7 + gardenHash(point.gridX, point.gridY, layer.seed + 37) * 11) * viewScale;
+        targetCtx.fillStyle = GARDEN2_SWAMP_GRASS;
+        drawRoundPentagon(targetCtx, screen.x, screen.y, radius, rotate, 0.24);
+        continue;
+      }
+
+      targetCtx.fillStyle = layer.type === "lightMoss" ? GARDEN2_SWAMP_LIGHT_MOSS : GARDEN2_SWAMP_DARK_MOSS;
+      const size = (layer.type === "lightMoss"
+        ? 10 + gardenHash(point.gridX, point.gridY, layer.seed + 43) * 18
+        : 17 + gardenHash(point.gridX, point.gridY, layer.seed + 43) * 25) * viewScale;
+      drawRoundTri(targetCtx, screen.x, screen.y, size, rotate, 0.28);
     }
   }
 
@@ -9726,7 +10047,7 @@ function drawBackground() {
       !state.spawned,
     );
   } else if (state.mapId === "garden2") {
-    drawGarden2CircleGroundDecorations(
+    drawGarden2SwampGroundDecorations(
       ctx,
       mapLeft,
       mapTop,
@@ -10098,6 +10419,30 @@ function drawPlayerFace(targetCtx, radius, eyeLook, redAlpha = 0) {
     targetCtx.restore();
   }
 
+  const mouthMode = state.input.defend ? "flat" : state.input.attack ? "angry" : "normal";
+  if (mouthMode !== "normal") {
+    targetCtx.save();
+    targetCtx.lineCap = "round";
+    targetCtx.lineJoin = "round";
+    targetCtx.fillStyle = "#ffe862";
+    targetCtx.beginPath();
+    targetCtx.ellipse(0, 19.4 * scale, 17.5 * scale, 10.2 * scale, 0, 0, Math.PI * 2);
+    targetCtx.fill();
+
+    targetCtx.strokeStyle = "#121316";
+    targetCtx.lineWidth = 3.2 * scale;
+    targetCtx.beginPath();
+    if (mouthMode === "angry") {
+      targetCtx.moveTo(-12.5 * scale, 17.2 * scale);
+      targetCtx.quadraticCurveTo(0, 6.4 * scale, 12.5 * scale, 17.2 * scale);
+    } else {
+      targetCtx.moveTo(-13 * scale, 15.4 * scale);
+      targetCtx.lineTo(13 * scale, 15.4 * scale);
+    }
+    targetCtx.stroke();
+    targetCtx.restore();
+  }
+
   if (redAlpha > 0) {
     targetCtx.save();
     targetCtx.globalAlpha = redAlpha;
@@ -10309,6 +10654,7 @@ function drawWeapons() {
 
   for (const weapon of getWeaponPositions()) {
     if (!weapon.petal) continue;
+    if (weapon.playerOverlay) continue;
 
     let weaponX = weapon.x;
     let weaponY = weapon.y;
@@ -10338,6 +10684,27 @@ function drawWeapons() {
     ctx.translate(x, y);
     ctx.rotate(weapon.angle + Math.PI / 2);
     const image = state.assets[weapon.petal.asset] || state.assets.basic;
+    ctx.drawImage(image, -petalSize / 2, -petalSize / 2, petalSize, petalSize);
+    ctx.restore();
+  }
+}
+
+function drawPlayerOverlayPetals() {
+  if (!state.spawned) return;
+  if (!state.player.alive || state.player.dying || state.player.hidden) return;
+
+  const center = worldToScreen(state.player.x, state.player.y);
+  const viewScale = getViewScale();
+
+  for (const weapon of getWeaponPositions()) {
+    if (!weapon.playerOverlay || !weapon.petal) continue;
+    if (!isPetalUnitActive(weapon.petal, weapon.unitIndex)) continue;
+
+    const petalSize = state.weapon.size * (weapon.sizeScale || 1) * viewScale;
+    const image = state.assets[weapon.petal.asset] || state.assets.basic;
+    ctx.save();
+    ctx.translate(center.x, center.y);
+    ctx.rotate(weapon.angle);
     ctx.drawImage(image, -petalSize / 2, -petalSize / 2, petalSize, petalSize);
     ctx.restore();
   }
@@ -10454,6 +10821,7 @@ function draw() {
     drawMapPortals();
     drawDrops();
     drawMonsters();
+    drawPlayerOverlayPetals();
     drawDamageNumbers();
   }
   drawWeapons();
@@ -10616,7 +10984,7 @@ async function boot() {
   syncAccountBackups();
   seedMonsterPopulation();
   saveActiveMonsterMapState();
-  ensureMonsterMapPopulation("garden2");
+  ensureMonsterMapPopulation("garden2", { immediateLimit: 180 });
   ensureMonsterMapPopulation("antHell");
   renderItemUi();
   renderMonsterDexUi();
@@ -10661,6 +11029,8 @@ window.addEventListener("pointermove", (event) => {
     tutorialButton.contains(event.target) ||
     shopPanel.contains(event.target) ||
     shopButton.contains(event.target) ||
+    thanksPanel.contains(event.target) ||
+    thanksButton.contains(event.target) ||
     monsterDexPanel.contains(event.target) ||
     monsterDexButton.contains(event.target) ||
     chatWidget.contains(event.target) ||
@@ -10920,6 +11290,13 @@ shopButton.addEventListener("click", () => {
     closeFloatingPanels();
   }
 });
+thanksButton.addEventListener("click", () => {
+  if (thanksPanel.classList.contains("is-hidden")) {
+    openThanksPanel();
+  } else {
+    closeFloatingPanels();
+  }
+});
 loginForm.addEventListener("submit", (event) => {
   event.preventDefault();
   loginAccount();
@@ -10996,6 +11373,7 @@ craftButton.addEventListener("click", () => {
   renderCraftingUi();
 });
 craftSubmitButton.addEventListener("click", craftLoadedPetals);
+craftAllInButton.addEventListener("click", loadSelectedCraftingAllIn);
 craftCloseButton.addEventListener("click", closeFloatingPanels);
 forgeButton.addEventListener("click", () => {
   const isOpening = forgePanel.classList.contains("is-hidden");
@@ -11095,6 +11473,12 @@ shopPanel.addEventListener("pointerenter", () => {
 shopPanel.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
+thanksPanel.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+thanksPanel.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
 authorQuickButton.addEventListener("pointerenter", () => {
   state.uiLockMovement = true;
 });
@@ -11155,6 +11539,12 @@ shopButton.addEventListener("pointerenter", () => {
 shopButton.addEventListener("pointerleave", () => {
   if (!dragData) state.uiLockMovement = false;
 });
+thanksButton.addEventListener("pointerenter", () => {
+  state.uiLockMovement = true;
+});
+thanksButton.addEventListener("pointerleave", () => {
+  if (!dragData) state.uiLockMovement = false;
+});
 inventoryPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
@@ -11177,6 +11567,9 @@ petalDexPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
 shopPanel.addEventListener("pointerdown", () => {
+  state.uiLockMovement = true;
+});
+thanksPanel.addEventListener("pointerdown", () => {
   state.uiLockMovement = true;
 });
 authorQuickButton.addEventListener("pointerdown", () => {
@@ -11202,6 +11595,7 @@ window.addEventListener("pointerup", (event) => {
     !petalDexPanel.contains(event.target) &&
     !monsterDexPanel.contains(event.target) &&
     !shopPanel.contains(event.target) &&
+    !thanksPanel.contains(event.target) &&
     !authorPortalCard.contains(event.target) &&
     !authorPanel.contains(event.target) &&
     !authorQuickButton.contains(event.target) &&
@@ -11214,6 +11608,7 @@ window.addEventListener("pointerup", (event) => {
 monsterDexCloseButton.addEventListener("click", closeFloatingPanels);
 petalDexCloseButton.addEventListener("click", closeFloatingPanels);
 shopCloseButton.addEventListener("click", closeFloatingPanels);
+thanksCloseButton.addEventListener("click", closeFloatingPanels);
 tutorialCloseButton.addEventListener("click", closeFloatingPanels);
 authorQuickButton.addEventListener("click", openAuthorPanel);
 authorPortalCloseButton.addEventListener("click", closeAuthorPortalPanel);
@@ -11224,6 +11619,7 @@ authorMapPreview.addEventListener("click", selectAuthorTeleportPoint);
 authorTeleportButton.addEventListener("click", teleportToAuthorPoint);
 authorAddItemButton.addEventListener("click", addAuthorInventoryItems);
 authorSetLevelButton.addEventListener("click", setAuthorPlayerLevel);
+authorHealthLockButton.addEventListener("click", toggleAuthorHealthLock);
 authorSpawnMonsterButton.addEventListener("click", spawnAuthorMonsters);
 inventoryPanel.addEventListener("dragover", (event) => {
   event.preventDefault();

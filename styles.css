@@ -292,6 +292,7 @@ body {
 .petaldex-menu-button,
 .monsterdex-menu-button,
 .shop-menu-button,
+.thanks-menu-button,
 .tutorial-menu-button {
   position: relative;
   min-width: 118px;
@@ -329,7 +330,8 @@ body {
   box-shadow: 0 5px 0 #5c3a1d, 0 8px 0 rgba(17, 18, 23, 0.3);
 }
 
-.shop-menu-button {
+.shop-menu-button,
+.thanks-menu-button {
   min-width: 126px;
   border-color: #244d82;
   background: #68b5f0;
@@ -340,10 +342,11 @@ body {
 .start-menu-buttons .petaldex-menu-button,
 .start-menu-buttons .monsterdex-menu-button,
 .start-menu-buttons .shop-menu-button,
+.start-menu-buttons .thanks-menu-button,
 .start-menu-buttons .tutorial-menu-button {
-  flex: 0 0 170px;
-  width: 170px;
-  min-width: 170px;
+  flex: 0 0 142px;
+  width: 142px;
+  min-width: 142px;
   height: 34px;
   border: 4px solid #24743f;
   border-radius: 0;
@@ -366,7 +369,9 @@ body {
 .monsterdex-menu-button.is-active,
 .monsterdex-menu-button:active,
 .shop-menu-button.is-active,
-.shop-menu-button:active {
+.shop-menu-button:active,
+.thanks-menu-button.is-active,
+.thanks-menu-button:active {
   background: #f0d883;
   box-shadow: 0 2px 0 #5c3a1d, 0 4px 0 rgba(17, 18, 23, 0.25);
 }
@@ -385,7 +390,9 @@ body {
 }
 
 .shop-menu-button.is-active,
-.shop-menu-button:active {
+.shop-menu-button:active,
+.thanks-menu-button.is-active,
+.thanks-menu-button:active {
   background: #86c8f7;
   transform: translateY(3px);
   box-shadow: 0 2px 0 #183862, 0 4px 0 rgba(17, 18, 23, 0.25);
@@ -399,10 +406,44 @@ body {
 .start-menu-buttons .monsterdex-menu-button:active,
 .start-menu-buttons .shop-menu-button.is-active,
 .start-menu-buttons .shop-menu-button:active,
+.start-menu-buttons .thanks-menu-button.is-active,
+.start-menu-buttons .thanks-menu-button:active,
 .start-menu-buttons .tutorial-menu-button.is-active,
 .start-menu-buttons .tutorial-menu-button:active {
   background: #68bd58;
   transform: translateY(2px);
+}
+
+.thanks-panel {
+  width: min(520px, calc(100vw - 40px));
+}
+
+.thanks-panel-content {
+  display: grid;
+  gap: 16px;
+  place-items: center;
+  padding: 28px;
+  color: var(--paper);
+  font: 900 24px/1.25 "Trebuchet MS", "Avenir Next", sans-serif;
+  text-align: center;
+  -webkit-text-stroke: 2px var(--ink);
+  paint-order: stroke fill;
+}
+
+.thanks-panel-content p {
+  margin: 0;
+}
+
+.thanks-panel-content a {
+  min-width: 180px;
+  padding: 10px 18px;
+  border: 4px solid #244d82;
+  border-radius: 7px;
+  background: #68b5f0;
+  color: var(--paper);
+  font-size: 18px;
+  text-decoration: none;
+  box-shadow: 0 5px 0 #183862, 0 8px 0 rgba(17, 18, 23, 0.3);
 }
 
 .account-panel {
@@ -1830,7 +1871,8 @@ body {
   display: none;
 }
 
-.craft-submit-button {
+.craft-submit-button,
+.craft-all-in-button {
   justify-self: center;
   width: 82px;
   min-height: 44px;
@@ -1847,13 +1889,25 @@ body {
   box-shadow: 0 4px 0 #2f2f2f;
 }
 
+.craft-all-in-button {
+  width: 96px;
+  min-height: 38px;
+  margin-top: -2px;
+  border-color: #7c5a24;
+  background: #f0c66e;
+  color: #fffdf1;
+  font-size: 16px;
+  box-shadow: 0 4px 0 #6b4519;
+}
+
 .forge-submit-button {
   border-color: #050506;
   background: #25262a;
   box-shadow: 0 4px 0 #060607;
 }
 
-.craft-submit-button:disabled {
+.craft-submit-button:disabled,
+.craft-all-in-button:disabled {
   cursor: default;
   filter: grayscale(0.45);
   opacity: 0.68;
@@ -2333,6 +2387,12 @@ body {
   cursor: default;
   filter: grayscale(0.36);
   opacity: 0.72;
+}
+
+.author-main-button.is-active {
+  border-color: #244d82;
+  background: #68b5f0;
+  box-shadow: 0 5px 0 #183862, 0 8px 0 rgba(17, 18, 23, 0.3);
 }
 
 .author-message {
@@ -3348,6 +3408,7 @@ body {
   .petaldex-menu-button,
   .monsterdex-menu-button,
   .shop-menu-button,
+  .thanks-menu-button,
   .tutorial-menu-button {
     height: 30px;
     min-width: 150px;
@@ -3358,6 +3419,7 @@ body {
   .start-menu-buttons .petaldex-menu-button,
   .start-menu-buttons .monsterdex-menu-button,
   .start-menu-buttons .shop-menu-button,
+  .start-menu-buttons .thanks-menu-button,
   .start-menu-buttons .tutorial-menu-button {
     flex-basis: 150px;
     width: 150px;
@@ -3370,7 +3432,8 @@ body {
   .account-menu-button,
   .petaldex-menu-button,
   .monsterdex-menu-button,
-  .shop-menu-button {
+  .shop-menu-button,
+  .thanks-menu-button {
     bottom: auto;
     transform: none;
   }
@@ -3384,7 +3447,9 @@ body {
   .monsterdex-menu-button.is-active,
   .monsterdex-menu-button:active,
   .shop-menu-button.is-active,
-  .shop-menu-button:active {
+  .shop-menu-button:active,
+  .thanks-menu-button.is-active,
+  .thanks-menu-button:active {
     transform: translateY(3px);
   }
 
@@ -3591,6 +3656,17 @@ body {
     grid-template-columns: repeat(5, 54px);
   }
 
+  .craft-submit-button {
+    min-height: 38px;
+    font-size: 16px;
+  }
+
+  .craft-all-in-button {
+    width: 86px;
+    min-height: 34px;
+    font-size: 14px;
+  }
+
   .inventory-title {
     font-size: 28px;
   }
@@ -3662,5 +3738,290 @@ body {
   .light-orb-stack img {
     width: 20px;
     height: 20px;
+  }
+
+  .is-tablet-ui .hud {
+    top: 8px;
+    left: 8px;
+    grid-template-columns: 46px 116px;
+    gap: 6px;
+  }
+
+  .is-tablet-ui .portrait {
+    width: 46px;
+    height: 46px;
+  }
+
+  .is-tablet-ui .player-name {
+    font-size: 16px;
+    -webkit-text-stroke-width: 2.2px;
+  }
+
+  .is-tablet-ui .player-level {
+    font-size: 12px;
+    -webkit-text-stroke-width: 1.6px;
+  }
+
+  .is-tablet-ui .hud-bar {
+    width: 116px;
+    height: 10px;
+    border-width: 2px;
+  }
+
+  .is-tablet-ui .health-hud-bar {
+    height: 13px;
+  }
+
+  .is-tablet-ui .main-menu-button,
+  .is-tablet-ui .settings-button,
+  .is-tablet-ui .author-quick-button {
+    top: 10px;
+    min-width: 48px;
+    height: 30px;
+    border-width: 3px;
+    font-size: 12px;
+    -webkit-text-stroke-width: 1.3px;
+  }
+
+  .is-tablet-ui .main-menu-button {
+    left: 178px;
+  }
+
+  .is-tablet-ui .settings-button {
+    left: 232px;
+  }
+
+  .is-tablet-ui .author-quick-button {
+    left: auto;
+    right: 8px;
+    min-width: 58px;
+  }
+
+  .is-tablet-ui .talent-button,
+  .is-tablet-ui .craft-button,
+  .is-tablet-ui .forge-button,
+  .is-tablet-ui .inventory-panel.is-collapsed {
+    left: 8px;
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    border-width: 3px;
+    font-size: 11px;
+    -webkit-text-stroke-width: 1.2px;
+  }
+
+  .is-tablet-ui .talent-button {
+    top: 70px;
+  }
+
+  .is-tablet-ui .craft-button {
+    top: 110px;
+  }
+
+  .is-tablet-ui .forge-button {
+    top: 150px;
+  }
+
+  .is-tablet-ui .inventory-panel.is-collapsed {
+    top: 190px;
+  }
+
+  .is-tablet-ui .settings-panel {
+    top: 46px;
+    left: 8px;
+    width: min(250px, calc(100vw - 16px));
+    max-height: calc(100vh - 62px);
+    padding: 10px;
+  }
+
+  .is-tablet-ui .inventory-panel {
+    top: 92px;
+    left: 50%;
+    width: calc(100vw - 16px);
+    height: min(360px, calc(100vh - 172px));
+    padding: 10px;
+    border-width: 4px;
+    transform: translateX(-50%);
+  }
+
+  .is-tablet-ui .inventory-head {
+    min-height: 40px;
+    margin-bottom: 8px;
+    border-bottom-width: 3px;
+  }
+
+  .is-tablet-ui .inventory-title {
+    font-size: 20px;
+    -webkit-text-stroke-width: 2px;
+  }
+
+  .is-tablet-ui .inventory-toggle-button {
+    width: 34px;
+    height: 34px;
+    border-width: 3px;
+    font-size: 22px;
+  }
+
+  .is-tablet-ui .inventory-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  .is-tablet-ui .inventory-grid .item-slot,
+  .is-tablet-ui .inventory-empty-slot {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  .is-tablet-ui .inventory-grid .item-slot {
+    grid-template-rows: minmax(0, 1fr) 10px;
+    padding: 2px;
+    border-width: 2px;
+    font-size: 8px;
+  }
+
+  .is-tablet-ui .inventory-grid .item-slot img {
+    width: min(28px, 70%);
+    height: min(28px, 70%);
+  }
+
+  .is-tablet-ui .talent-panel,
+  .is-tablet-ui .craft-panel,
+  .is-tablet-ui .forge-panel {
+    top: 50%;
+    left: 50%;
+    width: calc(100vw - 16px);
+    height: min(520px, calc(100vh - 16px));
+    max-height: none;
+    padding: 10px;
+    border-width: 4px;
+    transform: translate(-50%, -50%);
+  }
+
+  .is-tablet-ui .minimap {
+    top: 48px;
+    right: 8px;
+    bottom: auto;
+    width: 92px;
+    height: 92px;
+    border-width: 3px;
+  }
+
+  .is-tablet-ui .leaderboard-panel {
+    top: 146px;
+    right: 8px;
+    width: min(166px, calc(100vw - 16px));
+    max-height: 176px;
+    padding: 6px;
+    border-width: 3px;
+  }
+
+  .is-tablet-ui .leaderboard-title {
+    margin-bottom: 5px;
+    font-size: 13px;
+    -webkit-text-stroke-width: 1.4px;
+  }
+
+  .is-tablet-ui .leaderboard-list {
+    max-height: 130px;
+    gap: 3px;
+  }
+
+  .is-tablet-ui .leaderboard-row,
+  .is-tablet-ui .leaderboard-empty {
+    min-height: 22px;
+    border-width: 2px;
+    font-size: 10px;
+    -webkit-text-stroke-width: 1px;
+  }
+
+  .is-tablet-ui .leaderboard-row {
+    grid-template-columns: 26px minmax(0, 1fr) 34px;
+    gap: 3px;
+    padding: 2px 4px;
+  }
+
+  .is-tablet-ui .hotbar {
+    grid-template-columns: repeat(var(--slot-count, 5), 34px);
+    gap: 4px;
+  }
+
+  .is-tablet-ui .primary-hotbar {
+    bottom: 48px;
+  }
+
+  .is-tablet-ui .secondary-hotbar {
+    bottom: 8px;
+  }
+
+  .is-tablet-ui .slot {
+    width: 34px;
+    height: 36px;
+    grid-template-rows: 22px 8px;
+    padding: 2px;
+    border-width: 2px;
+    border-radius: 5px;
+    font-size: 8px;
+  }
+
+  .is-tablet-ui .slot img {
+    width: 21px;
+    height: 21px;
+  }
+
+  .is-tablet-ui .slot span {
+    -webkit-text-stroke-width: 0.8px;
+  }
+
+  .is-tablet-ui .secondary-hotbar .slot {
+    transform: none;
+  }
+
+  .is-tablet-ui .inventory-return-dropzone {
+    bottom: 28px;
+    width: 30px;
+    height: 30px;
+    border-width: 2px;
+    font-size: 15px;
+  }
+
+  .is-tablet-ui .touch-actions {
+    right: 8px;
+    bottom: 86px;
+    grid-template-columns: 52px;
+    gap: 8px;
+  }
+
+  .is-tablet-ui .touch-action-button {
+    height: 52px;
+    border-width: 3px;
+    font-size: 13px;
+    -webkit-text-stroke-width: 1.3px;
+  }
+
+  .is-tablet-ui .joystick {
+    width: 108px;
+    height: 108px;
+    border-width: 4px;
+  }
+
+  .is-tablet-ui .joystick-knob {
+    width: 44px;
+    height: 44px;
+    border-width: 4px;
+  }
+
+  .is-tablet-ui .chat-widget {
+    left: 50px;
+    bottom: 88px;
+  }
+
+  .is-tablet-ui .chat-prompt {
+    width: 128px;
+    height: 30px;
+    border-width: 3px;
+    font-size: 12px;
+    -webkit-text-stroke-width: 1.1px;
   }
 }

@@ -94,6 +94,7 @@
         <button id="petalDexButton" class="petaldex-menu-button" type="button" data-i18n="petalDex">花瓣图鉴</button>
         <button id="monsterDexButton" class="monsterdex-menu-button" type="button" data-i18n="monsterDex">怪物图鉴</button>
         <button id="shopButton" class="shop-menu-button" type="button" data-i18n="shop">商店</button>
+        <button id="thanksButton" class="thanks-menu-button" type="button" data-i18n="thanks">感谢</button>
       </div>
     </section>
 
@@ -167,6 +168,17 @@
       </div>
     </section>
 
+    <section id="thanksPanel" class="monsterdex-panel thanks-panel is-hidden" aria-label="感谢">
+      <div class="monsterdex-head">
+        <div class="monsterdex-title" data-i18n="thanks">感谢</div>
+        <button id="thanksCloseButton" class="monsterdex-close-button" type="button" aria-label="关闭">×</button>
+      </div>
+      <div class="thanks-panel-content">
+        <p data-i18n="thanksInvite">来玩 florr.io 吧</p>
+        <a href="https://florr.io/" target="_blank" rel="noopener noreferrer" data-i18n="thanksOpen">打开 florr.io</a>
+      </div>
+    </section>
+
     <section id="tutorialPanel" class="monsterdex-panel tutorial-panel is-hidden" aria-label="新手教程">
       <div class="monsterdex-head">
         <div class="monsterdex-title" data-i18n="tutorial">新手教程</div>
@@ -191,7 +203,7 @@
         </article>
         <article class="tutorial-card">
           <b data-i18n="tutorialGarden2Title">花园2</b>
-          <p data-i18n="tutorialGarden2Body">花园2需要玩家等级超过30级才能进入，里面只会出现更高级的怪物。</p>
+          <p data-i18n="tutorialGarden2Body">花园2可以直接进入，里面只会出现更高级的怪物。</p>
         </article>
       </div>
     </section>
@@ -332,6 +344,7 @@
             <div class="craft-slot item-slot is-empty"></div>
           </div>
           <button id="craftSubmitButton" class="craft-submit-button" type="button" data-i18n="craft">合成</button>
+          <button id="craftAllInButton" class="craft-all-in-button" type="button" data-i18n="craftAllIn">All in</button>
           <div id="craftChanceLabel" class="craft-chance"></div>
           <div class="craft-tip" data-i18n="craftTip">消耗5个相同的花瓣来进行一次合成</div>
           <div id="craftMessage" class="craft-message"></div>
@@ -414,6 +427,10 @@
                 <input id="authorLevelInput" class="author-input" type="number" min="1" max="600" value="1" />
                 <button id="authorSetLevelButton" class="author-main-button" type="button">设置等级</button>
               </div>
+            </div>
+            <div class="author-tool">
+              <div class="author-tool-title">锁血</div>
+              <button id="authorHealthLockButton" class="author-main-button" type="button">锁血：关</button>
             </div>
             <div class="author-tool">
               <div class="author-tool-title">生成生物</div>
