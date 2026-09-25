@@ -755,6 +755,7 @@ const MAP_WIDTH = 38400 * MAP_SCALE;
 const MAP_HEIGHT = 38400 * MAP_SCALE;
 const MAP_HALF_WIDTH = MAP_WIDTH / 2;
 const MAP_HALF_HEIGHT = MAP_HEIGHT / 2;
+const ANT_HELL_WORLD_SCALE = 2;
 const MINIMAP_WIDTH = 170;
 const MINIMAP_HEIGHT = 170;
 const PORTRAIT_SIZE = 74;
@@ -766,8 +767,8 @@ const FORGE_ITEMS_PER_ATTEMPT = 5;
 const THUNDER_HAMMER_MIN_TIER_NUMBER = 15;
 const THUNDER_HAMMER_LEADERBOARD_TIER_NUMBER = 16;
 const THUNDER_HAMMER_REFERENCE_TIER_NUMBER = 16;
-const THUNDER_HAMMER_REFERENCE_ATTACK = 656000000;
-const THUNDER_HAMMER_REFERENCE_DURABILITY = 328000000;
+const THUNDER_HAMMER_REFERENCE_ATTACK = 820000000;
+const THUNDER_HAMMER_REFERENCE_DURABILITY = 410000000;
 const LEADERBOARD_MIN_LEVEL = 75;
 const BASE_VIEW_RANGE_MULTIPLIER = 1.2;
 const VISION_TALENT_RANGE_BONUS = 0.05;
@@ -834,9 +835,9 @@ const PETAL_DEFINITIONS = {
   Stinger: {
     labelKey: "petalStinger",
     asset: "stinger",
-    baseAttack: 30,
+    baseAttack: 45,
     baseDurability: 2,
-    baseRespawnMs: 900,
+    baseRespawnMs: 5000,
     durabilityCost: 1,
     fixedDurability: true,
   },
@@ -1502,6 +1503,7 @@ const MAP_DEFINITIONS = {
   antHell: {
     routePoints: MAP_ANT_HELL_ROUTE_POINTS,
     spawnPoint: ANT_HELL_SPAWN_POINT,
+    worldScale: ANT_HELL_WORLD_SCALE,
     smallWalls: [],
     denseWalls: [],
     routeHalfWidth: 4.9,
@@ -2183,12 +2185,34 @@ function clamp(value, min, max) {
   return Math.max(min, Math.min(max, value));
 }
 
+function getMapWorldScale(mapId = state.mapId) {
+  return (MAP_DEFINITIONS[mapId] || MAP_DEFINITIONS.garden).worldScale || 1;
+}
+
+function getMapWorldWidth(mapId = state.mapId) {
+  return MAP_WIDTH * getMapWorldScale(mapId);
+}
+
+function getMapWorldHeight(mapId = state.mapId) {
+  return MAP_HEIGHT * getMapWorldScale(mapId);
+}
+
+function getMapWorldHalfWidth(mapId = state.mapId) {
+  return getMapWorldWidth(mapId) / 2;
+}
+
+function getMapWorldHalfHeight(mapId = state.mapId) {
+  return getMapWorldHeight(mapId) / 2;
+}
+
 function clampToMapX(x, padding = 0) {
-  return clamp(x, -MAP_HALF_WIDTH + padding, MAP_HALF_WIDTH - padding);
+  const halfWidth = getMapWorldHalfWidth();
+  return clamp(x, -halfWidth + padding, halfWidth - padding);
 }
 
 function clampToMapY(y, padding = 0) {
-  return clamp(y, -MAP_HALF_HEIGHT + padding, MAP_HALF_HEIGHT - padding);
+  const halfHeight = getMapWorldHalfHeight();
+  return clamp(y, -halfHeight + padding, halfHeight - padding);
 }
 
 function clampEntityToMap(entity, padding = entity.radius || 0) {
@@ -2199,10 +2223,14 @@ function clampEntityToMap(entity, padding = entity.radius || 0) {
 function worldToMapPixel(x, y) {
   const map = state.mapCollision;
   if (!map) return null;
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const halfWidth = mapWidth / 2;
+  const halfHeight = mapHeight / 2;
 
   return {
-    x: Math.floor(((x + MAP_HALF_WIDTH) / MAP_WIDTH) * map.width),
-    y: Math.floor(((y + MAP_HALF_HEIGHT) / MAP_HEIGHT) * map.height),
+    x: Math.floor(((x + halfWidth) / mapWidth) * map.width),
+    y: Math.floor(((y + halfHeight) / mapHeight) * map.height),
   };
 }
 
@@ -2282,7 +2310,7 @@ function findNearestFloorPosition(startX, startY, radius) {
     return { x: startX, y: startY };
   }
 
-  for (let searchRadius = 140; searchRadius < Math.min(MAP_HALF_WIDTH, MAP_HALF_HEIGHT); searchRadius += 140) {
+  for (let searchRadius = 140; searchRadius < Math.min(getMapWorldHalfWidth(), getMapWorldHalfHeight()); searchRadius += 140) {
     const samples = Math.max(24, Math.ceil((searchRadius * Math.PI * 2) / 220));
 
     for (let index = 0; index < samples; index++) {
@@ -2308,18 +2336,22 @@ function clampCameraToMap() {
   const viewScale = getViewScale();
   const halfViewWidth = state.width / (2 * viewScale);
   const halfViewHeight = state.height / (2 * viewScale);
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const halfWidth = mapWidth / 2;
+  const halfHeight = mapHeight / 2;
 
   state.camera.x =
-    MAP_WIDTH <= state.width / viewScale
+    mapWidth <= state.width / viewScale
       ? 0
-      : clamp(state.camera.x, -MAP_HALF_WIDTH + halfViewWidth, MAP_HALF_WIDTH - halfViewWidth);
+      : clamp(state.camera.x, -halfWidth + halfViewWidth, halfWidth - halfViewWidth);
   state.camera.y =
-    MAP_HEIGHT <= state.height / viewScale
+    mapHeight <= state.height / viewScale
       ? 0
       : clamp(
           state.camera.y,
-          -MAP_HALF_HEIGHT + halfViewHeight,
-          MAP_HALF_HEIGHT - halfViewHeight,
+          -halfHeight + halfViewHeight,
+          halfHeight - halfViewHeight,
         );
 }
 
@@ -2710,16 +2742,24 @@ function getRouteSignedOffset(tileX, tileY, projection = getRouteProjection(tile
 }
 
 function worldToRouteTilePoint(x, y) {
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const halfWidth = mapWidth / 2;
+  const halfHeight = mapHeight / 2;
   return {
-    x: ((x + MAP_HALF_WIDTH) / MAP_WIDTH) * MAP_TILE_COLUMNS,
-    y: ((y + MAP_HALF_HEIGHT) / MAP_HEIGHT) * MAP_TILE_ROWS,
+    x: ((x + halfWidth) / mapWidth) * MAP_TILE_COLUMNS,
+    y: ((y + halfHeight) / mapHeight) * MAP_TILE_ROWS,
   };
 }
 
 function routeTileToWorld(tileX, tileY) {
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const halfWidth = mapWidth / 2;
+  const halfHeight = mapHeight / 2;
   return {
-    x: (tileX / MAP_TILE_COLUMNS) * MAP_WIDTH - MAP_HALF_WIDTH,
-    y: (tileY / MAP_TILE_ROWS) * MAP_HEIGHT - MAP_HALF_HEIGHT,
+    x: (tileX / MAP_TILE_COLUMNS) * mapWidth - halfWidth,
+    y: (tileY / MAP_TILE_ROWS) * mapHeight - halfHeight,
   };
 }
 
@@ -3031,12 +3071,16 @@ function drawAntHellGroundDecorations(
   cameraY = state.camera.y,
   includeWallTiles = false,
 ) {
-  const tileSize = MAP_WIDTH / MAP_TILE_COLUMNS;
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const halfWidth = mapWidth / 2;
+  const halfHeight = mapHeight / 2;
+  const tileSize = mapWidth / MAP_TILE_COLUMNS;
   const decorCellSize = tileSize * 1.08;
-  const minCellX = Math.floor((visibleWorldLeft + MAP_HALF_WIDTH) / decorCellSize) - 1;
-  const minCellY = Math.floor((visibleWorldTop + MAP_HALF_HEIGHT) / decorCellSize) - 1;
-  const maxCellX = Math.ceil((visibleWorldRight + MAP_HALF_WIDTH) / decorCellSize) + 1;
-  const maxCellY = Math.ceil((visibleWorldBottom + MAP_HALF_HEIGHT) / decorCellSize) + 1;
+  const minCellX = Math.floor((visibleWorldLeft + halfWidth) / decorCellSize) - 1;
+  const minCellY = Math.floor((visibleWorldTop + halfHeight) / decorCellSize) - 1;
+  const maxCellX = Math.ceil((visibleWorldRight + halfWidth) / decorCellSize) + 1;
+  const maxCellY = Math.ceil((visibleWorldBottom + halfHeight) / decorCellSize) + 1;
 
   targetCtx.save();
   targetCtx.lineCap = "round";
@@ -3051,11 +3095,11 @@ function drawAntHellGroundDecorations(
       if (stripeRoll < 0.26) continue;
 
       const centerWorldX =
-        -MAP_HALF_WIDTH + cellX * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 101) * 0.4);
+        -halfWidth + cellX * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 101) * 0.4);
       const centerWorldY =
-        -MAP_HALF_HEIGHT + cellY * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 105) * 0.4);
-      const tileX = Math.floor((centerWorldX + MAP_HALF_WIDTH) / tileSize);
-      const tileY = Math.floor((centerWorldY + MAP_HALF_HEIGHT) / tileSize);
+        -halfHeight + cellY * decorCellSize + decorCellSize * (0.3 + antHellMaskHash(cellX, cellY, 105) * 0.4);
+      const tileX = Math.floor((centerWorldX + halfWidth) / tileSize);
+      const tileY = Math.floor((centerWorldY + halfHeight) / tileSize);
       if (
         tileX < 0 ||
         tileX >= MAP_TILE_COLUMNS ||
@@ -6219,8 +6263,10 @@ function updateAuthorPanelUi() {
   authorSpawnMonsterButton.disabled = !state.author.verified;
   authorMapMarker.classList.toggle("is-hidden", !state.author.hasSelection);
   if (state.author.hasSelection) {
-    const left = ((state.author.selectedX + MAP_HALF_WIDTH) / MAP_WIDTH) * 100;
-    const top = ((state.author.selectedY + MAP_HALF_HEIGHT) / MAP_HEIGHT) * 100;
+    const mapWidth = getMapWorldWidth();
+    const mapHeight = getMapWorldHeight();
+    const left = ((state.author.selectedX + mapWidth / 2) / mapWidth) * 100;
+    const top = ((state.author.selectedY + mapHeight / 2) / mapHeight) * 100;
     authorMapMarker.style.left = `${left}%`;
     authorMapMarker.style.top = `${top}%`;
   }
@@ -6451,8 +6497,10 @@ function selectAuthorTeleportPoint(event) {
   const rect = authorMapPreview.getBoundingClientRect();
   const ratioX = clamp((event.clientX - rect.left) / rect.width, 0, 1);
   const ratioY = clamp((event.clientY - rect.top) / rect.height, 0, 1);
-  const targetX = ratioX * MAP_WIDTH - MAP_HALF_WIDTH;
-  const targetY = ratioY * MAP_HEIGHT - MAP_HALF_HEIGHT;
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const targetX = ratioX * mapWidth - mapWidth / 2;
+  const targetY = ratioY * mapHeight - mapHeight / 2;
   const floorPoint = findNearestFloorPosition(targetX, targetY, state.player.hitRadius);
 
   state.author.selectedX = floorPoint.x;
@@ -6584,7 +6632,7 @@ function getAccountText() {
 }
 
 function normalizeAccountName(name) {
-  return name.trim().slice(0, 16);
+  return `${name || ""}`.trim().slice(0, 16);
 }
 
 function getAccountKey(name, password) {
@@ -6662,6 +6710,26 @@ function readLocalAccountBackups() {
   return readLocalStorageJson(ACCOUNT_BACKUP_STORAGE_KEY, {});
 }
 
+function readLastLocalAccountBackup() {
+  const lastAccount = readLocalStorageJson(ACCOUNT_LAST_LOCAL_KEY, null);
+  if (!lastAccount?.accountKey && !lastAccount?.name) return {};
+
+  const name = normalizeAccountName(lastAccount.name || getAccountNameFromKey(lastAccount.accountKey));
+  const password = lastAccount.password || "";
+  const accountKey = password ? getAccountKey(name, password) : lastAccount.accountKey;
+  if (!accountKey || !lastAccount.saveData) return {};
+
+  return {
+    [accountKey]: {
+      name,
+      password,
+      saveData: lastAccount.saveData,
+      updatedAt: lastAccount.savedAt || Date.now(),
+      localBackupAt: lastAccount.savedAt || Date.now(),
+    },
+  };
+}
+
 function writeLocalAccountBackup(accountKey, account) {
   if (!accountKey || !account) return;
 
@@ -6683,7 +6751,7 @@ function writeLocalAccountBackup(accountKey, account) {
 function readAccounts() {
   return mergeAccountStores(
     readLocalStorageJson(ACCOUNT_STORAGE_KEY, {}),
-    readLocalAccountBackups(),
+    mergeAccountStores(readLocalAccountBackups(), readLastLocalAccountBackup()),
   );
 }
 
@@ -6693,6 +6761,21 @@ function writeAccounts(accounts) {
     ...readLocalAccountBackups(),
     ...accounts,
   });
+}
+
+function findStoredAccountForLogin(accounts, name, password) {
+  const accountKey = getAccountKey(name, password);
+  if (accounts[accountKey]) return { accountKey, account: accounts[accountKey], shouldMigrate: false };
+
+  const lowerName = name.toLowerCase();
+  const match = Object.entries(accounts).find(([key, account]) => {
+    const accountName = normalizeAccountName(account?.name || getAccountNameFromKey(key));
+    const accountPassword = account?.password || "";
+    return accountName.toLowerCase() === lowerName && accountPassword === password;
+  });
+  if (match) return { accountKey: match[0], account: match[1], shouldMigrate: match[0] !== accountKey };
+
+  return { accountKey, account: null, shouldMigrate: false };
 }
 
 function syncAccountBackups() {
@@ -7019,21 +7102,37 @@ function loginAccount() {
   const name = normalizeAccountName(loginNameInput.value);
   const password = loginPasswordInput.value;
   const accounts = readAccounts();
+  const loginResult = findStoredAccountForLogin(accounts, name, password);
   const accountKey = getAccountKey(name, password);
-  const account = accounts[accountKey];
+  const account = loginResult.account;
 
   if (!name || !password) {
     setAccountMessage("accountMissingFields");
     return;
   }
   if (!account) {
-    const hasSameName = Object.values(accounts).some((entry) => entry?.name === name);
+    const lowerName = name.toLowerCase();
+    const hasSameName = Object.entries(accounts).some(([key, entry]) => (
+      normalizeAccountName(entry?.name || getAccountNameFromKey(key)).toLowerCase() === lowerName
+    ));
     setAccountMessage(hasSameName ? "accountWrongPassword" : "accountNotFound");
     return;
   }
 
+  if (loginResult.shouldMigrate) {
+    accounts[accountKey] = {
+      ...account,
+      name,
+      password,
+      updatedAt: Math.max(Date.now(), getAccountSavedAt(account)),
+    };
+    delete accounts[loginResult.accountKey];
+    writeAccounts(accounts);
+    writeLocalAccountBackup(accountKey, accounts[accountKey]);
+  }
+
   state.accountName = "";
-  applySaveData(account.saveData);
+  applySaveData(accounts[accountKey]?.saveData || account.saveData);
   state.accountName = accountKey;
   state.player.name = name;
   nameInput.value = name;
@@ -7677,9 +7776,11 @@ function updateMonsters(dt, time) {
       const anchorDistance = Math.hypot(anchorDx, anchorDy);
       const routeProgress = getRouteProgressForWorld(monster.x, monster.y);
       const tierRange = getMonsterTierProgressRange(monster.tierIndex);
+      const halfWidth = getMapWorldHalfWidth();
+      const halfHeight = getMapWorldHalfHeight();
       const nearMapEdge =
-        Math.abs(monster.x) > MAP_HALF_WIDTH - 180 ||
-        Math.abs(monster.y) > MAP_HALF_HEIGHT - 180;
+        Math.abs(monster.x) > halfWidth - 180 ||
+        Math.abs(monster.y) > halfHeight - 180;
 
       const isChasing = isMonsterChasingPlayer(monster, time);
       if (isChasing) {
@@ -8010,11 +8111,13 @@ function chooseMonsterSpeciesForTier(tierIndex) {
 }
 
 function isPointInsideMap(x, y, padding = BEE_STATS.radius) {
+  const halfWidth = getMapWorldHalfWidth();
+  const halfHeight = getMapWorldHalfHeight();
   return (
-    x >= -MAP_HALF_WIDTH + padding &&
-    x <= MAP_HALF_WIDTH - padding &&
-    y >= -MAP_HALF_HEIGHT + padding &&
-    y <= MAP_HALF_HEIGHT - padding
+    x >= -halfWidth + padding &&
+    x <= halfWidth - padding &&
+    y >= -halfHeight + padding &&
+    y <= halfHeight - padding
   );
 }
 
@@ -8057,7 +8160,7 @@ function createAntHellHubSpawnPoint(tierIndex, sequence, spawnPadding) {
   if (state.mapId !== "antHell" || tierIndex !== getActiveMonsterMinTierIndex()) return null;
 
   const center = routeTileToWorld(ANT_HELL_SPAWN_POINT.x, ANT_HELL_SPAWN_POINT.y);
-  const tileWorldSize = MAP_WIDTH / MAP_TILE_COLUMNS;
+  const tileWorldSize = getMapWorldWidth() / MAP_TILE_COLUMNS;
   const goldenAngle = Math.PI * (3 - Math.sqrt(5));
 
   for (let attempt = 0; attempt < 72; attempt++) {
@@ -8225,7 +8328,7 @@ function createRareMonsterSpawnPoint(tierIndex, sequence, spawnPadding) {
 function createTierSpawnPoint(tierIndex) {
   const { min, max } = getMonsterTierProgressRange(tierIndex);
   const spawnPadding = getMonsterSizeScale(BEE_STATS.radius, tierIndex);
-  const tileWorldSize = MAP_WIDTH / MAP_TILE_COLUMNS;
+  const tileWorldSize = getMapWorldWidth() / MAP_TILE_COLUMNS;
   const maxOffset = Math.max(
     0,
     getActiveMapDefinition().routeHalfWidth - spawnPadding / tileWorldSize - 0.35,
@@ -9319,9 +9422,11 @@ function worldToScreen(x, y) {
 }
 
 function worldToMapUiPoint(x, y, width, height) {
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
   return {
-    x: ((x + MAP_HALF_WIDTH) / MAP_WIDTH) * width,
-    y: ((y + MAP_HALF_HEIGHT) / MAP_HEIGHT) * height,
+    x: ((x + mapWidth / 2) / mapWidth) * width,
+    y: ((y + mapHeight / 2) / mapHeight) * height,
   };
 }
 
@@ -9586,23 +9691,27 @@ function drawGardenGroundDecorations(
 function drawBackground() {
   const viewScale = getViewScale();
   const activeMap = getActiveMapDefinition();
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const halfWidth = mapWidth / 2;
+  const halfHeight = mapHeight / 2;
   const textureCameraX = state.spawned ? state.camera.x : state.camera.x + state.lastTime * 0.18 / viewScale;
   const textureCameraY = state.camera.y;
-  const mapLeft = (-MAP_HALF_WIDTH - state.camera.x) * viewScale + state.width / 2;
-  const mapTop = (-MAP_HALF_HEIGHT - state.camera.y) * viewScale + state.height / 2;
+  const mapLeft = (-halfWidth - state.camera.x) * viewScale + state.width / 2;
+  const mapTop = (-halfHeight - state.camera.y) * viewScale + state.height / 2;
   const rawVisibleWorldLeft = textureCameraX - state.width / (2 * viewScale);
   const rawVisibleWorldTop = textureCameraY - state.height / (2 * viewScale);
   const rawVisibleWorldRight = textureCameraX + state.width / (2 * viewScale);
   const rawVisibleWorldBottom = textureCameraY + state.height / (2 * viewScale);
-  const visibleWorldLeft = state.spawned ? Math.max(-MAP_HALF_WIDTH, rawVisibleWorldLeft) : rawVisibleWorldLeft;
-  const visibleWorldTop = state.spawned ? Math.max(-MAP_HALF_HEIGHT, rawVisibleWorldTop) : rawVisibleWorldTop;
-  const visibleWorldRight = state.spawned ? Math.min(MAP_HALF_WIDTH, rawVisibleWorldRight) : rawVisibleWorldRight;
-  const visibleWorldBottom = state.spawned ? Math.min(MAP_HALF_HEIGHT, rawVisibleWorldBottom) : rawVisibleWorldBottom;
+  const visibleWorldLeft = state.spawned ? Math.max(-halfWidth, rawVisibleWorldLeft) : rawVisibleWorldLeft;
+  const visibleWorldTop = state.spawned ? Math.max(-halfHeight, rawVisibleWorldTop) : rawVisibleWorldTop;
+  const visibleWorldRight = state.spawned ? Math.min(halfWidth, rawVisibleWorldRight) : rawVisibleWorldRight;
+  const visibleWorldBottom = state.spawned ? Math.min(halfHeight, rawVisibleWorldBottom) : rawVisibleWorldBottom;
 
   ctx.fillStyle = state.mapId === "antHell" ? ANT_HELL_OUTER_COLOR : "#186044";
   ctx.fillRect(0, 0, state.width, state.height);
   ctx.fillStyle = getActiveMapGroundColor();
-  ctx.fillRect(mapLeft, mapTop, MAP_WIDTH * viewScale, MAP_HEIGHT * viewScale);
+  ctx.fillRect(mapLeft, mapTop, mapWidth * viewScale, mapHeight * viewScale);
 
   if (state.mapId === "antHell") {
     drawAntHellGroundDecorations(
@@ -9621,8 +9730,8 @@ function drawBackground() {
       ctx,
       mapLeft,
       mapTop,
-      MAP_WIDTH * viewScale,
-      MAP_HEIGHT * viewScale,
+      mapWidth * viewScale,
+      mapHeight * viewScale,
       visibleWorldLeft,
       visibleWorldTop,
       visibleWorldRight,
@@ -9636,8 +9745,8 @@ function drawBackground() {
       ctx,
       mapLeft,
       mapTop,
-      MAP_WIDTH * viewScale,
-      MAP_HEIGHT * viewScale,
+      mapWidth * viewScale,
+      mapHeight * viewScale,
       visibleWorldLeft,
       visibleWorldTop,
       visibleWorldRight,
@@ -9658,8 +9767,8 @@ function drawBackground() {
     ctx,
     mapLeft,
     mapTop,
-    MAP_WIDTH * viewScale,
-    MAP_HEIGHT * viewScale,
+    mapWidth * viewScale,
+    mapHeight * viewScale,
     visibleWorldLeft,
     visibleWorldTop,
     visibleWorldRight,
@@ -10403,8 +10512,10 @@ function drawHitboxes() {
 }
 
 function drawMinimap() {
-  const playerX = ((state.player.x + MAP_HALF_WIDTH) / MAP_WIDTH) * MINIMAP_WIDTH;
-  const playerY = ((state.player.y + MAP_HALF_HEIGHT) / MAP_HEIGHT) * MINIMAP_HEIGHT;
+  const mapWidth = getMapWorldWidth();
+  const mapHeight = getMapWorldHeight();
+  const playerX = ((state.player.x + mapWidth / 2) / mapWidth) * MINIMAP_WIDTH;
+  const playerY = ((state.player.y + mapHeight / 2) / mapHeight) * MINIMAP_HEIGHT;
 
   minimapCtx.clearRect(0, 0, MINIMAP_WIDTH, MINIMAP_HEIGHT);
   minimapCtx.fillStyle = "#22a969";
