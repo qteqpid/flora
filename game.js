@@ -923,6 +923,7 @@ const CRAFT_RESULT_EFFECT_MS = 720;
 const ACCOUNT_STORAGE_KEY = "flora-local-accounts-v1";
 const ACCOUNT_BACKUP_STORAGE_KEY = "flora-local-account-backups-v1";
 const ACCOUNT_LAST_LOCAL_KEY = "flora-local-last-account-v1";
+const LOCAL_CURRENT_SAVE_KEY = "flora-local-current-save-v1";
 const PETAL_BASE_RESPAWN_MS = 450;
 const MONSTER_ROAM_RADIUS = 165;
 const BASE_PLAYER_MAX_HEALTH = 100;
@@ -940,9 +941,11 @@ const PET_HEALTH_MULTIPLIER = 0.1;
 const PET_ATTACK_MULTIPLIER = 10000;
 const PET_INCOMING_DAMAGE_MULTIPLIER = 1000;
 const HIGH_TIER_PASS_THROUGH_GAP = 3;
-const PET_ATTACK_COOLDOWN_MS = 500;
+const PET_ATTACK_COOLDOWN_MS = 100;
+const PET_INCOMING_DAMAGE_COOLDOWN_MS = 100;
 const PET_TARGET_RANGE = 1900;
 const PET_FOLLOW_DISTANCE = 280;
+const AUTO_SAVE_INTERVAL_MS = 1500;
 const BUBBLE_LAUNCH_BASE_DISTANCE = 150;
 const BUBBLE_LAUNCH_DISTANCE_PER_TIER = 8;
 const BUBBLE_LAUNCH_CHAIN_INTERVAL_MS = 115;
@@ -1049,6 +1052,7 @@ const PETAL_DEFINITIONS = {
     fixedDurability: true,
     infiniteDurability: true,
     noContactDamage: true,
+    noKnockback: true,
     summonSpecies: "Bee",
     summonMs: PET_EGG_SUMMON_MS,
   },
@@ -1063,6 +1067,7 @@ const PETAL_DEFINITIONS = {
     fixedDurability: true,
     infiniteDurability: true,
     noContactDamage: true,
+    noKnockback: true,
     summonSpecies: "Ladybug",
     summonMs: PET_EGG_SUMMON_MS,
   },
@@ -1077,6 +1082,7 @@ const PETAL_DEFINITIONS = {
     fixedDurability: true,
     infiniteDurability: true,
     noContactDamage: true,
+    noKnockback: true,
     summonSpecies: "Rock",
     summonMs: PET_EGG_SUMMON_MS,
   },
@@ -1091,6 +1097,7 @@ const PETAL_DEFINITIONS = {
     fixedDurability: true,
     infiniteDurability: true,
     noContactDamage: true,
+    noKnockback: true,
     summonSpecies: "WorkerAnt",
     summonMs: PET_EGG_SUMMON_MS,
   },
@@ -1105,6 +1112,7 @@ const PETAL_DEFINITIONS = {
     fixedDurability: true,
     infiniteDurability: true,
     noContactDamage: true,
+    noKnockback: true,
     summonSpecies: "Caterpillar",
     summonMs: PET_EGG_SUMMON_MS,
   },
@@ -2447,6 +2455,30 @@ function restorePetalItem(savedItem) {
   return item;
 }
 
+function serializeDrop(drop) {
+  const item = serializePetalItem(drop?.item);
+  if (!item) return null;
+
+  return {
+    x: drop.x,
+    y: drop.y,
+    quantity: Math.max(1, Math.floor(drop.quantity || 1)),
+    item,
+  };
+}
+
+function restoreDrop(savedDrop) {
+  const item = restorePetalItem(savedDrop?.item);
+  if (!item) return null;
+
+  return createDrop(
+    Number(savedDrop.x) || 0,
+    Number(savedDrop.y) || 0,
+    item,
+    Math.max(1, Math.floor(savedDrop.quantity || 1)),
+  );
+}
+
 function createSaveData() {
   return {
     player: {
@@ -2467,6 +2499,13 @@ function createSaveData() {
       points: state.shop.points,
       dateKey: state.shop.dateKey,
       tasks: state.shop.tasks,
+    },
+    world: {
+      mapId: MAP_DEFINITIONS[state.mapId] ? state.mapId : "garden",
+      playerX: state.player.x,
+      playerY: state.player.y,
+      drops: state.drops.map(serializeDrop).filter(Boolean),
+      mapMonsterStates: state.mapMonsterStates,
     },
     savedAt: Date.now(),
   };
@@ -2500,6 +2539,27 @@ function applySaveData(saveData) {
   state.shop.dateKey = saveData.shop?.dateKey || "";
   state.shop.tasks = Array.isArray(saveData.shop?.tasks) ? saveData.shop.tasks : [];
   state.shop.message = "";
+  state.mapMonsterStates = {};
+  const savedMapStates = saveData.world?.mapMonsterStates;
+  if (savedMapStates && typeof savedMapStates === "object") {
+    Object.keys(MAP_DEFINITIONS).forEach((mapId) => {
+      if (savedMapStates[mapId]) {
+        state.mapMonsterStates[mapId] = savedMapStates[mapId];
+      }
+    });
+  }
+  if (MAP_DEFINITIONS[saveData.world?.mapId]) {
+    state.mode = saveData.world.mapId;
+    applyMapStaticData(saveData.world.mapId);
+    state.pendingPlayerWorldPosition = {
+      mapId: saveData.world.mapId,
+      x: Number(saveData.world.playerX),
+      y: Number(saveData.world.playerY),
+    };
+    state.drops = Array.isArray(saveData.world.drops)
+      ? saveData.world.drops.map(restoreDrop).filter(Boolean)
+      : [];
+  }
   refreshPlayerMaxHealth();
   state.player.health = clamp(saveData.player.health || state.player.maxHealth, 1, state.player.maxHealth);
   applyTalentEffects();
@@ -2519,6 +2579,7 @@ const state = {
   mapId: "garden",
   accountName: "",
   uiLockMovement: false,
+  pendingPlayerWorldPosition: null,
   settings: {
     movement: "mouse",
     layout: "auto",
@@ -2603,6 +2664,7 @@ const state = {
   camera: { x: 0, y: 0, freeX: 0, freeY: 0 },
   inventory: [],
   selectedEquipmentForInventory: null,
+  lastAutoSaveAt: 0,
   crafting: {
     stackKey: "",
     quantity: 0,
@@ -5047,7 +5109,7 @@ function updateFriendlyPet(pet, dt, time) {
     }
     if (time >= (pet.nextBodyDamageAt || 0)) {
       damageFriendlyPet(pet, getMonsterBodyDamageToPetal(monster) * PET_INCOMING_DAMAGE_MULTIPLIER, time);
-      pet.nextBodyDamageAt = time + monster.bodyDamageCooldown;
+      pet.nextBodyDamageAt = time + PET_INCOMING_DAMAGE_COOLDOWN_MS;
     }
     break;
   }
@@ -6738,6 +6800,20 @@ function respawnPlayer() {
   syncDeathScreen();
 }
 
+function restorePendingPlayerWorldPosition() {
+  const pending = state.pendingPlayerWorldPosition;
+  state.pendingPlayerWorldPosition = null;
+  if (!pending || pending.mapId !== state.mapId) return;
+  if (!Number.isFinite(pending.x) || !Number.isFinite(pending.y)) return;
+
+  const point = findNearestFloorPosition(pending.x, pending.y, state.player.hitRadius);
+  state.player.x = point.x;
+  state.player.y = point.y;
+  state.camera.x = point.x;
+  state.camera.y = point.y;
+  updatePointerWorld();
+}
+
 function startGame() {
   if (state.spawned) return;
 
@@ -6759,6 +6835,7 @@ function startGame() {
     });
   }
   respawnPlayer();
+  restorePendingPlayerWorldPosition();
   if (!state.accountName) {
     openAccountPanel("accountLoginRequired");
   }
@@ -6932,7 +7009,6 @@ function switchActiveMap(mapId) {
   state.pointer.x = state.width / 2;
   state.pointer.y = state.height / 2;
   updatePointerWorld();
-  state.drops = [];
   state.weapon.homingUnits = Object.create(null);
   resetPetEggSummons();
   clearAntHellPlayerSpawnZone();
@@ -8184,35 +8260,96 @@ function submitChatMessage() {
 
 function saveActiveAccount() {
   if (!state.accountName) return false;
+  if (state.spawned && MAP_DEFINITIONS[state.mapId]) {
+    saveActiveMonsterMapState(state.mapId);
+  }
 
   const accounts = readAccounts();
   const account = accounts[state.accountName];
   if (!account) return false;
+  const saveData = createSaveData();
 
   accounts[state.accountName] = {
     ...account,
-    saveData: createSaveData(),
+    saveData,
     updatedAt: Date.now(),
   };
   writeAccounts(accounts);
   writeLocalAccountBackup(state.accountName, accounts[state.accountName]);
+  writeLocalStorageJson(LOCAL_CURRENT_SAVE_KEY, {
+    accountKey: state.accountName,
+    name: account.name || state.player.name,
+    password: account.password,
+    saveData,
+    savedAt: Date.now(),
+  });
   return true;
 }
 
-function saveGameFromButton() {
-  if (!state.accountName) {
-    showGameNotice("saveLoginRequired");
-    openAccountPanel("saveLoginRequired");
-    return;
+function saveLocalCurrentGame() {
+  if (!state.spawned) return false;
+  if (MAP_DEFINITIONS[state.mapId]) {
+    saveActiveMonsterMapState(state.mapId);
   }
+  writeLocalStorageJson(LOCAL_CURRENT_SAVE_KEY, {
+    accountKey: state.accountName,
+    name: state.player.name,
+    saveData: createSaveData(),
+    savedAt: Date.now(),
+  });
+  return true;
+}
 
-  saveActiveMonsterMapState(state.mapId);
-  if (saveActiveAccount()) {
+function saveCurrentGame() {
+  if (saveActiveAccount()) return true;
+  return saveLocalCurrentGame();
+}
+
+function autoSaveCurrentGame(time = performance.now()) {
+  if (!state.spawned) return;
+  if (time < state.lastAutoSaveAt + AUTO_SAVE_INTERVAL_MS) return;
+  state.lastAutoSaveAt = time;
+  saveCurrentGame();
+}
+
+function saveGameFromButton() {
+  if (saveCurrentGame()) {
     showGameNotice("saveSuccess");
   } else {
     showGameNotice("saveLoginRequired");
     openAccountPanel("saveLoginRequired");
   }
+}
+
+function restoreLocalCurrentGame() {
+  const localSave = readLocalStorageJson(LOCAL_CURRENT_SAVE_KEY, null);
+  if (!localSave?.saveData) return false;
+
+  const accountKey = localSave.accountKey || "";
+  if (accountKey) {
+    const accounts = readAccounts();
+    const account = accounts[accountKey];
+    if (account) {
+      const localSavedAt = localSave.savedAt || localSave.saveData.savedAt || 0;
+      if (localSavedAt >= getAccountSavedAt(account)) {
+        accounts[accountKey] = {
+          ...account,
+          saveData: localSave.saveData,
+          updatedAt: Date.now(),
+        };
+        writeAccounts(accounts);
+        writeLocalAccountBackup(accountKey, accounts[accountKey]);
+      }
+      state.accountName = accountKey;
+    }
+  }
+
+  applySaveData(localSave.saveData);
+  if (localSave.name) {
+    state.player.name = localSave.name;
+    nameInput.value = localSave.name;
+  }
+  return true;
 }
 
 function loginAccount() {
@@ -9751,6 +9888,7 @@ function createMonsterMapSnapshot() {
   return {
     mapId: state.mapId,
     monsters: state.monsters.map((monster) => ({ ...monster, mapId: monster.mapId || state.mapId })),
+    drops: state.drops.map(serializeDrop).filter(Boolean),
     monsterSpawnSequence: [...state.monsterSpawnSequence],
     nextRareMonsterSpawnAt: [...state.nextRareMonsterSpawnAt],
     monsterBackfillQueue: [...state.monsterBackfillQueue],
@@ -9767,6 +9905,9 @@ function applyMonsterMapSnapshot(snapshot) {
     if (!monster.mapId && !activeSpecies.has(monster.name)) return false;
     return true;
   });
+  state.drops = Array.isArray(snapshot?.drops)
+    ? snapshot.drops.map(restoreDrop).filter(Boolean)
+    : [];
   state.monsterSpawnSequence = [...(snapshot?.monsterSpawnSequence || Array(TIERS.length).fill(0))];
   state.nextRareMonsterSpawnAt = [...(snapshot?.nextRareMonsterSpawnAt || Array(TIERS.length).fill(0))];
   state.monsterBackfillQueue = [...(snapshot?.monsterBackfillQueue || [])];
@@ -9813,6 +9954,7 @@ function restoreMonsterMapState(mapId, options = {}) {
   }
 
   state.monsters = [];
+  state.drops = [];
   state.monsterSpawnSequence = Array(TIERS.length).fill(0);
   state.nextRareMonsterSpawnAt = Array(TIERS.length).fill(0);
   state.monsterBackfillQueue = [];
@@ -10469,6 +10611,7 @@ function resolvePlacedPollenBarriers(time) {
 
 function pushMonsterAwayFromWeapon(weapon, monster, monsterShape) {
   if (monster.stationary) return;
+  if (PETAL_DEFINITIONS[weapon.petal?.name]?.noKnockback) return;
   if (weapon.petal?.name === "Light" || weapon.petal?.name === "Rice") return;
 
   const angle = Math.atan2(weapon.y - monster.y, weapon.x - monster.x);
@@ -10630,6 +10773,7 @@ function update(dt, time) {
   updateWeaponHits(time);
   syncEquipmentSlotWearUi();
   updateDamageNumbers(time);
+  autoSaveCurrentGame(time);
 
   if (state.settings.cameraMode === "locked" && time < (state.bubbleCameraLockUntil || 0)) {
     state.camera.x = state.player.x;
@@ -12063,7 +12207,11 @@ async function boot() {
   resize();
   await loadAssets();
   syncAccountBackups();
-  seedMonsterPopulation();
+  restoreLocalCurrentGame();
+  restoreMonsterMapState(state.mapId, {
+    seed: true,
+    immediateLimit: 180,
+  });
   saveActiveMonsterMapState();
   ensureMonsterMapPopulation("garden2", { immediateLimit: 180 });
   ensureMonsterMapPopulation("antHell");
@@ -12081,8 +12229,12 @@ async function boot() {
 
 window.addEventListener("resize", resize);
 document.addEventListener("visibilitychange", () => {
+  if (document.hidden) saveCurrentGame();
   syncBackgroundSimulation();
   ensureMusicPlaying();
+});
+window.addEventListener("pagehide", () => {
+  saveCurrentGame();
 });
 window.addEventListener("focus", ensureMusicPlaying);
 window.addEventListener("keydown", ensureMusicPlaying);
@@ -12171,8 +12323,7 @@ window.addEventListener("pointercancel", () => {
 });
 window.addEventListener("beforeunload", (event) => {
   if (!state.spawned) return;
-  saveActiveMonsterMapState(state.mapId);
-  saveActiveAccount();
+  saveCurrentGame();
   event.preventDefault();
   event.returnValue = getCurrentText().leaveConfirm;
 });
