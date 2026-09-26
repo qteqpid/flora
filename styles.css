@@ -30,6 +30,7 @@ body {
 
 .is-menu .hud,
 .is-menu .main-menu-button,
+.is-menu .save-button,
 .is-menu .settings-button,
 .is-menu .talent-button,
 .is-menu .craft-button,
@@ -1285,6 +1286,7 @@ body {
 }
 
 .main-menu-button,
+.save-button,
 .settings-button {
   position: fixed;
   top: 28px;
@@ -1311,7 +1313,21 @@ body {
 }
 
 .settings-button {
+  left: 462px;
+}
+
+.save-button {
   left: 394px;
+  min-width: 56px;
+  border-color: #145a37;
+  background: #45bd68;
+  box-shadow: 0 5px 0 #0d3f24, 0 8px 0 rgba(17, 18, 23, 0.3);
+}
+
+.save-button:active {
+  background: #32a957;
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 #0d3f24, 0 4px 0 rgba(17, 18, 23, 0.25);
 }
 
 .talent-button {
@@ -3237,9 +3253,15 @@ body {
     min-width: 78px;
   }
 
-  .is-tablet-ui .settings-button {
+  .is-tablet-ui .save-button {
     top: 22px;
     left: 354px;
+    min-width: 62px;
+  }
+
+  .is-tablet-ui .settings-button {
+    top: 22px;
+    left: 428px;
   }
 
 .is-tablet-ui .author-quick-button {
@@ -3773,6 +3795,7 @@ body {
   }
 
   .is-tablet-ui .main-menu-button,
+  .is-tablet-ui .save-button,
   .is-tablet-ui .settings-button,
   .is-tablet-ui .author-quick-button {
     top: 10px;
@@ -3787,8 +3810,12 @@ body {
     left: 178px;
   }
 
-  .is-tablet-ui .settings-button {
+  .is-tablet-ui .save-button {
     left: 232px;
+  }
+
+  .is-tablet-ui .settings-button {
+    left: 286px;
   }
 
   .is-tablet-ui .author-quick-button {

@@ -18,6 +18,7 @@ const monsterDexButton = document.querySelector("#monsterDexButton");
 const petalDexButton = document.querySelector("#petalDexButton");
 const shopButton = document.querySelector("#shopButton");
 const thanksButton = document.querySelector("#thanksButton");
+const saveButton = document.querySelector("#saveButton");
 const accountPanel = document.querySelector("#accountPanel");
 const loginForm = document.querySelector("#loginForm");
 const loginNameInput = document.querySelector("#loginName");
@@ -220,6 +221,10 @@ const ASSETS = {
   pollen: "pollen.webp",
   rice: "rice.webp",
   leaf: "leaf.webp",
+  rangeLeaf: "range leaf.webp",
+  reloadLeaf: "reload leaf.webp",
+  magicLeaf: "magic leaf.webp",
+  egg: "egg.webp",
   corn: "corn.webp",
   rose: "rose.webp",
   light: "light1.webp",
@@ -230,6 +235,8 @@ const ASSETS = {
   ladybug: "ladybug.webp",
   babyAnt: "baby ant.webp",
   workerAnt: "worker ant.webp",
+  caterpillarHead: "蜈蚣头部.webp",
+  caterpillarBody: "蜈蚣身体.webp",
   rock: createRockDataUrl(),
   lentil: createLentilDataUrl(),
 };
@@ -293,6 +300,10 @@ const TEXT = {
     password: "密码",
     confirmPassword: "再次确认密码",
     confirm: "确定",
+    save: "存档",
+    saveSuccess: "已保存到本地",
+    saveLoginRequired: "请先登录或注册，再保存存档",
+    leaveConfirm: "离开前要确认存档是否已经保存。",
     wechatRegister: "微信注册",
     appleRegister: "Apple注册",
     accountLoginRequired: "请先登录或注册，本地记录会保存你的进度。",
@@ -337,6 +348,7 @@ const TEXT = {
     monsterBabyAnt: "幼蚁",
     monsterWorkerAnt: "工蚁",
     monsterRock: "石头",
+    monsterCaterpillar: "松毛虫",
     monsterHealth: "生命",
     monsterDamage: "体伤",
     monsterExperience: "经验",
@@ -401,12 +413,12 @@ const TEXT = {
     forgeAvailable: "可锻造材料",
     forgeSlots: "锻造槽",
     forgeChance: "必定成功",
-    forgeTip: "消耗5个15级以上同级Stinger换同级雷神之锤",
-    forgeEmpty: "没有够5个的15级以上Stinger",
+    forgeTip: "消耗20个13级以上同级Stinger换同级雷神之锤",
+    forgeEmpty: "没有够20个的13级以上Stinger",
     forgeResult: "获得",
     leaderboard: "排行榜",
     leaderboardEmpty: "暂无玩家",
-    leaderboardNoQualified: "没有达到75级的玩家 · 当前玩家数：{count}",
+    leaderboardNoQualified: "没有达到70级的玩家 · 当前玩家数：{count}",
     authorPanel: "作者面板",
     authorQuick: "作者模式",
     authorPortalTitle: "作者传送门",
@@ -426,6 +438,11 @@ const TEXT = {
     petalDamage: "伤害",
     petalDurability: "耐久",
     petalCooldown: "刷新",
+    petalCooldownReduction: "刷新减少",
+    petalAttackRange: "攻击距离",
+    petalSlow: "减速",
+    petalHealthCost: "耗血",
+    petalSummon: "召唤",
     petalHeal: "回血",
     petalHomingRange: "追击距离",
     petalDurabilityCost: "命中消耗",
@@ -438,6 +455,14 @@ const TEXT = {
     petalPollen: "花粉",
     petalRice: "米",
     petalLeaf: "叶子",
+    petalRangeLeaf: "距离叶",
+    petalReloadLeaf: "刷新叶",
+    petalMagicLeaf: "魔法叶",
+    petalBeeEgg: "蜜蜂蛋",
+    petalLadybugEgg: "瓢虫蛋",
+    petalRockEgg: "石头蛋",
+    petalWorkerAntEgg: "工蚁蛋",
+    petalCaterpillarEgg: "松毛虫蛋",
     petalCorn: "玉米",
     petalRose: "玫瑰",
     petalLight: "Light",
@@ -469,6 +494,10 @@ const TEXT = {
     password: "Password",
     confirmPassword: "Confirm Password",
     confirm: "Confirm",
+    save: "Save",
+    saveSuccess: "Saved locally",
+    saveLoginRequired: "Please log in or register before saving.",
+    leaveConfirm: "Make sure your save is stored before leaving.",
     wechatRegister: "WeChat",
     appleRegister: "Apple",
     accountLoginRequired: "Please login or register first. Local records will save your progress.",
@@ -513,6 +542,7 @@ const TEXT = {
     monsterBabyAnt: "Baby Ant",
     monsterWorkerAnt: "Worker Ant",
     monsterRock: "Rock",
+    monsterCaterpillar: "Caterpillar",
     monsterHealth: "Health",
     monsterDamage: "Body Damage",
     monsterExperience: "XP",
@@ -577,12 +607,12 @@ const TEXT = {
     forgeAvailable: "Forge Materials",
     forgeSlots: "Forge Slots",
     forgeChance: "Guaranteed",
-    forgeTip: "Spend 5 same-tier Lv.15+ Stingers for a same-tier Thunder Hammer",
-    forgeEmpty: "No Lv.15+ Stinger stack has 5 yet",
+    forgeTip: "Spend 20 same-tier Lv.13+ Stingers for a same-tier Thunder Hammer",
+    forgeEmpty: "No Lv.13+ Stinger stack has 20 yet",
     forgeResult: "Received",
     leaderboard: "Leaderboard",
     leaderboardEmpty: "No players yet",
-    leaderboardNoQualified: "No players at level 75 yet · Players: {count}",
+    leaderboardNoQualified: "No players at level 70 yet · Players: {count}",
     authorPanel: "Author Panel",
     authorQuick: "Author",
     authorPortalTitle: "Author Portal",
@@ -602,6 +632,11 @@ const TEXT = {
     petalDamage: "Damage",
     petalDurability: "Durability",
     petalCooldown: "Respawn",
+    petalCooldownReduction: "Respawn Reduction",
+    petalAttackRange: "Attack Range",
+    petalSlow: "Slow",
+    petalHealthCost: "Health Cost",
+    petalSummon: "Summon",
     petalHeal: "Heal",
     petalHomingRange: "Homing Range",
     petalDurabilityCost: "Hit Cost",
@@ -614,6 +649,14 @@ const TEXT = {
     petalPollen: "Pollen",
     petalRice: "Rice",
     petalLeaf: "Leaf",
+    petalRangeLeaf: "Range Leaf",
+    petalReloadLeaf: "Reload Leaf",
+    petalMagicLeaf: "Magic Leaf",
+    petalBeeEgg: "Bee Egg",
+    petalLadybugEgg: "Ladybug Egg",
+    petalRockEgg: "Rock Egg",
+    petalWorkerAntEgg: "Worker Ant Egg",
+    petalCaterpillarEgg: "Caterpillar Egg",
     petalCorn: "Corn",
     petalRose: "Rose",
     petalLight: "Light",
@@ -709,18 +752,40 @@ const WORKER_ANT_STATS = {
   spawnSafeRadius: 320,
   spawnExtraSpacing: 72,
 };
+const CATERPILLAR_STATS = {
+  maxHealth: 50,
+  attack: 10,
+  experienceReward: 30,
+  bodyDamageCooldown: 500,
+  radius: 40,
+  width: 78,
+  height: 78,
+  hitShape: "circle",
+  hitRadius: 23,
+  hitRadiusX: 20,
+  hitRadiusY: 25,
+  bodyHitRadiusX: 18,
+  bodyHitRadiusY: 16,
+  chaseOnHit: true,
+  chaseDurationMs: 9000,
+  chaseRadius: 1500,
+  spawnWeight: 3,
+  spawnSafeRadius: 320,
+  spawnExtraSpacing: 120,
+  segmented: true,
+};
 const MONSTER_DEFINITIONS = {
   Bee: {
     labelKey: "monsterBee",
     asset: "bee",
     stats: BEE_STATS,
-    drops: ["Stinger", "Pollen"],
+    drops: ["Stinger", "Pollen", "BeeEgg"],
   },
   Ladybug: {
     labelKey: "monsterLadybug",
     asset: "ladybug",
     stats: LADYBUG_STATS,
-    drops: ["Rose", "Light"],
+    drops: ["Rose", "Light", "LadybugEgg"],
   },
   BabyAnt: {
     labelKey: "monsterBabyAnt",
@@ -732,16 +797,23 @@ const MONSTER_DEFINITIONS = {
     labelKey: "monsterWorkerAnt",
     asset: "workerAnt",
     stats: WORKER_ANT_STATS,
-    drops: ["Leaf", "Corn", "Bubble"],
+    drops: ["Leaf", "Corn", "Bubble", "WorkerAntEgg"],
   },
   Rock: {
     labelKey: "monsterRock",
     asset: "rock",
     stats: ROCK_STATS,
-    drops: ["Stone", "Boulder", "Lentil"],
+    drops: ["Stone", "Boulder", "Lentil", "RockEgg"],
+  },
+  Caterpillar: {
+    labelKey: "monsterCaterpillar",
+    asset: "caterpillarHead",
+    bodyAsset: "caterpillarBody",
+    stats: CATERPILLAR_STATS,
+    drops: ["Leaf", "RangeLeaf", "ReloadLeaf", "MagicLeaf", "CaterpillarEgg"],
   },
 };
-const DEFAULT_MONSTER_SPECIES = ["Bee", "Ladybug", "Rock"];
+const DEFAULT_MONSTER_SPECIES = ["Bee", "Ladybug", "Rock", "Caterpillar"];
 const MONSTER_SPECIES = Object.keys(MONSTER_DEFINITIONS);
 const SHOP_DAILY_MIN_TIER_INDEX = Math.max(0, getTierIndexByName("Ultra"));
 const DAILY_TASK_COUNT = Math.max(0, TIERS.length - SHOP_DAILY_MIN_TIER_INDEX);
@@ -818,13 +890,12 @@ const BASE_EQUIPMENT_SLOTS = 5;
 const MAX_EQUIPMENT_SLOTS = 10;
 const MAX_TALENT_POINTS = 600;
 const CRAFT_ITEMS_PER_ATTEMPT = 5;
-const FORGE_ITEMS_PER_ATTEMPT = 5;
-const THUNDER_HAMMER_MIN_TIER_NUMBER = 15;
-const THUNDER_HAMMER_LEADERBOARD_TIER_NUMBER = 16;
+const FORGE_ITEMS_PER_ATTEMPT = 20;
+const THUNDER_HAMMER_MIN_TIER_NUMBER = 13;
 const THUNDER_HAMMER_REFERENCE_TIER_NUMBER = 16;
 const THUNDER_HAMMER_REFERENCE_ATTACK = 820000000;
 const THUNDER_HAMMER_REFERENCE_DURABILITY = 410000000;
-const LEADERBOARD_MIN_LEVEL = 75;
+const LEADERBOARD_MIN_LEVEL = 70;
 const BASE_VIEW_RANGE_MULTIPLIER = 1.2;
 const VISION_TALENT_RANGE_BONUS = 0.05;
 const CRAFT_CHANCES = [
@@ -863,6 +934,15 @@ const PETAL_MONSTER_PUSH_STRENGTH = 0.72;
 const PETAL_DURABILITY_TIER_MULTIPLIER = 2;
 const PETAL_BASE_DURABILITY = 10;
 const PETAL_BASE_ATTACK = 10;
+const PET_EGG_SUMMON_MS = 10000;
+const PET_EGG_RESPAWN_MS = 1000;
+const PET_HEALTH_MULTIPLIER = 0.1;
+const PET_ATTACK_MULTIPLIER = 10000;
+const PET_INCOMING_DAMAGE_MULTIPLIER = 1000;
+const HIGH_TIER_PASS_THROUGH_GAP = 3;
+const PET_ATTACK_COOLDOWN_MS = 500;
+const PET_TARGET_RANGE = 1900;
+const PET_FOLLOW_DISTANCE = 280;
 const BUBBLE_LAUNCH_BASE_DISTANCE = 150;
 const BUBBLE_LAUNCH_DISTANCE_PER_TIER = 8;
 const BUBBLE_LAUNCH_CHAIN_INTERVAL_MS = 115;
@@ -924,6 +1004,110 @@ const PETAL_DEFINITIONS = {
     durabilityCost: 5,
     healPerSecond: 15,
   },
+  RangeLeaf: {
+    labelKey: "petalRangeLeaf",
+    asset: "rangeLeaf",
+    baseAttack: 8,
+    baseDurability: 10,
+    baseRespawnMs: 300,
+    durabilityCost: 1,
+    rangeBonus: 24,
+    rangeTierMultiplier: 1.12,
+  },
+  ReloadLeaf: {
+    labelKey: "petalReloadLeaf",
+    asset: "reloadLeaf",
+    baseAttack: 10,
+    baseDurability: 10,
+    baseRespawnMs: 1000,
+    durabilityCost: 1,
+    cooldownReduction: 0.05,
+    cooldownReductionPerTier: 0.04,
+  },
+  MagicLeaf: {
+    labelKey: "petalMagicLeaf",
+    asset: "magicLeaf",
+    baseAttack: 40,
+    baseDurability: 20,
+    baseRespawnMs: 600,
+    durabilityCost: 1,
+    slowAmount: 0.4,
+    slowAmountPerTier: 0.015,
+    slowDurationMs: 1200,
+    slowDurationPerTierMs: 250,
+    healthCost: 15,
+    healthCostTierMultiplier: 1.32,
+  },
+  BeeEgg: {
+    labelKey: "petalBeeEgg",
+    asset: "egg",
+    baseAttack: 0,
+    baseDurability: 1,
+    baseRespawnMs: PET_EGG_RESPAWN_MS,
+    durabilityCost: 0,
+    fixedAttack: true,
+    fixedDurability: true,
+    infiniteDurability: true,
+    noContactDamage: true,
+    summonSpecies: "Bee",
+    summonMs: PET_EGG_SUMMON_MS,
+  },
+  LadybugEgg: {
+    labelKey: "petalLadybugEgg",
+    asset: "egg",
+    baseAttack: 0,
+    baseDurability: 1,
+    baseRespawnMs: PET_EGG_RESPAWN_MS,
+    durabilityCost: 0,
+    fixedAttack: true,
+    fixedDurability: true,
+    infiniteDurability: true,
+    noContactDamage: true,
+    summonSpecies: "Ladybug",
+    summonMs: PET_EGG_SUMMON_MS,
+  },
+  RockEgg: {
+    labelKey: "petalRockEgg",
+    asset: "egg",
+    baseAttack: 0,
+    baseDurability: 1,
+    baseRespawnMs: PET_EGG_RESPAWN_MS,
+    durabilityCost: 0,
+    fixedAttack: true,
+    fixedDurability: true,
+    infiniteDurability: true,
+    noContactDamage: true,
+    summonSpecies: "Rock",
+    summonMs: PET_EGG_SUMMON_MS,
+  },
+  WorkerAntEgg: {
+    labelKey: "petalWorkerAntEgg",
+    asset: "egg",
+    baseAttack: 0,
+    baseDurability: 1,
+    baseRespawnMs: PET_EGG_RESPAWN_MS,
+    durabilityCost: 0,
+    fixedAttack: true,
+    fixedDurability: true,
+    infiniteDurability: true,
+    noContactDamage: true,
+    summonSpecies: "WorkerAnt",
+    summonMs: PET_EGG_SUMMON_MS,
+  },
+  CaterpillarEgg: {
+    labelKey: "petalCaterpillarEgg",
+    asset: "egg",
+    baseAttack: 0,
+    baseDurability: 1,
+    baseRespawnMs: PET_EGG_RESPAWN_MS,
+    durabilityCost: 0,
+    fixedAttack: true,
+    fixedDurability: true,
+    infiniteDurability: true,
+    noContactDamage: true,
+    summonSpecies: "Caterpillar",
+    summonMs: PET_EGG_SUMMON_MS,
+  },
   Corn: {
     labelKey: "petalCorn",
     asset: "corn",
@@ -964,7 +1148,7 @@ const PETAL_DEFINITIONS = {
     labelKey: "petalBoulder",
     asset: "boulder",
     baseAttack: 5,
-    baseDurability: 200,
+    baseDurability: 120,
     baseRespawnMs: 10000,
     durabilityCost: 1,
     durabilityTierMultiplier: 4,
@@ -1911,6 +2095,7 @@ function createPetalItem(name = "Basic", tierIndex = 0) {
     durability: maxDurability,
     baseRespawnMs: definition.baseRespawnMs,
     durabilityCost: definition.durabilityCost,
+    infiniteDurability: Boolean(definition.infiniteDurability),
     placeableBarrier: Boolean(definition.placeableBarrier),
     placed: false,
     placedX: 0,
@@ -1919,11 +2104,29 @@ function createPetalItem(name = "Basic", tierIndex = 0) {
     placedAt: 0,
     nextBarrierDamageAt: 0,
     attack: getPetalAttack(name, tier.index),
+    rangeBonus: definition.rangeBonus
+      ? definition.rangeBonus * (definition.rangeTierMultiplier || 1) ** tier.index
+      : 0,
+    cooldownReduction: definition.cooldownReduction
+      ? getReloadLeafCooldownReductionForTier(tier.index)
+      : 0,
+    slowAmount: definition.slowAmount
+      ? getMagicLeafSlowAmountForTier(tier.index)
+      : 0,
+    slowDurationMs: definition.slowDurationMs
+      ? getMagicLeafSlowDurationForTier(tier.index)
+      : 0,
+    healthCost: definition.healthCost
+      ? getMagicLeafHealthCostForTier(tier.index)
+      : 0,
     healAmount: definition.baseHeal ? scaleStatByTier(definition.baseHeal, 2.2, tier.index) : 0,
     healPerSecond: definition.healPerSecond ? scaleStatByTier(definition.healPerSecond, 2.2, tier.index) : 0,
     active: true,
     readyAt: 0,
     cooldownStartedAt: 0,
+    summonStartedAt: 0,
+    summonReadyAt: 0,
+    petId: 0,
   };
 
   if (item.name === "Light") ensureLightOrbStates(item);
@@ -1974,7 +2177,7 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
   const maxHealth = scaleStatByTier(stats.maxHealth, 4.5, tier.index);
   const sizeScale = getMonsterSizeScale(1, tier.index);
 
-  return {
+  const monster = {
     id: nextMonsterId++,
     name: speciesName,
     asset: definition.asset,
@@ -2024,6 +2227,191 @@ function createMonster(speciesName = "Bee", x, y, direction = 1, tierIndex = 0) 
     deathStartedAt: 0,
     deathDuration: DEATH_ANIMATION_MS,
   };
+
+  if (stats.segmented) createCaterpillarSegments(monster);
+  return monster;
+}
+
+function createCaterpillarSegments(monster) {
+  const segmentCount = Math.floor(Math.random() * 11) + 5;
+  const segmentSpacing = monster.radius * 0.82;
+  const perSegmentHealth = monster.maxHealth;
+  const segments = [
+    {
+      head: true,
+      active: true,
+      x: monster.x,
+      y: monster.y,
+      angle: monster.moveAngle,
+      health: perSegmentHealth,
+      maxHealth: perSegmentHealth,
+    },
+  ];
+
+  for (let index = 1; index <= segmentCount; index++) {
+    segments.push({
+      head: false,
+      active: true,
+      x: monster.x - Math.cos(monster.moveAngle) * segmentSpacing * index,
+      y: monster.y - Math.sin(monster.moveAngle) * segmentSpacing * index,
+      angle: monster.moveAngle,
+      health: perSegmentHealth,
+      maxHealth: perSegmentHealth,
+    });
+  }
+
+  monster.segments = segments;
+  monster.segmentSpacing = segmentSpacing;
+  monster.maxHealth = perSegmentHealth * segments.length;
+  monster.health = monster.maxHealth;
+  monster.experienceReward = Math.round(monster.experienceReward * 3);
+}
+
+function syncSegmentedMonsterHealth(monster) {
+  if (!monster?.segments) return;
+  monster.health = monster.segments.reduce((total, segment) => total + Math.max(0, segment.health || 0), 0);
+}
+
+function isSegmentedMonster(monster) {
+  return Array.isArray(monster?.segments) && monster.segments.length > 0;
+}
+
+function getCaterpillarSegmentHitRadius(monster) {
+  const stats = MONSTER_DEFINITIONS[monster.name]?.stats || {};
+  return Math.max(stats.hitRadiusX || monster.hitRadius || 26, stats.hitRadiusY || monster.hitRadius || 26) *
+    getMonsterSizeScale(1, monster.tierIndex);
+}
+
+function getCaterpillarSegmentHitRadii(monster, segment) {
+  const stats = MONSTER_DEFINITIONS[monster.name]?.stats || {};
+  const sizeScale = getMonsterSizeScale(1, monster.tierIndex);
+  if (segment?.head) {
+    return {
+      radiusX: (stats.hitRadiusX || 25) * sizeScale,
+      radiusY: (stats.hitRadiusY || 31) * sizeScale,
+    };
+  }
+  return {
+    radiusX: (stats.bodyHitRadiusX || 25) * sizeScale,
+    radiusY: (stats.bodyHitRadiusY || 22) * sizeScale,
+  };
+}
+
+function updateCaterpillarSegments(monster, dt, time) {
+  if (!isSegmentedMonster(monster)) return;
+
+  const spacing = monster.segmentSpacing || monster.radius * 0.82;
+  monster.segments[0].x = monster.x;
+  monster.segments[0].y = monster.y;
+  monster.segments[0].angle = monster.moveAngle;
+  monster.segments[0].active = true;
+
+  for (let index = 1; index < monster.segments.length; index++) {
+    const segment = monster.segments[index];
+    const leader = monster.segments[index - 1];
+    const dx = segment.x - leader.x;
+    const dy = segment.y - leader.y;
+    const distance = Math.hypot(dx, dy) || 1;
+    const targetX = leader.x + (dx / distance) * spacing;
+    const targetY = leader.y + (dy / distance) * spacing;
+    const reconnectSpeed = 7.5;
+    segment.x += (targetX - segment.x) * Math.min(1, dt * reconnectSpeed);
+    segment.y += (targetY - segment.y) * Math.min(1, dt * reconnectSpeed);
+    segment.angle = Math.atan2(leader.y - segment.y, leader.x - segment.x);
+  }
+
+  resolveCaterpillarSelfCollisions(monster);
+  syncSegmentedMonsterHealth(monster);
+}
+
+function resolveCaterpillarSelfCollisions(monster) {
+  if (!isSegmentedMonster(monster)) return;
+
+  const head = monster.segments[0];
+  if (!head) return;
+  head.x = monster.x;
+  head.y = monster.y;
+
+  const minDistance = (monster.segmentSpacing || monster.radius * 0.82) * 0.98;
+  for (let pass = 0; pass < 2; pass++) {
+    for (let index = 1; index < monster.segments.length; index++) {
+      const a = monster.segments[index];
+      if (!a || a.health <= 0) continue;
+
+      for (let otherIndex = index + 2; otherIndex < monster.segments.length; otherIndex++) {
+        const b = monster.segments[otherIndex];
+        if (!b || b.health <= 0) continue;
+
+        const dx = b.x - a.x;
+        const dy = b.y - a.y;
+        const distance = Math.hypot(dx, dy) || 1;
+        if (distance >= minDistance) continue;
+
+        const push = Math.min((minDistance - distance) * 0.35, monster.radius * 0.18);
+        const nx = dx / distance;
+        const ny = dy / distance;
+        a.x -= nx * push;
+        a.y -= ny * push;
+        b.x += nx * push;
+        b.y += ny * push;
+      }
+    }
+  }
+
+  head.x = monster.x;
+  head.y = monster.y;
+}
+
+function getMonsterDrawCullRadius(monster) {
+  if (!isSegmentedMonster(monster)) return Math.max(monster.width, monster.height);
+  return Math.max(monster.width, monster.height) + (monster.segments.length - 1) * (monster.segmentSpacing || monster.radius);
+}
+
+function getCaterpillarSegmentShape(monster, segmentIndex) {
+  const segment = monster.segments?.[segmentIndex];
+  if (!segment || segment.health <= 0) return null;
+  const radii = getCaterpillarSegmentHitRadii(monster, segment);
+  return {
+    type: "ellipse",
+    x: segment.x,
+    y: segment.y,
+    radiusX: radii.radiusX,
+    radiusY: radii.radiusY,
+    angle: segment.angle + Math.PI / 2,
+  };
+}
+
+function getCaterpillarHitShapes(monster) {
+  if (!isSegmentedMonster(monster)) return [];
+  return monster.segments
+    .map((segment, index) => getCaterpillarSegmentShape(monster, index))
+    .filter(Boolean);
+}
+
+function getCaterpillarHitSegmentIndex(monster, hitbox) {
+  if (!isSegmentedMonster(monster)) return null;
+
+  let bestIndex = null;
+  let bestDistance = Infinity;
+  for (let index = 0; index < monster.segments.length; index++) {
+    const shape = getCaterpillarSegmentShape(monster, index);
+    if (!shape || !hitShapesOverlap(hitbox, shape)) continue;
+
+    const distance = Math.hypot(shape.x - hitbox.x, shape.y - hitbox.y);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestIndex = index;
+    }
+  }
+  return bestIndex;
+}
+
+function getCaterpillarOverlappingShapes(monster, hitbox) {
+  if (!isSegmentedMonster(monster)) return [];
+
+  return monster.segments
+    .map((segment, index) => getCaterpillarSegmentShape(monster, index))
+    .filter((shape) => shape && hitShapesOverlap(hitbox, shape));
 }
 
 function createBee(x, y, direction = 1, tierIndex = 0) {
@@ -2052,6 +2440,9 @@ function restorePetalItem(savedItem) {
   item.active = true;
   item.readyAt = 0;
   item.cooldownStartedAt = 0;
+  item.summonStartedAt = 0;
+  item.summonReadyAt = 0;
+  item.petId = 0;
   if (item.name === "Light") ensureLightOrbStates(item, savedItem.orbs);
   return item;
 }
@@ -2251,6 +2642,7 @@ const state = {
   bubbleCameraLockUntil: 0,
   damageNumbers: [],
   monsters: [],
+  friendlyPets: [],
   mapMonsterStates: {},
   monsterSpawnSequence: Array(TIERS.length).fill(0),
   nextRareMonsterSpawnAt: Array(TIERS.length).fill(0),
@@ -3756,6 +4148,10 @@ function formatSeconds(milliseconds) {
   return `${formatPetalStat(milliseconds / 1000)}s`;
 }
 
+function formatPercent(value) {
+  return `${formatPetalStat(value * 100)}%`;
+}
+
 function formatMonsterSize(width, height) {
   return `${formatPetalStat(width)}x${formatPetalStat(height)}`;
 }
@@ -3779,6 +4175,22 @@ function createPetalPreviewItem(name, tierIndex) {
     durabilityCost: definition.durabilityCost,
     healAmount: definition.baseHeal ? scaleStatByTier(definition.baseHeal, 2.2, tier.index) : 0,
     attack: getPetalAttack(name, tier.index),
+    rangeBonus: definition.rangeBonus
+      ? definition.rangeBonus * (definition.rangeTierMultiplier || 1) ** tier.index
+      : 0,
+    cooldownReduction: definition.cooldownReduction
+      ? getReloadLeafCooldownReductionForTier(tier.index)
+      : 0,
+    slowAmount: definition.slowAmount
+      ? getMagicLeafSlowAmountForTier(tier.index)
+      : 0,
+    slowDurationMs: definition.slowDurationMs
+      ? getMagicLeafSlowDurationForTier(tier.index)
+      : 0,
+    healthCost: definition.healthCost
+      ? getMagicLeafHealthCostForTier(tier.index)
+      : 0,
+    summonMs: definition.summonMs || 0,
     active: true,
     readyAt: 0,
   };
@@ -3816,13 +4228,20 @@ function getMonsterSpeciesSpawnChance(speciesName, tierIndex) {
   }
 
   const tierNumber = getTier(tierIndex).index + 1;
-  const rockChance = 0.16;
+  const caterpillarChance = 0.1;
+  const rockChance = 0.15;
   const ladybugChance = tierNumber >= 4 ? 0.52 : 0.42;
-  const movingMonsterShare = 1 - rockChance;
+  const movingMonsterShare = 1 - rockChance - caterpillarChance;
 
   if (speciesName === "Rock") return rockChance;
+  if (speciesName === "Caterpillar") return caterpillarChance;
   if (speciesName === "Ladybug") return movingMonsterShare * ladybugChance;
   return movingMonsterShare * (1 - ladybugChance);
+}
+
+function getMonsterPopulationWeight(monsterOrSpeciesName) {
+  const speciesName = typeof monsterOrSpeciesName === "string" ? monsterOrSpeciesName : monsterOrSpeciesName?.name;
+  return MONSTER_DEFINITIONS[speciesName]?.stats?.spawnWeight || 1;
 }
 
 function getMonsterSpeciesTargetCounts(tierIndex) {
@@ -4037,13 +4456,26 @@ function showPetalDexTooltip(entry, event) {
     createTooltipRow(text.petalName, entry.label),
     createTooltipRow(text.petalTier, entry.tier),
     createTooltipRow(text.petalDamage, formatPetalStat(entry.attack)),
-    createTooltipRow(text.petalDurability, formatPetalStat(entry.maxDurability)),
+    createTooltipRow(text.petalDurability, entry.infiniteDurability ? "∞" : formatPetalStat(entry.maxDurability)),
     createTooltipRow(text.petalCooldown, formatSeconds(entry.cooldown)),
     createTooltipRow(text.petalDurabilityCost, formatPetalStat(entry.durabilityCost || 10)),
   ];
   if (entry.healAmount) tooltipRows.push(createTooltipRow(text.petalHeal, formatPetalStat(entry.healAmount)));
   if (entry.healPerSecond) tooltipRows.push(createTooltipRow(text.petalHeal, `${formatPetalStat(entry.healPerSecond)}/s`));
   if (entry.homingRange) tooltipRows.push(createTooltipRow(text.petalHomingRange, formatPetalStat(entry.homingRange)));
+  if (entry.rangeBonus) tooltipRows.push(createTooltipRow(text.petalAttackRange, `+${formatPetalStat(entry.rangeBonus)}`));
+  if (entry.cooldownReduction) {
+    tooltipRows.push(createTooltipRow(text.petalCooldownReduction, formatPercent(entry.cooldownReduction)));
+  }
+  if (entry.slowAmount) {
+    tooltipRows.push(createTooltipRow(text.petalSlow, `${formatPercent(entry.slowAmount)} / ${formatSeconds(entry.slowDurationMs)}`));
+  }
+  if (entry.healthCost) {
+    tooltipRows.push(createTooltipRow(text.petalHealthCost, formatPetalStat(entry.healthCost)));
+  }
+  if (entry.summonMs) {
+    tooltipRows.push(createTooltipRow(text.petalSummon, formatSeconds(entry.summonMs)));
+  }
   if (entry.name === "Light") tooltipRows.push(createTooltipRow("Light", `${entry.orbCount}`));
   rows.append(...tooltipRows);
 
@@ -4340,14 +4772,293 @@ function getMonsterHealthBarRatios(monster, time = state.lastTime) {
   return { currentRatio, trailRatio };
 }
 
-function damageMonsterByPlayer(monster, amount, time) {
+function damageSegmentedMonsterByPlayer(monster, amount, time, segmentIndex = null) {
+  if (!isSegmentedMonster(monster)) return false;
+  const targetIndex = segmentIndex ?? 0;
+  const segment = monster.segments[targetIndex] || monster.segments[0];
+  if (!segment || segment.health <= 0) return false;
+
+  const damage = Math.max(0, amount);
+  segment.health = Math.max(0, segment.health - damage);
+  if (segment.health <= 0) {
+    if (segment.head) {
+      monster.health = 0;
+      monster.alive = false;
+      monster.dying = true;
+      monster.deathStartedAt = time;
+      return true;
+    }
+    spawnMonsterSegmentDrops(monster, segment);
+    monster.segments.splice(targetIndex, 1);
+  }
+
+  monster.hitFlash = HIT_FLASH_SECONDS;
+  syncSegmentedMonsterHealth(monster);
+  if (monster.health <= 0) {
+    monster.alive = false;
+    monster.dying = true;
+    monster.deathStartedAt = time;
+  }
+  return damage > 0;
+}
+
+function damageMonsterByPlayer(monster, amount, time, segmentIndex = null) {
   const healthBefore = monster.health || 0;
-  const damaged = damageCreature(monster, amount, time);
+  const damaged = isSegmentedMonster(monster)
+    ? damageSegmentedMonsterByPlayer(monster, amount, time, segmentIndex)
+    : damageCreature(monster, amount, time);
   if (!damaged) return false;
 
   markMonsterHealthTrailDamage(monster, healthBefore, time);
   recordMonsterDamageForCurrentLife(monster, Math.max(0, healthBefore - (monster.health || 0)));
   return true;
+}
+
+function spendPlayerHealth(amount, time) {
+  if (!state.player.alive || state.player.dying || state.player.hidden) return false;
+  if (state.author.verified && state.author.healthLocked) return false;
+
+  state.player.health = Math.max(0, state.player.health - Math.max(0, amount));
+  state.player.hitFlash = HIT_FLASH_SECONDS;
+  if (state.player.health <= 0) {
+    state.player.lastDeathX = state.player.x;
+    state.player.lastDeathY = state.player.y;
+    state.player.lastDeathMapId = state.mapId;
+    state.player.alive = false;
+    state.player.dying = true;
+    state.player.deathStartedAt = time;
+    state.player.hitFlash = 0;
+  }
+  return true;
+}
+
+function applyMagicLeafOnHit(petal, monster, time) {
+  if (!petal || petal.name !== "MagicLeaf" || !monster) return;
+
+  const slowAmount = getMagicLeafSlowAmountForTier(petal.tierIndex || 0);
+  const slowDurationMs = getMagicLeafSlowDurationForTier(petal.tierIndex || 0);
+  const currentSlowAmount = time < (monster.magicSlowUntil || 0) ? monster.magicSlowAmount || 0 : 0;
+  monster.magicSlowAmount = Math.max(currentSlowAmount, slowAmount);
+  monster.magicSlowUntil = Math.max(monster.magicSlowUntil || 0, time + slowDurationMs);
+  spendPlayerHealth(getMagicLeafHealthCostForTier(petal.tierIndex || 0), time);
+}
+
+function getPetEggSpecies(petal) {
+  return PETAL_DEFINITIONS[petal?.name]?.summonSpecies || "";
+}
+
+function isPetEgg(petal) {
+  return Boolean(getPetEggSpecies(petal));
+}
+
+function findFriendlyPetByEgg(petal) {
+  if (!petal?.petId) return null;
+  return state.friendlyPets.find((pet) => pet.id === petal.petId && !pet.hidden) || null;
+}
+
+function getSummonedPetHealthForEgg(petal) {
+  if (!isPetEgg(petal)) return null;
+  const pet = findFriendlyPetByEgg(petal);
+  if (!pet || pet.dying || !pet.alive) return null;
+  return {
+    health: Math.max(0, pet.health || 0),
+    maxHealth: Math.max(1, pet.maxHealth || 1),
+  };
+}
+
+function removeFriendlyPetForEgg(petal) {
+  if (!petal?.petId) return;
+  state.friendlyPets = state.friendlyPets.filter((pet) => pet.id !== petal.petId);
+  petal.petId = 0;
+}
+
+function resetPetEggSummons() {
+  state.friendlyPets = [];
+  for (const petal of [...state.weapon.petals, ...state.weapon.secondaryPetals, ...state.inventory]) {
+    if (!isPetEgg(petal)) continue;
+    petal.petId = 0;
+    petal.summonStartedAt = 0;
+    petal.summonReadyAt = 0;
+  }
+}
+
+function scaleFriendlyPetStats(pet) {
+  pet.friendly = true;
+  pet.stationary = false;
+  pet.passive = false;
+  pet.ownerLifeId = state.player.lifeId || 0;
+  pet.maxHealth = Math.max(1, Math.round(pet.maxHealth * PET_HEALTH_MULTIPLIER));
+  pet.health = pet.maxHealth;
+  pet.attack = Math.max(1, Math.round(pet.attack * PET_ATTACK_MULTIPLIER));
+  pet.nextPetAttackAt = 0;
+  pet.targetMonsterId = 0;
+  if (isSegmentedMonster(pet)) {
+    pet.segments.forEach((segment) => {
+      segment.maxHealth = Math.max(1, Math.round(segment.maxHealth * PET_HEALTH_MULTIPLIER));
+      segment.health = segment.maxHealth;
+    });
+    syncSegmentedMonsterHealth(pet);
+  }
+}
+
+function createFriendlyPetFromEgg(petal, time) {
+  const speciesName = getPetEggSpecies(petal);
+  if (!speciesName) return null;
+
+  const angle = Math.atan2(state.pointer.worldY - state.player.y, state.pointer.worldX - state.player.x) || 0;
+  const spawnDistance = state.player.radius + 72;
+  const spawn = findNearestFloorPosition(
+    state.player.x + Math.cos(angle) * spawnDistance,
+    state.player.y + Math.sin(angle) * spawnDistance,
+    state.player.hitRadius,
+  );
+  const pet = createMonster(speciesName, spawn.x, spawn.y, Math.cos(angle) >= 0 ? 1 : -1, petal.tierIndex || 0);
+  scaleFriendlyPetStats(pet);
+  pet.ownerPetalId = petal.id;
+  pet.mapId = state.mapId;
+  pet.spawnedAt = time;
+  state.friendlyPets.push(pet);
+  petal.petId = pet.id;
+  petal.summonStartedAt = 0;
+  petal.summonReadyAt = 0;
+  return pet;
+}
+
+function getNearestEnemyMonsterToPet(pet) {
+  let bestMonster = null;
+  let bestDistance = Infinity;
+  for (const monster of state.monsters) {
+    if (monster.hidden || monster.dying || !monster.alive) continue;
+    const distance = getMonsterDistanceToPoint(monster, pet.x, pet.y);
+    if (distance > PET_TARGET_RANGE || distance >= bestDistance) continue;
+    bestMonster = monster;
+    bestDistance = distance;
+  }
+  return bestMonster;
+}
+
+function damageFriendlyPet(pet, amount, time) {
+  if (!pet || pet.hidden || pet.dying || !pet.alive) return false;
+  pet.health = Math.max(0, pet.health - Math.max(0, amount));
+  pet.hitFlash = HIT_FLASH_SECONDS;
+  if (isSegmentedMonster(pet)) {
+    const ratio = clamp(pet.health / Math.max(1, pet.maxHealth), 0, 1);
+    pet.segments.forEach((segment) => {
+      segment.health = segment.maxHealth * ratio;
+    });
+  }
+  if (pet.health <= 0) {
+    pet.alive = false;
+    pet.dying = true;
+    pet.deathStartedAt = time;
+    pet.hitFlash = 0;
+  }
+  return true;
+}
+
+function handleFriendlyPetDeath(pet, time) {
+  if (!pet || pet.deathHandled) return;
+  pet.deathHandled = true;
+  const egg = state.weapon.petals.find((petal) => petal?.id === pet.ownerPetalId);
+  if (!egg) return;
+  egg.petId = 0;
+  egg.summonStartedAt = 0;
+  egg.summonReadyAt = 0;
+  startPetalCooldown(egg, time);
+}
+
+function updatePetEggs(time) {
+  if (!state.spawned || !state.player.alive || state.player.dying || state.player.hidden) return;
+  const activeEggs = new Set(state.weapon.petals.filter((petal) => isPetEgg(petal)));
+
+  for (const petal of [...state.weapon.petals, ...state.weapon.secondaryPetals, ...state.inventory]) {
+    if (!isPetEgg(petal)) continue;
+    if (!activeEggs.has(petal)) {
+      removeFriendlyPetForEgg(petal);
+      petal.summonStartedAt = 0;
+      petal.summonReadyAt = 0;
+    }
+  }
+
+  for (const petal of activeEggs) {
+    const pet = findFriendlyPetByEgg(petal);
+    if (pet && pet.alive && !pet.dying) continue;
+    if (petal.petId && !pet) {
+      petal.petId = 0;
+      startPetalCooldown(petal, time);
+      continue;
+    }
+    if (!petal.active) continue;
+    if (!petal.summonReadyAt) {
+      petal.summonStartedAt = time;
+      petal.summonReadyAt = time + (PETAL_DEFINITIONS[petal.name]?.summonMs || PET_EGG_SUMMON_MS);
+      continue;
+    }
+    if (time >= petal.summonReadyAt) {
+      createFriendlyPetFromEgg(petal, time);
+    }
+  }
+}
+
+function updateFriendlyPet(pet, dt, time) {
+  updateCreatureEffects(pet, dt, time);
+  if (pet.hidden) return;
+  if (pet.dying || !pet.alive) {
+    handleFriendlyPetDeath(pet, time);
+    return;
+  }
+
+  const target = getNearestEnemyMonsterToPet(pet);
+  if (target) {
+    const targetPart = getNearestMonsterPartToPoint(target, pet.x, pet.y);
+    pet.targetMoveAngle = Math.atan2(targetPart.y - pet.y, targetPart.x - pet.x);
+    pet.targetSpeed = pet.name === "Rock" ? 70 : 105 + pet.tierIndex * 5;
+  } else {
+    const dx = state.player.x - pet.x;
+    const dy = state.player.y - pet.y;
+    const distance = Math.hypot(dx, dy);
+    pet.targetMoveAngle = distance > 1 ? Math.atan2(dy, dx) : pet.targetMoveAngle;
+    pet.targetSpeed = distance > PET_FOLLOW_DISTANCE ? 95 : 0;
+  }
+
+  pet.speed += (pet.targetSpeed - pet.speed) * Math.min(1, dt * 5);
+  pet.moveAngle = lerpAngle(pet.moveAngle, pet.targetMoveAngle, Math.min(1, dt * 4));
+  const nextX = pet.x + Math.cos(pet.moveAngle) * pet.speed * dt;
+  const nextY = pet.y + Math.sin(pet.moveAngle) * pet.speed * dt;
+  moveCircleEntityWithMapCollision(pet, nextX, nextY, pet.radius, MONSTER_COLLISION_SAMPLE_COUNT);
+  clampEntityToMap(pet, pet.radius);
+  pet.direction = Math.cos(pet.moveAngle) >= 0 ? 1 : -1;
+  pet.faceAngle = lerpAngle(pet.faceAngle, pet.moveAngle + Math.PI / 2, Math.min(1, dt * 10));
+  updateCaterpillarSegments(pet, dt, time);
+
+  const petShape = getMonsterHitbox(pet);
+  for (const monster of state.monsters) {
+    if (monster.hidden || monster.dying || !monster.alive) continue;
+    if (!hitShapesOverlap(petShape, getMonsterHitbox(monster))) continue;
+    if (time >= (pet.nextPetAttackAt || 0)) {
+      const hitSegmentIndex = getCaterpillarHitSegmentIndex(monster, petShape);
+      const wasAlive = monster.alive;
+      if (damageMonsterByPlayer(monster, pet.attack, time, hitSegmentIndex)) {
+        addDamageNumber(monster, pet.attack, time);
+        monster.lastPlayerHitAt = time;
+        if (wasAlive && !monster.alive) rewardMonsterKill(monster);
+      }
+      pet.nextPetAttackAt = time + PET_ATTACK_COOLDOWN_MS;
+    }
+    if (time >= (pet.nextBodyDamageAt || 0)) {
+      damageFriendlyPet(pet, getMonsterBodyDamageToPetal(monster) * PET_INCOMING_DAMAGE_MULTIPLIER, time);
+      pet.nextBodyDamageAt = time + monster.bodyDamageCooldown;
+    }
+    break;
+  }
+}
+
+function updateFriendlyPets(dt, time) {
+  if (!state.spawned || !state.player.alive || state.player.dying || state.player.hidden) return;
+  state.friendlyPets = state.friendlyPets.filter((pet) => !pet.hidden);
+  for (const pet of state.friendlyPets) {
+    updateFriendlyPet(pet, dt, time);
+  }
 }
 
 function hasMonsterDropContribution(monster) {
@@ -4536,12 +5247,17 @@ function showEquipmentTooltip(item, event) {
 
   const text = getCurrentText();
   if (item.name === "Light") ensureLightOrbStates(item);
+  const summonedPetHealth = getSummonedPetHealthForEgg(item);
   const currentDurability =
-    item.name === "Light"
+    summonedPetHealth
+      ? summonedPetHealth.health
+      : item.name === "Light"
       ? item.orbs.reduce((total, orb) => total + Math.max(0, orb.durability || 0), 0)
       : Math.max(0, item.durability || 0);
   const maxDurability =
-    item.name === "Light" ? item.maxDurability * item.orbs.length : item.maxDurability;
+    summonedPetHealth
+      ? summonedPetHealth.maxHealth
+      : item.name === "Light" ? item.maxDurability * item.orbs.length : item.maxDurability;
   const remainingCooldown = item.active ? 0 : Math.max(0, (item.readyAt || 0) - state.lastTime);
   const statusText = item.placed
     ? text.petalPlaced
@@ -4578,8 +5294,10 @@ function showEquipmentTooltip(item, event) {
     createTooltipRow(text.petalTier, item.tier),
     createTooltipRow(text.petalDamage, formatPetalStat(item.attack)),
     createTooltipRow(
-      text.petalDurability,
-      `${formatPetalStat(currentDurability)} / ${formatPetalStat(maxDurability)}`,
+      summonedPetHealth ? text.monsterHealth : text.petalDurability,
+      item.infiniteDurability && !summonedPetHealth
+        ? "∞"
+        : `${formatPetalStat(currentDurability)} / ${formatPetalStat(maxDurability)}`,
     ),
     createTooltipRow(text.petalCooldown, formatSeconds(getPetalCooldownMs(item))),
   ];
@@ -4593,6 +5311,31 @@ function showEquipmentTooltip(item, event) {
         formatPetalStat(getLentilHomingRangeBonus(item)),
       ),
     );
+  }
+  if (itemDefinition.rangeBonus) {
+    const rangeBonus = itemDefinition.rangeBonus * (itemDefinition.rangeTierMultiplier || 1) ** item.tierIndex;
+    tooltipRows.push(createTooltipRow(text.petalAttackRange, `+${formatPetalStat(rangeBonus)}`));
+  }
+  if (itemDefinition.cooldownReduction) {
+    tooltipRows.push(
+      createTooltipRow(text.petalCooldownReduction, formatPercent(getReloadLeafCooldownReductionForTier(item.tierIndex))),
+    );
+  }
+  if (itemDefinition.slowAmount) {
+    tooltipRows.push(
+      createTooltipRow(
+        text.petalSlow,
+        `${formatPercent(getMagicLeafSlowAmountForTier(item.tierIndex))} / ${formatSeconds(getMagicLeafSlowDurationForTier(item.tierIndex))}`,
+      ),
+    );
+  }
+  if (itemDefinition.healthCost) {
+    tooltipRows.push(
+      createTooltipRow(text.petalHealthCost, formatPetalStat(getMagicLeafHealthCostForTier(item.tierIndex))),
+    );
+  }
+  if (itemDefinition.summonMs) {
+    tooltipRows.push(createTooltipRow(text.petalSummon, formatSeconds(itemDefinition.summonMs)));
   }
   if (item.name === "Light") {
     tooltipRows.push(createTooltipRow("Light", `${getLightOrbCount(item.tierIndex)}`));
@@ -4609,6 +5352,15 @@ function showEquipmentTooltip(item, event) {
 }
 
 function setItemSlotWearState(slot, item) {
+  const summonedPetHealth = getSummonedPetHealthForEgg(item);
+  if (summonedPetHealth) {
+    const healthRatio = clamp(summonedPetHealth.health / summonedPetHealth.maxHealth, 0, 1);
+    slot.classList.toggle("is-recharging", false);
+    slot.style.setProperty("--wear-ratio", `${1 - healthRatio}`);
+    slot.style.setProperty("--recharge-angle", "360deg");
+    return;
+  }
+
   if (item?.name === "Light") {
     ensureLightOrbStates(item);
     const totalRatio =
@@ -4719,6 +5471,7 @@ function getEquipmentArray(source) {
 function movePetalToInventory(item) {
   if (!item) return;
 
+  removeFriendlyPetForEgg(item);
   resetPetalForInventory(item);
   state.inventory.push(item);
   sortInventory();
@@ -4747,6 +5500,9 @@ function resetPetalForInventory(item) {
   item.durability = item.maxDurability;
   item.readyAt = 0;
   item.cooldownStartedAt = 0;
+  item.summonStartedAt = 0;
+  item.summonReadyAt = 0;
+  item.petId = 0;
   resetPetalPlacement(item);
 
   if (item.name === "Light") {
@@ -4782,12 +5538,42 @@ function restartPetalCooldownForPrimaryEquip(item, time = performance.now()) {
   }
 }
 
+function rescalePetalUnitCooldown(unitState, petal, time) {
+  if (!unitState || unitState.active) return;
+  const start = unitState.cooldownStartedAt || time;
+  const oldDuration = Math.max(1, (unitState.readyAt || time) - start);
+  const progress = clamp((time - start) / oldDuration, 0, 1);
+  const newDuration = getPetalCooldownMs(petal);
+  unitState.cooldownStartedAt = time - newDuration * progress;
+  unitState.readyAt = unitState.cooldownStartedAt + newDuration;
+}
+
+function rescaleEquippedPetalCooldowns(time = performance.now()) {
+  for (const petal of [...state.weapon.petals, ...state.weapon.secondaryPetals]) {
+    if (!petal) continue;
+    if (petal.name === "Light") {
+      ensureLightOrbStates(petal);
+      petal.orbs.forEach((orb) => rescalePetalUnitCooldown(orb, petal, time));
+      syncPetalActiveState(petal);
+      continue;
+    }
+    rescalePetalUnitCooldown(petal, petal, time);
+  }
+}
+
+function rescaleEquippedPetalCooldownsIfReloadLeafChanged(previousReduction, time = performance.now()) {
+  if (Math.abs(previousReduction - getEquippedReloadLeafCooldownReduction()) < 0.0001) return;
+  rescaleEquippedPetalCooldowns(time);
+}
+
 function moveEquipmentToInventory(index) {
+  const previousReloadLeafReduction = getEquippedReloadLeafCooldownReduction();
   const item = state.weapon.petals[index];
   if (!item) return;
 
   state.weapon.petals[index] = null;
   movePetalToInventory(item);
+  rescaleEquippedPetalCooldownsIfReloadLeafChanged(previousReloadLeafReduction);
 }
 
 function moveSecondaryEquipmentToInventory(index) {
@@ -4857,6 +5643,7 @@ function dropDraggedItemToEquipment(targetIndex, targetSource = "equipment") {
   if (!dragData) return;
   if (targetIndex >= getEffectiveEquipmentSlots()) return;
 
+  const previousReloadLeafReduction = getEquippedReloadLeafCooldownReduction();
   const targetArray = getEquipmentArray(targetSource);
 
   if (isEquipmentSource(dragData.source)) {
@@ -4867,6 +5654,8 @@ function dropDraggedItemToEquipment(targetIndex, targetSource = "equipment") {
     targetArray[targetIndex] = sourceItem;
     if (targetSource === "equipment" && dragData.source !== "equipment") {
       restartPetalCooldownForPrimaryEquip(sourceItem);
+    } else if (dragData.source === "equipment" && targetSource !== "equipment") {
+      restartPetalCooldownForPrimaryEquip(sourceArray[sourceIndex]);
     }
   } else {
     const sourceItem = state.inventory.splice(dragData.index, 1)[0];
@@ -4880,6 +5669,7 @@ function dropDraggedItemToEquipment(targetIndex, targetSource = "equipment") {
   }
 
   dragDropCompleted = true;
+  rescaleEquippedPetalCooldownsIfReloadLeafChanged(previousReloadLeafReduction);
   renderItemUi();
 }
 
@@ -4910,6 +5700,7 @@ function equipInventoryItem(index) {
   const item = state.inventory[index];
   if (!item) return;
 
+  const previousReloadLeafReduction = getEquippedReloadLeafCooldownReduction();
   let targetSource = "equipment";
   let targetIndex = findFirstEmptyEquipmentSlot("equipment");
   if (targetIndex < 0) {
@@ -4923,16 +5714,19 @@ function equipInventoryItem(index) {
   if (targetSource === "equipment") {
     restartPetalCooldownForPrimaryEquip(item);
   }
+  rescaleEquippedPetalCooldownsIfReloadLeafChanged(previousReloadLeafReduction);
   renderItemUi();
 }
 
 function swapEquipmentSlot(index) {
   if (index >= getEffectiveEquipmentSlots()) return;
 
+  const previousReloadLeafReduction = getEquippedReloadLeafCooldownReduction();
   const mainItem = state.weapon.petals[index];
   state.weapon.petals[index] = state.weapon.secondaryPetals[index];
   state.weapon.secondaryPetals[index] = mainItem;
   restartPetalCooldownForPrimaryEquip(state.weapon.petals[index]);
+  rescaleEquippedPetalCooldownsIfReloadLeafChanged(previousReloadLeafReduction);
   renderItemUi();
 }
 
@@ -4959,12 +5753,15 @@ function syncInventoryReturnDropzonePosition(slotCount = getEffectiveEquipmentSl
 
 function swapAllEquipmentSlots() {
   const slotCount = getEffectiveEquipmentSlots();
+  const previousReloadLeafReduction = getEquippedReloadLeafCooldownReduction();
+  resetPetEggSummons();
   for (let index = 0; index < slotCount; index++) {
     const mainItem = state.weapon.petals[index];
     state.weapon.petals[index] = state.weapon.secondaryPetals[index];
     state.weapon.secondaryPetals[index] = mainItem;
     restartPetalCooldownForPrimaryEquip(state.weapon.petals[index]);
   }
+  rescaleEquippedPetalCooldownsIfReloadLeafChanged(previousReloadLeafReduction);
   renderItemUi();
 }
 
@@ -5530,7 +6327,7 @@ function circleIntersectsBounds(x, y, radius, bounds) {
 }
 
 function isMonsterNearPlayer(monster, extraRadius = 0) {
-  const activeRadius = MONSTER_PLAYER_ACTIVE_RADIUS + monster.radius + extraRadius;
+  const activeRadius = MONSTER_PLAYER_ACTIVE_RADIUS + getMonsterDrawCullRadius(monster) + extraRadius;
   return (
     Math.abs(monster.x - state.player.x) <= activeRadius &&
     Math.abs(monster.y - state.player.y) <= activeRadius
@@ -5580,6 +6377,14 @@ function getCircleHitShape(x, y, radius) {
 }
 
 function getMonsterHitShape(monster) {
+  if (isSegmentedMonster(monster)) {
+    return {
+      type: "compound",
+      x: monster.x,
+      y: monster.y,
+      shapes: getCaterpillarHitShapes(monster),
+    };
+  }
   if (monster.hitShape === "circle") {
     return getCircleHitShape(monster.x, monster.y, monster.hitRadius || Math.max(monster.hitRadiusX, monster.hitRadiusY));
   }
@@ -5595,6 +6400,39 @@ function getMonsterHitShape(monster) {
     radiusY: monster.hitRadiusY,
     angle: monster.faceAngle + sway,
   };
+}
+
+function getHitShapeCenterDistance(shape, x, y) {
+  return Math.hypot(shape.x - x, shape.y - y);
+}
+
+function getHitShapeBroadRadius(shape) {
+  if (shape.type === "circle") return shape.radius;
+  if (shape.type === "compound") {
+    return shape.shapes.reduce((maxRadius, part) => Math.max(maxRadius, getHitShapeBroadRadius(part)), 0);
+  }
+  return Math.max(shape.radiusX, shape.radiusY);
+}
+
+function getNearestMonsterPartToPoint(monster, x, y) {
+  const shape = getMonsterHitShape(monster);
+  if (shape.type !== "compound") return shape;
+
+  let bestPart = null;
+  let bestDistance = Infinity;
+  for (const part of shape.shapes) {
+    const distance = getHitShapeCenterDistance(part, x, y) - getHitShapeBroadRadius(part);
+    if (distance < bestDistance) {
+      bestDistance = distance;
+      bestPart = part;
+    }
+  }
+  return bestPart || shape;
+}
+
+function getMonsterDistanceToPoint(monster, x, y) {
+  const part = getNearestMonsterPartToPoint(monster, x, y);
+  return getHitShapeCenterDistance(part, x, y) - getHitShapeBroadRadius(part);
 }
 
 function pointInRotatedEllipse(x, y, ellipse, inflate = 0) {
@@ -5620,6 +6458,12 @@ function ellipseRadiusToward(ellipse, worldAngle) {
 
 function hitShapeRadiusToward(shape, worldAngle) {
   if (shape.type === "circle") return shape.radius;
+  if (shape.type === "compound") {
+    return shape.shapes.reduce(
+      (maxRadius, part) => Math.max(maxRadius, hitShapeRadiusToward(part, worldAngle)),
+      0,
+    );
+  }
   return ellipseRadiusToward(shape, worldAngle);
 }
 
@@ -5662,6 +6506,8 @@ function ellipseEllipseOverlap(a, b) {
 }
 
 function hitShapesOverlap(a, b) {
+  if (a.type === "compound") return a.shapes.some((shape) => hitShapesOverlap(shape, b));
+  if (b.type === "compound") return b.shapes.some((shape) => hitShapesOverlap(a, shape));
   if (a.type === "circle" && b.type === "circle") return circleCircleOverlap(a, b);
   if (a.type === "circle" && b.type === "ellipse") return circleEllipseOverlap(a, b);
   if (a.type === "ellipse" && b.type === "circle") return circleEllipseOverlap(b, a);
@@ -5683,14 +6529,14 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
   if (!state.spawned) return;
   if (!state.player.alive || state.player.hidden || state.player.dying) return;
 
-  const playerShape = getPlayerHitbox();
-
   for (const monster of state.monsters) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
     if (!isMonsterNearPlayer(monster, state.player.hitRadius + 80)) continue;
 
+    let playerShape = getPlayerHitbox();
     const monsterShape = getMonsterHitbox(monster);
     if (!hitShapesOverlap(playerShape, monsterShape)) continue;
+    const hitSegmentIndex = getCaterpillarHitSegmentIndex(monster, playerShape);
 
     if (time >= (state.player.nextContactFlashAt || 0)) {
       state.player.hitFlash = HIT_FLASH_SECONDS;
@@ -5707,7 +6553,7 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
     if (time >= (monster.nextPlayerBodyDamageAt || 0)) {
       const wasAlive = monster.alive;
       const bodyDamage = getPlayerBodyDamage();
-      if (damageMonsterByPlayer(monster, bodyDamage, time)) {
+      if (damageMonsterByPlayer(monster, bodyDamage, time, hitSegmentIndex)) {
         addDamageNumber(monster, bodyDamage, time);
         monster.lastPlayerHitAt = time;
         if (wasAlive && !monster.alive) {
@@ -5717,24 +6563,38 @@ function resolvePlayerMonsterCollisions(time = performance.now()) {
       monster.nextPlayerBodyDamageAt = time + PLAYER_BODY_DAMAGE_COOLDOWN_MS;
     }
 
-    const dx = state.player.x - monster.x;
-    const dy = state.player.y - monster.y;
-    const angle = Math.atan2(dy, dx);
-    const distance = Math.hypot(dx, dy) || 1;
-    const targetDistance =
-      state.player.hitRadius + hitShapeRadiusToward(monsterShape, angle) + 0.5;
-    const push = Math.max(1, targetDistance - distance);
+    let recoilShape = null;
+    const collisionPasses = isSegmentedMonster(monster) ? 2 : 1;
+    for (let pass = 0; pass < collisionPasses; pass++) {
+      playerShape = getPlayerHitbox();
+      const collisionShapes = isSegmentedMonster(monster)
+        ? getCaterpillarOverlappingShapes(monster, playerShape)
+        : [monsterShape];
+      if (collisionShapes.length === 0) break;
+      if (!recoilShape) recoilShape = collisionShapes[0];
+
+      for (const collisionShape of collisionShapes) {
+        const dx = state.player.x - collisionShape.x;
+        const dy = state.player.y - collisionShape.y;
+        const angle = dx === 0 && dy === 0 ? monster.moveAngle + Math.PI : Math.atan2(dy, dx);
+        const distance = Math.hypot(dx, dy) || 1;
+        const targetDistance =
+          state.player.hitRadius + hitShapeRadiusToward(collisionShape, angle) + 0.5;
+        const push = Math.max(1, targetDistance - distance);
+        moveCircleEntityWithMapCollision(
+          state.player,
+          state.player.x + Math.cos(angle) * push,
+          state.player.y + Math.sin(angle) * push,
+          state.player.hitRadius,
+        );
+        clampEntityToMap(state.player, state.player.radius);
+      }
+    }
 
     if (playerWasHit) {
-      recoilPlayerFromMonster(angle, push + PLAYER_MONSTER_HIT_RECOIL_DISTANCE);
-    } else {
-      moveCircleEntityWithMapCollision(
-        state.player,
-        state.player.x + Math.cos(angle) * push,
-        state.player.y + Math.sin(angle) * push,
-        state.player.hitRadius,
-      );
-      clampEntityToMap(state.player, state.player.radius);
+      const recoilSource = recoilShape || monsterShape;
+      const recoilAngle = Math.atan2(state.player.y - recoilSource.y, state.player.x - recoilSource.x);
+      recoilPlayerFromMonster(recoilAngle, PLAYER_MONSTER_HIT_RECOIL_DISTANCE);
     }
   }
 }
@@ -5849,12 +6709,16 @@ function respawnPlayer() {
   state.weapon.homingUnits = Object.create(null);
   state.weapon.homingUpdatedAt = 0;
   state.nextBubbleLaunchAt = 0;
+  state.friendlyPets = [];
   for (const petal of [...state.weapon.petals, ...state.weapon.secondaryPetals]) {
     if (!petal) continue;
     petal.active = true;
     petal.durability = petal.maxDurability;
     petal.readyAt = 0;
     petal.cooldownStartedAt = 0;
+    petal.summonStartedAt = 0;
+    petal.summonReadyAt = 0;
+    petal.petId = 0;
     if (petal.name === "Light") {
       ensureLightOrbStates(petal);
       petal.orbs.forEach((orb) => {
@@ -5904,6 +6768,7 @@ function returnToMainMenu() {
   if (!state.spawned) return;
 
   saveActiveMonsterMapState(state.mapId);
+  resetPetEggSummons();
   closeFloatingPanels();
   state.spawned = false;
   state.pointer.active = false;
@@ -6069,6 +6934,7 @@ function switchActiveMap(mapId) {
   updatePointerWorld();
   state.drops = [];
   state.weapon.homingUnits = Object.create(null);
+  resetPetEggSummons();
   clearAntHellPlayerSpawnZone();
   renderMonsterDexUi();
 }
@@ -6288,7 +7154,7 @@ function placePollenPetals({ orbitRadius = state.weapon.orbitRadius } = {}) {
 }
 
 function placePollenPetalsFromAttack() {
-  placePollenPetals({ orbitRadius: getPetalOrbitRadius(state.weapon.attackRadius) });
+  placePollenPetals({ orbitRadius: getPetalOrbitRadius(state.weapon.attackRadius, true) });
 }
 
 function getBubbleLaunchDistance(petal) {
@@ -6404,6 +7270,7 @@ function closeFloatingPanels() {
 function isFloatingPanelTarget(target) {
   return (
     mainMenuButton.contains(target) ||
+    saveButton.contains(target) ||
     settingsPanel.contains(target) ||
     settingsButton.contains(target) ||
     talentPanel.contains(target) ||
@@ -7031,6 +7898,19 @@ function isCurrentPlayerOnLeaderboard(entries = getLeaderboardEntries()) {
   return entries.some((entry) => entry.key === currentKey);
 }
 
+function isCurrentPlayerLeaderboardLeader(entries = getLeaderboardEntries()) {
+  return entries[0]?.key === getCurrentLeaderboardKey();
+}
+
+function getThunderHammerLeaderboardTierNumber(level = state.player.level) {
+  const safeLevel = Math.max(1, Math.floor(level || 1));
+  if (safeLevel >= 88) return 17;
+  if (safeLevel >= 85) return 16;
+  if (safeLevel >= 82) return 15;
+  if (safeLevel >= 76) return 14;
+  return 13;
+}
+
 function isLeaderboardRewardPetal(item) {
   return Boolean(item?.temporary && item?.rewardSource === "leaderboard");
 }
@@ -7068,15 +7948,23 @@ function hasLeaderboardRewardPetal() {
 }
 
 function syncLeaderboardReward(entries = getLeaderboardEntries()) {
-  if (!state.spawned || !isCurrentPlayerOnLeaderboard(entries)) {
+  if (!state.spawned || !isCurrentPlayerLeaderboardLeader(entries)) {
     removeLeaderboardRewardPetals();
     return;
   }
 
-  if (!hasLeaderboardRewardPetal()) {
+  const rewardTierNumber = getThunderHammerLeaderboardTierNumber(state.player.level);
+  const hasCorrectReward = [
+    ...state.inventory,
+    ...state.weapon.petals,
+    ...state.weapon.secondaryPetals,
+  ].some((item) => isLeaderboardRewardPetal(item) && item.name === "ThunderHammer" && item.tierIndex === rewardTierNumber - 1);
+
+  if (!hasCorrectReward) {
+    removeLeaderboardRewardPetals();
     const reward = createPetalItem(
       "ThunderHammer",
-      THUNDER_HAMMER_LEADERBOARD_TIER_NUMBER - 1,
+      rewardTierNumber - 1,
     );
     reward.temporary = true;
     reward.rewardSource = "leaderboard";
@@ -7295,11 +8183,11 @@ function submitChatMessage() {
 }
 
 function saveActiveAccount() {
-  if (!state.accountName) return;
+  if (!state.accountName) return false;
 
   const accounts = readAccounts();
   const account = accounts[state.accountName];
-  if (!account) return;
+  if (!account) return false;
 
   accounts[state.accountName] = {
     ...account,
@@ -7308,6 +8196,23 @@ function saveActiveAccount() {
   };
   writeAccounts(accounts);
   writeLocalAccountBackup(state.accountName, accounts[state.accountName]);
+  return true;
+}
+
+function saveGameFromButton() {
+  if (!state.accountName) {
+    showGameNotice("saveLoginRequired");
+    openAccountPanel("saveLoginRequired");
+    return;
+  }
+
+  saveActiveMonsterMapState(state.mapId);
+  if (saveActiveAccount()) {
+    showGameNotice("saveSuccess");
+  } else {
+    showGameNotice("saveLoginRequired");
+    openAccountPanel("saveLoginRequired");
+  }
 }
 
 function loginAccount() {
@@ -7429,7 +8334,7 @@ function ensurePlayerBaseMaxHealthForLevel() {
 
 function getPlayerMaxHealth() {
   ensurePlayerBaseMaxHealthForLevel();
-  return Math.round(state.player.baseMaxHealth * (1 + getTalentLevel("maxHealth") * 0.08));
+  return Math.round(state.player.baseMaxHealth * (1 + getTalentLevel("maxHealth") * 0.1));
 }
 
 function getViewScale() {
@@ -7442,7 +8347,46 @@ function getPetalCooldownMs(petal = null) {
   const tierMultiplier = definition?.cooldownTierMultiplier
     ? definition.cooldownTierMultiplier ** getTier(petal?.tierIndex || 0).index
     : 1;
-  return Math.max(80, baseRespawnMs * tierMultiplier * (1 - getTalentLevel("petalRefresh") * 0.07));
+  const talentMultiplier = 1 - getTalentLevel("petalRefresh") * 0.07;
+  const reloadLeafMultiplier = 1 - getEquippedReloadLeafCooldownReduction();
+  return Math.max(80, baseRespawnMs * tierMultiplier * talentMultiplier * reloadLeafMultiplier);
+}
+
+function getReloadLeafCooldownReductionForTier(tierIndex = 0) {
+  const definition = PETAL_DEFINITIONS.ReloadLeaf;
+  if (!definition) return 0;
+  const tier = getTier(tierIndex);
+  return (definition.cooldownReduction || 0) + (definition.cooldownReductionPerTier || 0) * tier.index;
+}
+
+function getEquippedReloadLeafCooldownReduction() {
+  const petals = state?.weapon?.petals || [];
+  const reduction = petals.reduce((total, petal) => {
+    if (!petal || petal.name !== "ReloadLeaf") return total;
+    return total + getReloadLeafCooldownReductionForTier(petal.tierIndex || 0);
+  }, 0);
+  return clamp(reduction, 0, 0.9);
+}
+
+function getMagicLeafSlowAmountForTier(tierIndex = 0) {
+  const definition = PETAL_DEFINITIONS.MagicLeaf;
+  if (!definition) return 0;
+  const tier = getTier(tierIndex);
+  return clamp((definition.slowAmount || 0) + (definition.slowAmountPerTier || 0) * tier.index, 0, 0.9);
+}
+
+function getMagicLeafSlowDurationForTier(tierIndex = 0) {
+  const definition = PETAL_DEFINITIONS.MagicLeaf;
+  if (!definition) return 0;
+  const tier = getTier(tierIndex);
+  return (definition.slowDurationMs || 0) + (definition.slowDurationPerTierMs || 0) * tier.index;
+}
+
+function getMagicLeafHealthCostForTier(tierIndex = 0) {
+  const definition = PETAL_DEFINITIONS.MagicLeaf;
+  if (!definition) return 0;
+  const tier = getTier(tierIndex);
+  return Math.round((definition.healthCost || 0) * (definition.healthCostTierMultiplier || 1) ** tier.index);
 }
 
 function getDropMagnetRadius() {
@@ -7469,8 +8413,17 @@ function getPetalAttackRangeMultiplier() {
   return 1 + getTalentLevel("attackRange") * 0.06;
 }
 
-function getPetalOrbitRadius(baseRadius) {
-  return baseRadius * getPetalAttackRangeMultiplier();
+function getPetalOrbitRadius(baseRadius, includeRangeLeafBonus = false) {
+  return baseRadius * getPetalAttackRangeMultiplier() + (includeRangeLeafBonus ? getRangeLeafBonus() : 0);
+}
+
+function getRangeLeafBonus() {
+  return state.weapon.petals.reduce((total, petal) => {
+    if (!petal || petal.name !== "RangeLeaf") return total;
+    const definition = PETAL_DEFINITIONS.RangeLeaf;
+    const tierIndex = getTier(petal.tierIndex || 0).index;
+    return total + definition.rangeBonus * definition.rangeTierMultiplier ** tierIndex;
+  }, 0);
 }
 
 function getPetalDurabilityMultiplier() {
@@ -7909,6 +8862,11 @@ function getDirectionalMovementVector() {
   return { x: x / length, y: y / length };
 }
 
+function getMonsterSpeedMultiplier(monster, time) {
+  if (!monster || time >= (monster.magicSlowUntil || 0)) return 1;
+  return 1 - clamp(monster.magicSlowAmount || 0, 0, 0.9);
+}
+
 function updateDistantMonster(monster, dt, time) {
   if (monster.stationary) {
     monster.speed = 0;
@@ -7956,8 +8914,9 @@ function updateLazyWanderMonster(monster, dt, time) {
 
   monster.speed += (monster.targetSpeed - monster.speed) * Math.min(1, dt * 5.5);
   monster.moveAngle = lerpAngle(monster.moveAngle, monster.targetMoveAngle, Math.min(1, dt * 3.6));
-  const nextX = monster.x + Math.cos(monster.moveAngle) * monster.speed * dt;
-  const nextY = monster.y + Math.sin(monster.moveAngle) * monster.speed * dt;
+  const effectiveSpeed = monster.speed * getMonsterSpeedMultiplier(monster, time);
+  const nextX = monster.x + Math.cos(monster.moveAngle) * effectiveSpeed * dt;
+  const nextY = monster.y + Math.sin(monster.moveAngle) * effectiveSpeed * dt;
   const moved = moveCircleEntityWithMapCollision(
     monster,
     nextX,
@@ -7972,10 +8931,12 @@ function updateLazyWanderMonster(monster, dt, time) {
   clampEntityToMap(monster, monster.radius);
   monster.direction = Math.cos(monster.moveAngle) >= 0 ? 1 : -1;
   monster.faceAngle = lerpAngle(monster.faceAngle, monster.moveAngle + Math.PI / 2, Math.min(1, dt * 7));
+  updateCaterpillarSegments(monster, dt, time);
 }
 
 function shouldUseLazyWanderMovement(monster, time) {
   if (monster.lazyWander) return true;
+  if (isSegmentedMonster(monster) && !isMonsterChasingPlayer(monster, time)) return true;
   return monster.name === "WorkerAnt" && !isMonsterChasingPlayer(monster, time);
 }
 
@@ -7990,6 +8951,7 @@ function updateMonsters(dt, time) {
     if (!monster.alive) continue;
     if (monster.stationary) {
       monster.speed = 0;
+      updateCaterpillarSegments(monster, dt, time);
       continue;
     }
     if (shouldUseLazyWanderMovement(monster, time)) {
@@ -7999,6 +8961,7 @@ function updateMonsters(dt, time) {
 
     if (!shouldFullySimulateMonster(monster, simulationBounds)) {
       updateDistantMonster(monster, dt, time);
+      updateCaterpillarSegments(monster, dt, time);
       continue;
     }
 
@@ -8040,8 +9003,9 @@ function updateMonsters(dt, time) {
 
     monster.speed += (monster.targetSpeed - monster.speed) * Math.min(1, dt * 5);
     monster.moveAngle = lerpAngle(monster.moveAngle, monster.targetMoveAngle, Math.min(1, dt * 4));
-    const nextX = monster.x + Math.cos(monster.moveAngle) * monster.speed * dt;
-    const nextY = monster.y + Math.sin(monster.moveAngle) * monster.speed * dt;
+    const effectiveSpeed = monster.speed * getMonsterSpeedMultiplier(monster, time);
+    const nextX = monster.x + Math.cos(monster.moveAngle) * effectiveSpeed * dt;
+    const nextY = monster.y + Math.sin(monster.moveAngle) * effectiveSpeed * dt;
     const moved = moveCircleEntityWithMapCollision(
       monster,
       nextX,
@@ -8064,6 +9028,7 @@ function updateMonsters(dt, time) {
     monster.direction = Math.cos(monster.moveAngle) >= 0 ? 1 : -1;
     const targetFaceAngle = monster.moveAngle + Math.PI / 2;
     monster.faceAngle = lerpAngle(monster.faceAngle, targetFaceAngle, Math.min(1, dt * 12));
+    updateCaterpillarSegments(monster, dt, time);
   }
 }
 
@@ -8071,18 +9036,18 @@ function resolveMonsterCollisions() {
   if (!state.spawned) return;
 
   const simulationBounds = getWorldViewportBounds(MONSTER_FULL_SIMULATE_MARGIN);
+  const collisionCreatures = [...state.monsters, ...state.friendlyPets].filter(
+    (monster) =>
+      !monster.hidden &&
+      !monster.dying &&
+      monster.alive &&
+      shouldFullySimulateMonster(monster, simulationBounds),
+  );
 
   for (let pass = 0; pass < 2; pass++) {
     const collisionCells = new Map();
-    const activeMonsters = state.monsters.filter(
-      (monster) =>
-        !monster.hidden &&
-        !monster.dying &&
-        monster.alive &&
-        shouldFullySimulateMonster(monster, simulationBounds),
-    );
 
-    activeMonsters.forEach((monster, index) => {
+    collisionCreatures.forEach((monster, index) => {
       const cellX = Math.floor(monster.x / MONSTER_COLLISION_CELL_SIZE);
       const cellY = Math.floor(monster.y / MONSTER_COLLISION_CELL_SIZE);
       const key = `${cellX}:${cellY}`;
@@ -8091,8 +9056,8 @@ function resolveMonsterCollisions() {
       collisionCells.get(key).push(index);
     });
 
-    for (let i = 0; i < activeMonsters.length; i++) {
-      const a = activeMonsters[i];
+    for (let i = 0; i < collisionCreatures.length; i++) {
+      const a = collisionCreatures[i];
       const cellX = Math.floor(a.x / MONSTER_COLLISION_CELL_SIZE);
       const cellY = Math.floor(a.y / MONSTER_COLLISION_CELL_SIZE);
 
@@ -8104,7 +9069,8 @@ function resolveMonsterCollisions() {
           for (const j of indexes) {
             if (j <= i) continue;
 
-            const b = activeMonsters[j];
+            const b = collisionCreatures[j];
+            if (a.friendly && b.friendly) continue;
             resolveMonsterPairCollision(a, b, i, j);
           }
         }
@@ -8113,7 +9079,13 @@ function resolveMonsterCollisions() {
   }
 }
 
+function canHigherTierCreaturePassThroughLower(a, b) {
+  return Math.abs((a.tierIndex || 0) - (b.tierIndex || 0)) >= HIGH_TIER_PASS_THROUGH_GAP;
+}
+
 function resolveMonsterPairCollision(a, b, indexA, indexB) {
+  if (canHigherTierCreaturePassThroughLower(a, b)) return;
+
   const aShape = getMonsterHitbox(a);
   const bShape = getMonsterHitbox(b);
   if (!hitShapesOverlap(aShape, bShape)) return;
@@ -8163,6 +9135,7 @@ function updateMonsterRegeneration(dt, time) {
 
   for (const monster of state.monsters) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
+    if (isSegmentedMonster(monster)) continue;
     if (monster.health >= monster.maxHealth) continue;
     if (time - monster.lastPlayerHitAt < MONSTER_REGEN_DELAY_MS) continue;
 
@@ -8223,7 +9196,7 @@ function getMonsterTierCounts({ includeRare = true } = {}) {
   for (const monster of state.monsters) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
     if (!includeRare && monster.rareSpawn) continue;
-    counts[monster.tierIndex] += 1;
+    counts[monster.tierIndex] += getMonsterPopulationWeight(monster);
   }
 
   return counts;
@@ -8693,17 +9666,20 @@ function seedMonsterPopulation({ immediateLimit = Infinity } = {}) {
   for (let tierIndex = 0; tierIndex < targetCounts.length; tierIndex++) {
     const targetCount = targetCounts[tierIndex];
 
-    for (let count = 0; count < targetCount; count++) {
+    for (let count = 0; count < targetCount;) {
       if (immediateCount >= immediateLimit) {
         state.monsterBackfillQueue.push(tierIndex);
+        count += 1;
         continue;
       }
       const monster = createRandomMonster(tierIndex);
       if (monster) {
         state.monsters.push(monster);
         immediateCount += 1;
+        count += getMonsterPopulationWeight(monster);
       } else {
         state.monsterBackfillQueue.push(tierIndex);
+        count += 1;
       }
     }
   }
@@ -8997,15 +9973,15 @@ function getWeaponPositions(orbitRadius = state.weapon.orbitRadius, time = state
       if (target) {
         const originX = homingState ? homingState.x : state.player.x;
         const originY = homingState ? homingState.y : state.player.y;
-        const targetAngle = Math.atan2(target.y - originY, target.x - originX);
-        const monsterShape = getMonsterHitbox(target);
-        const bodyRadius = hitShapeRadiusToward(monsterShape, targetAngle + Math.PI);
+        const targetPart = getNearestMonsterPartToPoint(target, originX, originY);
+        const targetAngle = Math.atan2(targetPart.y - originY, targetPart.x - originX);
+        const bodyRadius = hitShapeRadiusToward(targetPart, targetAngle + Math.PI);
         const impactInset = Math.min(
           bodyRadius * LENTIL_HOMING_IMPACT_INSET_RATIO,
           Math.max(6, hitRadius * 0.5),
         );
-        const targetX = target.x - Math.cos(targetAngle) * impactInset;
-        const targetY = target.y - Math.sin(targetAngle) * impactInset;
+        const targetX = targetPart.x - Math.cos(targetAngle) * impactInset;
+        const targetY = targetPart.y - Math.sin(targetAngle) * impactInset;
         const previousTargetId = homingState?.targetId;
         if (!homingState) {
           homingState = {
@@ -9208,7 +10184,7 @@ function getMonsterDropCount(tierIndex) {
   return 10;
 }
 
-function spawnMonsterDrops(monster) {
+function spawnMonsterDropsAt(monster, x, y) {
   const definition = MONSTER_DEFINITIONS[monster.name] || MONSTER_DEFINITIONS.Bee;
   const dropCount =
     getMonsterDropCount(monster.tierIndex) + (Math.random() < getExtraDropChance() ? 1 : 0);
@@ -9221,14 +10197,22 @@ function spawnMonsterDrops(monster) {
     const dropAngle = angle + (index / Math.max(1, drops.length)) * Math.PI * 2;
     state.drops.push(
       createDrop(
-        monster.x + Math.cos(dropAngle) * spread,
-        monster.y + Math.sin(dropAngle) * spread,
+        x + Math.cos(dropAngle) * spread,
+        y + Math.sin(dropAngle) * spread,
         createPetalItem(dropName, dropTierIndex),
         dropCount,
       ),
     );
   });
   mergeNearbyDrops();
+}
+
+function spawnMonsterDrops(monster) {
+  spawnMonsterDropsAt(monster, monster.x, monster.y);
+}
+
+function spawnMonsterSegmentDrops(monster, segment) {
+  spawnMonsterDropsAt(monster, segment.x, segment.y);
 }
 
 function updateDrops(dt = 1 / 60) {
@@ -9367,7 +10351,7 @@ function getNearestMonsterToPoint(x, y, maxDistance, excludedMonsterId = null) {
     if (monster.hidden || monster.dying || !monster.alive) continue;
     if (monster.id === excludedMonsterId) continue;
 
-    const distance = Math.hypot(monster.x - x, monster.y - y) - monster.radius;
+    const distance = getMonsterDistanceToPoint(monster, x, y);
     if (distance < bestDistance) {
       bestDistance = distance;
       bestMonster = monster;
@@ -9425,11 +10409,13 @@ function resolvePlacedPollenBarriers(time) {
 
     for (const monster of state.monsters) {
       if (monster.hidden || monster.dying || !monster.alive) continue;
-      if (Math.abs(monster.x - petal.placedX) > monster.radius + POLLEN_BARRIER_RADIUS + 12) continue;
-      if (Math.abs(monster.y - petal.placedY) > monster.radius + POLLEN_BARRIER_RADIUS + 12) continue;
+      const broadReach = getMonsterDrawCullRadius(monster) + POLLEN_BARRIER_RADIUS + 12;
+      if (Math.abs(monster.x - petal.placedX) > broadReach) continue;
+      if (Math.abs(monster.y - petal.placedY) > broadReach) continue;
 
       const monsterShape = getMonsterHitbox(monster);
       if (!hitShapesOverlap(pollenShape, monsterShape)) continue;
+      const hitSegmentIndex = getCaterpillarHitSegmentIndex(monster, pollenShape);
 
       const angle = Math.atan2(petal.placedY - monster.y, petal.placedX - monster.x);
       const distance = Math.hypot(petal.placedX - monster.x, petal.placedY - monster.y) || 1;
@@ -9461,7 +10447,7 @@ function resolvePlacedPollenBarriers(time) {
 
       if (time >= (petal.nextBarrierDamageAt || 0)) {
         const wasAlive = monster.alive;
-        if (damageMonsterByPlayer(monster, petal.attack, time)) {
+        if (damageMonsterByPlayer(monster, petal.attack, time, hitSegmentIndex)) {
           addDamageNumber(monster, petal.attack, time);
           monster.lastPlayerHitAt = time;
           if (wasAlive && !monster.alive) {
@@ -9510,23 +10496,26 @@ function updateWeaponHits(time) {
     if (!weapon.petal) continue;
     if (!isPetalUnitActive(weapon.petal, weapon.unitIndex)) continue;
     if (weapon.placed) continue;
+    if (PETAL_DEFINITIONS[weapon.petal.name]?.noContactDamage) continue;
 
     const weaponHitbox = getWeaponHitbox(weapon);
 
     for (const monster of state.monsters) {
       if (monster.hidden || monster.dying || !monster.alive) continue;
-      const reach = (weapon.hitRadius || state.weapon.hitRadius) + monster.radius + 18;
+      const reach = (weapon.hitRadius || state.weapon.hitRadius) + getMonsterDrawCullRadius(monster) + 18;
       if (Math.abs(monster.x - weapon.x) > reach || Math.abs(monster.y - weapon.y) > reach) continue;
 
       const monsterShape = getMonsterHitbox(monster);
       if (!hitShapesOverlap(weaponHitbox, monsterShape)) continue;
+      const hitSegmentIndex = getCaterpillarHitSegmentIndex(monster, weaponHitbox);
 
       pushMonsterAwayFromWeapon(weapon, monster, monsterShape);
       const wasAlive = monster.alive;
       let killedByThisHit = false;
-      if (damageMonsterByPlayer(monster, weapon.petal.attack, time)) {
+      if (damageMonsterByPlayer(monster, weapon.petal.attack, time, hitSegmentIndex)) {
         addDamageNumber(monster, weapon.petal.attack, time);
         monster.lastPlayerHitAt = time;
+        applyMagicLeafOnHit(weapon.petal, monster, time);
         if (wasAlive && !monster.alive) {
           killedByThisHit = true;
           rewardMonsterKill(monster);
@@ -9599,7 +10588,7 @@ function update(dt, time) {
   }
 
   if (state.controls.attack) {
-    state.weapon.targetRadius = getPetalOrbitRadius(state.weapon.attackRadius);
+    state.weapon.targetRadius = getPetalOrbitRadius(state.weapon.attackRadius, true);
   } else if (state.controls.defend) {
     state.weapon.targetRadius = state.weapon.defendRadius;
   } else {
@@ -9626,6 +10615,8 @@ function update(dt, time) {
     }
   }
   updatePetals(time, dt);
+  updatePetEggs(time);
+  updateFriendlyPets(dt, time);
   updateLeaderboard(time);
   updateMonsters(dt, time);
   updateMonsterRegeneration(dt, time);
@@ -10227,6 +11218,42 @@ function drawRockMonsterShape(targetCtx, width, height, seed, redAlpha = 0, tier
   targetCtx.stroke();
 }
 
+function drawSegmentedMonster(monster, viewScale, redAlpha = 0) {
+  const scale = getCreatureScale(monster, state.lastTime);
+  const headImage = state.assets[monster.asset] || state.assets.bee;
+  const bodyImage = state.assets[MONSTER_DEFINITIONS[monster.name]?.bodyAsset] || headImage;
+  const drawSize = monster.width * viewScale;
+
+  for (let index = monster.segments.length - 1; index >= 0; index--) {
+    const segment = monster.segments[index];
+    if (!segment || segment.health <= 0) continue;
+
+    const point = worldToScreen(segment.x, segment.y);
+    const image = segment.head ? headImage : bodyImage;
+    const alpha = segment.active ? 1 : clamp((segment.health || 0) / Math.max(1, segment.maxHealth), 0.18, 0.72);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    ctx.translate(point.x, point.y);
+    ctx.scale(scale, scale);
+    ctx.rotate(segment.angle + Math.PI / 2);
+    drawAssetImage(ctx, image, segment.head ? monster.asset : MONSTER_DEFINITIONS[monster.name]?.bodyAsset, -drawSize / 2, -drawSize / 2, drawSize, drawSize);
+    if (redAlpha > 0) {
+      drawTintedAssetImage(
+        ctx,
+        image,
+        segment.head ? monster.asset : MONSTER_DEFINITIONS[monster.name]?.bodyAsset,
+        -drawSize / 2,
+        -drawSize / 2,
+        drawSize,
+        drawSize,
+        "#ff2f2f",
+        redAlpha,
+      );
+    }
+    ctx.restore();
+  }
+}
+
 function drawDrops() {
   const bounds = getWorldViewportBounds(DRAW_CULL_MARGIN);
   const viewScale = getViewScale();
@@ -10265,13 +11292,13 @@ function drawDrops() {
   }
 }
 
-function drawMonsters() {
+function drawMonsters(monsters = state.monsters) {
   const bounds = getWorldViewportBounds(DRAW_CULL_MARGIN);
   const viewScale = getViewScale();
 
-  for (const monster of state.monsters) {
+  for (const monster of monsters) {
     if (monster.hidden) continue;
-    if (!circleIntersectsBounds(monster.x, monster.y, Math.max(monster.width, monster.height), bounds)) continue;
+    if (!circleIntersectsBounds(monster.x, monster.y, getMonsterDrawCullRadius(monster), bounds)) continue;
 
     const point = worldToScreen(monster.x, monster.y);
     const drawWidth = monster.width * viewScale;
@@ -10283,6 +11310,40 @@ function drawMonsters() {
     const sway = monster.stationary ? 0 : Math.sin(idleTime * 1.45) * monster.wobbleAmount;
     const drawSway = monster.name === "WorkerAnt" && isMonsterChasingPlayer(monster, state.lastTime) ? 0 : sway;
     const image = state.assets[monster.asset] || state.assets.bee;
+
+    if (isSegmentedMonster(monster)) {
+      drawSegmentedMonster(monster, viewScale, redAlpha);
+      if (monster.dying) continue;
+
+      const tierLabel = monster.tier || TIERS[monster.tierIndex]?.name || `Lv.${monster.tierIndex + 1}`;
+      drawOutlinedText(
+        tierLabel,
+        point.x,
+        point.y + bob + (drawHeight * scale) / 2 + 15 * viewScale,
+        Math.max(11, 13 * viewScale),
+        createTierCanvasFill(ctx, monster.tierIndex, point.x - 42 * viewScale, point.y, point.x + 42 * viewScale, point.y),
+      );
+
+      if (monster.health >= monster.maxHealth) continue;
+
+      const barWidth = 58 * viewScale;
+      const barHeight = 8 * viewScale;
+      const barX = point.x - barWidth / 2;
+      const barY = point.y - drawHeight / 2 - 18 * viewScale;
+      const { currentRatio, trailRatio } = getMonsterHealthBarRatios(monster, state.lastTime);
+      ctx.fillStyle = "rgba(17, 18, 23, 0.42)";
+      ctx.fillRect(barX, barY, barWidth, barHeight);
+      if (trailRatio > currentRatio) {
+        ctx.fillStyle = "#ef3f3f";
+        ctx.fillRect(barX, barY, barWidth * trailRatio, barHeight);
+      }
+      ctx.fillStyle = "#35d661";
+      ctx.fillRect(barX, barY, barWidth * currentRatio, barHeight);
+      ctx.strokeStyle = "#111217";
+      ctx.lineWidth = Math.max(1, 2 * viewScale);
+      ctx.strokeRect(barX, barY, barWidth, barHeight);
+      continue;
+    }
 
     ctx.save();
     ctx.translate(point.x, point.y + bob);
@@ -10351,6 +11412,10 @@ function drawMonsters() {
     ctx.lineWidth = Math.max(1.5, 3 * viewScale);
     ctx.strokeRect(barX, barY, barWidth, barHeight);
   }
+}
+
+function drawFriendlyPets() {
+  drawMonsters(state.friendlyPets);
 }
 
 function drawDamageNumbers() {
@@ -10732,7 +11797,7 @@ function getVisibleBossBarMonsters() {
     .filter((monster) => {
       if (monster.hidden || monster.dying || !monster.alive) return false;
       if (monster.tierIndex < MONSTER_BOSS_BAR_MIN_TIER_NUMBER - 1) return false;
-      return circleIntersectsBounds(monster.x, monster.y, Math.max(monster.width, monster.height), bounds);
+      return circleIntersectsBounds(monster.x, monster.y, getMonsterDrawCullRadius(monster), bounds);
     })
     .sort((a, b) => {
       const tierDelta = b.tierIndex - a.tierIndex;
@@ -10821,6 +11886,7 @@ function draw() {
     drawMapPortals();
     drawDrops();
     drawMonsters();
+    drawFriendlyPets();
     drawPlayerOverlayPetals();
     drawDamageNumbers();
   }
@@ -10849,27 +11915,42 @@ function drawHitboxes() {
     ctx.stroke();
   }
 
-  for (const monster of state.monsters) {
-    if (monster.hidden) continue;
-    if (!circleIntersectsBounds(monster.x, monster.y, Math.max(monster.width, monster.height), bounds)) continue;
-    const monsterPoint = worldToScreen(monster.x, monster.y);
-    const monsterShape = getMonsterHitbox(monster);
+  function drawHitShape(shape, originX = shape.x, originY = shape.y) {
+    if (shape.type === "compound") {
+      shape.shapes.forEach((part) => drawHitShape(part, part.x, part.y));
+      return;
+    }
+    const monsterPoint = worldToScreen(originX, originY);
     ctx.save();
     ctx.translate(monsterPoint.x, monsterPoint.y);
     ctx.beginPath();
-    if (monsterShape.type === "circle") {
-      ctx.arc(0, 0, monsterShape.radius * viewScale, 0, Math.PI * 2);
+    if (shape.type === "circle") {
+      ctx.arc(0, 0, shape.radius * viewScale, 0, Math.PI * 2);
     } else {
-      ctx.rotate(monsterShape.angle);
-      ctx.ellipse(0, 0, monsterShape.radiusX * viewScale, monsterShape.radiusY * viewScale, 0, 0, Math.PI * 2);
+      ctx.rotate(shape.angle);
+      ctx.ellipse(0, 0, shape.radiusX * viewScale, shape.radiusY * viewScale, 0, 0, Math.PI * 2);
     }
     ctx.stroke();
     ctx.restore();
   }
 
+  for (const monster of [...state.friendlyPets, ...state.monsters]) {
+    if (monster.hidden) continue;
+    if (!circleIntersectsBounds(monster.x, monster.y, getMonsterDrawCullRadius(monster), bounds)) continue;
+    if (isSegmentedMonster(monster)) {
+      for (let index = 0; index < monster.segments.length; index++) {
+        const shape = getCaterpillarSegmentShape(monster, index);
+        if (shape) drawHitShape(shape);
+      }
+      continue;
+    }
+    drawHitShape(getMonsterHitbox(monster));
+  }
+
   ctx.strokeStyle = "rgba(255, 214, 41, 0.92)";
   for (const weapon of getWeaponPositions()) {
     if (!weapon.petal || !weapon.petal.active) continue;
+    if (PETAL_DEFINITIONS[weapon.petal.name]?.noContactDamage) continue;
     const weaponPoint = worldToScreen(weapon.x, weapon.y);
     ctx.beginPath();
     ctx.arc(weaponPoint.x, weaponPoint.y, (weapon.hitRadius || state.weapon.hitRadius) * viewScale, 0, Math.PI * 2);
@@ -11015,6 +12096,7 @@ window.addEventListener("pointermove", (event) => {
   if (
     inventoryPanel.contains(event.target) ||
     mainMenuButton.contains(event.target) ||
+    saveButton.contains(event.target) ||
     settingsPanel.contains(event.target) ||
     settingsButton.contains(event.target) ||
     talentPanel.contains(event.target) ||
@@ -11086,6 +12168,13 @@ window.addEventListener("pointercancel", () => {
   state.input.attack = false;
   state.input.defend = false;
   syncCombatControls();
+});
+window.addEventListener("beforeunload", (event) => {
+  if (!state.spawned) return;
+  saveActiveMonsterMapState(state.mapId);
+  saveActiveAccount();
+  event.preventDefault();
+  event.returnValue = getCurrentText().leaveConfirm;
 });
 window.addEventListener("contextmenu", (event) => {
   event.preventDefault();
@@ -11188,6 +12277,13 @@ window.addEventListener("keydown", (event) => {
     swapAllEquipmentSlots();
     return;
   }
+  if (event.code === "KeyV") {
+    event.preventDefault();
+    state.settings.movement = state.settings.movement === "wasd" ? "mouse" : "wasd";
+    resetJoystick();
+    syncSettingsUi();
+    return;
+  }
 
   if (event.code === "ArrowUp") state.input.cameraUp = true;
   if (event.code === "ArrowLeft") state.input.cameraLeft = true;
@@ -11247,6 +12343,10 @@ window.addEventListener("blur", () => {
 mainMenuButton.addEventListener("click", (event) => {
   event.stopPropagation();
   returnToMainMenu();
+});
+saveButton.addEventListener("click", (event) => {
+  event.stopPropagation();
+  saveGameFromButton();
 });
 settingsButton.addEventListener("click", (event) => {
   event.stopPropagation();
